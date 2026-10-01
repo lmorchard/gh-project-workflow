@@ -31,3 +31,21 @@ The [file-issue skill](../skills/file-issue/SKILL.md) comes from the [issue 861 
 The skill adds recovery guidance for failed or uncertain writes. The trial did not exercise those failures. This guidance is a design precaution, not a measured guarantee of safe retries.
 
 The skill uses installed command help instead of a fixed command template. The trial used gh 2.101.0, which supports parent links and field-name edits. Other installed versions can require different commands.
+
+## Implementation procedure
+
+The [implement-issue skill](../skills/implement-issue/SKILL.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
+
+The draft retains planning against current code, isolated worktrees, baseline results, requirement-specific checks, and small changes. It also retains explicit reports of blocked work and enough information for another session to resume. Project rules determine the required tests and record format.
+
+The [old PR phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/open_pr.md) supplies useful self-review questions. The new skill uses those questions before handoff. It does not import unconditional rebasing, pushes, PR creation, or merge decisions into implementation.
+
+The [frozen-check reference](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/frozen-checks.md) explains why an implementer must not weaken tests to claim success. The new skill uses ordinary test review and explanations for changed assertions. It does not use freeze commits, read-only test files, or a separate validation system.
+
+The old reference contradicts itself about small tasks. Its opening requires checks.md at every size, but its ceremony paragraph permits skipping that file. The new skill requires evidence without that fixed file contract.
+
+The draft omits tier labels, marker requirements, write manifests, mandatory subagents, and a machine-readable merge verdict. It explicitly distinguishes self-review from independent review. Those omissions reduce machinery but do not preserve the old claim of independent verification.
+
+This adaptation is a draft. Static validation cannot establish that it guides implementation well. A real trial on issue 861 remains the next test.
+
+Les explicitly requested that the frozen-check scheme remain at a distance. It is deferred, not a planned layer to restore. Useful tests, diff review, and honest reports are the initial verification approach.

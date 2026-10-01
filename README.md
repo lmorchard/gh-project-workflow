@@ -11,6 +11,7 @@ The repository contains these draft skills:
 - [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
 - [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
+- [implement-issue](skills/implement-issue/SKILL.md) produces tested, committed changes for PR preparation.
 
 Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.
 
