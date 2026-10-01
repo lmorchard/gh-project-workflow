@@ -15,6 +15,7 @@ The repository contains these draft skills:
 - [submit-pr](skills/submit-pr/SKILL.md) publishes committed work and requests Copilot review.
 - [address-pr-review](skills/address-pr-review/SKILL.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
 - [review-changes](skills/review-changes/SKILL.md) assesses changes in a fresh reviewer context without editing them.
+- [merge-pr](skills/merge-pr/SKILL.md) confirms CI and review findings, merges authorized changes, and confirms the result.
 
 Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.
 

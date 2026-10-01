@@ -86,3 +86,11 @@ The independent reviewer reports findings without changing code. Submission publ
 No fixed report files are required. None of these tasks merges the PR. A timeout remains an incomplete review, not approval.
 
 PR follow-up also watches hosted CI for the current commit. It corrects failures and repeats checks until CI passes or a concrete blocker requires user action. The review deadline does not limit CI repair or turn missing checks into success.
+
+## Merge policy
+
+Les requires green CI and prefers Copilot review. A literal approving review is not required by this workflow. The agent often submits PRs as the user, and GitHub does not let authors approve their own PRs.
+
+A completed review with no findings can be sufficient even when its state is COMMENTED. Missing Copilot review remains an explicit limit, not an automatic prohibition. Unresolved defects, human objections, and repository protection rules still require attention.
+
+Merge uses explicit user authorization and checks the current commit. It does not bypass GitHub rules or weaken checks. The result includes confirmed merge, issue, and board state.
