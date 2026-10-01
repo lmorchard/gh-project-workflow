@@ -13,7 +13,7 @@ Read the parent issue, comments, existing children, related PRs, and project ins
 
 Compare completed work with the parent's success conditions. Credit delivered behavior without treating a merged child as proof of parent completion. If the parent needs reconsideration, apply [reconsider-issue](../reconsider-issue/SKILL.md) without repeating settled interviews.
 
-Inspect actual callers, interfaces, tests, and relevant error paths. Do not invent consumers to fit a proposed task. For migrations, identify the concrete operations and their consumers before choosing groups. Include indirect requests and nonstandard transports where they affect the agreed boundary.
+Inspect actual callers, interfaces, tests, and relevant error paths. Do not invent consumers to fit a proposed task. For migrations, identify the concrete operations and their consumers before choosing groups. Include indirect requests and nonstandard transports where they affect the agreed boundary. A migrated operation can still have other unmigrated callers. For type-safety work, inspect whether each actual entry point is included in type checks.
 
 Create a compact coverage map appropriate to the task. Link each remaining requirement or operation to completed work, an existing child, a proposed child, or an explicit exclusion. Name search coverage and uncertainty. Do not call the decomposition exhaustive when evidence is incomplete.
 
