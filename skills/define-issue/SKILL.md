@@ -51,6 +51,25 @@ An existing automated test is not required for every condition. Name tests that 
 
 Keep the original issue text separate from proposed edits. Do not erase the original intent when proposing a split. Do not put essential decisions only in a separate conversation or report.
 
+## Review and revise the draft
+
+Before returning or filing the draft, review it as the next implementer. Make corrections yourself rather than asking the user to edit. Use these review questions:
+
+- Does the opening state the problem and intended result?
+- Can the reader understand the scope without this conversation?
+- Do success conditions demonstrate the intended result rather than a convenient substitute?
+- Are source facts, proposed tests, and unresolved decisions clearly separate?
+- Does the draft preserve confirmed decisions and exclude unrelated changes?
+- Can shorter sentences or ordinary words make the draft easier to use?
+
+Correct unsupported claims, missing context, repetition, and unclear wording. Use active voice and define unfamiliar technical terms. Keep instruction sentences within 20 words and description sentences within 25 words.
+
+Make sure that edits preserve meaning, permission, scope, and uncertainty. Do not change a proposal into a requirement during editing. Leave routine implementation choices open when the success conditions are sufficient.
+
+After editing, read the result again for contradictions and lost requirements. Return the revised draft, not just a list of suggested edits. Mention material corrections and remaining limits briefly.
+
+If a correction requires a new user decision, state the question and your recommendation. Otherwise, continue without an extra approval step. This review does not grant permission to file the issue.
+
 ## Return the result
 
 State whether the draft is ready for implementation, needs a decision, or lacks evidence. Give the specific reason. This assessment does not authorize implementation or merge.
