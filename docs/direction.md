@@ -53,6 +53,6 @@ We propose separate decisions about task readiness, evidence, and permission. Pl
 
 ## Open decisions
 
-We did not select the language, package format, command names, initial operation, or skill structure. The [First experiment](first-experiment.md) document proposes a starting task. It is not a commitment to that task.
+We selected issue definition for the first skill trial. The [First experiment](first-experiment.md) describes the task and evaluation. The CLI language, package format, command names, and first CLI operation remain open.
 
 Automatic scheduling, background polling, custom session storage, attempt labels, and a special merge-result format remain outside the initial effort. Les also requested an ASD-STE100 trial. The [Writing rules](writing.md) describe that trial and its limits.
