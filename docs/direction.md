@@ -116,3 +116,11 @@ We may return to this approach after the individual tasks work well. First inspe
 Les proposed a skill that helps answer “what is next?” after using the individual skills. One possible starting point is advice based on the current issue or PR, available evidence, unresolved decisions, and existing authorization. It can explain which task fits and why.
 
 Automatic dispatch remains an open design choice. A recommendation does not grant permission to publish, implement, or merge. We will use the current trials to identify useful conditions before defining this skill. This proposal does not add a scheduler or require every task to pass through a fixed sequence.
+
+## Proposed express path
+
+Les proposed a bounded path through implement-issue, review-changes, submit-pr, and address-pr-review. It continues through routine handoffs while existing authorization covers the work. It returns to the user when a material decision or blocker requires intervention. Merge remains a separate task with its existing policy.
+
+A future skill can pass evidence, source revisions, review results, and authorization between these tasks. It must preserve the separate tasks for direct use. It must also report unavailable independent review rather than silently treating self-review as its replacement.
+
+This remains a proposal. The current trial explicitly continues from completed implementation through submission and Copilot follow-up. It does not establish that the full proposed path or local review fallback works.
