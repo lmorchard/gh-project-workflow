@@ -37,6 +37,18 @@ Establish the relevant baseline before implementation. A baseline records test r
 
 If a baseline problem prevents meaningful verification, investigate or report the blocker. Independent implementation can continue when it remains useful. Do not describe incomplete verification as success.
 
+## Mark implementation in progress
+
+When implementation starts, move the issue to the configured in-progress state if a project board is available. Use the board supplied by the user or identified in project instructions. Existing issue membership can identify the board when there is only one.
+
+Read the board fields and status options before editing. Use its actual in-progress option rather than assuming spelling or capitalization. If multiple boards or status options are ambiguous, return that choice to the parent or user.
+
+Add the issue to the identified board if necessary, then change its status. This transition is part of the implementation task unless the user restricts GitHub writes. If the issue is already in progress, leave it unchanged.
+
+Read back the status to make sure that the change succeeded. If access fails or no suitable state exists, report the problem and continue useful implementation. Do not create a board or change its fields to make the transition possible.
+
+Do not move an issue merely because you inspected it or found no remaining work. On resumption, preserve a later state such as In review or Done. Do not move it backward without a reason and authorization.
+
 ## Plan the change and its evidence
 
 Make a short plan against the current code. Connect each planned change to an issue requirement. Prefer small steps that demonstrate useful behavior across the relevant components.
@@ -75,12 +87,12 @@ This self-review is not independent review. If another reviewer supplies finding
 
 ## Return the result
 
-Return the issue URL, worktree path, branch, base revision, and final commit identifiers.
+Return the issue URL, worktree path, branch, base revision, and final commit identifiers. Include the confirmed board transition or explain why it was skipped or failed.
 
 Include the implementation model when session metadata identifies it. Otherwise, record it as unknown. This lets the parent select a different model for later local review. Summarize the changes and the result for each success condition. Give the executed commands and observed results, including failures and checks not executed.
 
 State whether the changes are ready for PR preparation, incomplete, or awaiting a decision. Include existing failures, remaining human assessments, and unresolved risks that affect the result. Keep the report in plain technical English.
 
-If interrupted or blocked, preserve the worktree and report completed work and the next useful action. Do not publish comments or change board fields merely to report a blocker. Use separate authorization for GitHub changes.
+If interrupted or blocked, preserve the worktree and report completed work and the next useful action. Do not publish comments or make further board changes merely to report a blocker. The initial in-progress transition does not authorize other GitHub changes.
 
 Do not push, open a PR, merge, or remove the worktree as part of this skill. Hand off separately requested actions with their authorization. Do not ask for approval that the user already gave.
