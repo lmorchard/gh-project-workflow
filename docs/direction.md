@@ -73,6 +73,12 @@ Les requested an implementation skill that uses ordinary development practices. 
 
 The frozen-check scheme from agent-sessions is deferred. This project does not plan to restore freeze commits, locked test files, or a separate validation system. Any later proposal for such machinery requires evidence of a problem that ordinary tests and review do not address.
 
+## Interactive issue review
+
+Les prefers interviews and interactive questions to reviewing draft files. The agent explains its findings and recommendation in the conversation. It asks focused questions about decisions that need user judgment, then updates the draft itself.
+
+Draft files support the conversation but are not required reading for approval. Before requesting publication permission, the agent summarizes the concrete changes. Existing decisions and permissions remain valid within their scope.
+
 ## Review approach
 
 PR submission will request Copilot review when available. If access is unavailable, the parent can dispatch a local reviewer in a fresh context. The local reviewer must use a different model from the implementer for this fallback.

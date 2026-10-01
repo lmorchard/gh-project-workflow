@@ -39,6 +39,18 @@ Include the remaining problem, known completed work, success conditions, and mat
 
 Review the proposal against the evidence before returning it. Make sure that it preserves the original goal and does not repeat completed work. Make sure that status and closure recommendations agree with the remaining scope. Correct unsupported claims and unclear wording yourself.
 
+## Discuss the recommendation
+
+Use conversation as the default user review. Summarize what changed, what remains, and the recommended action before asking for input. Do not require the user to open a file, edit prose, or review the full draft.
+
+Ask one focused question at a time about decisions that affect scope, behavior, completion, or status. Explain the recommendation and its tradeoff in the question. Use existing answers and resolve factual questions through research. Do not invent questions merely to conduct an interview.
+
+After each answer, revise the proposal yourself and explain material changes. Keep the full draft available as supporting detail. Offer it when useful or requested, without making file review a required step. The separate `interview-issue` skill can guide this conversation, but is not required.
+
+When delegated, give the parent the proposed update and a short opening summary for the user. Include the first useful question, recommendation, tradeoff, and remaining decisions. The parent conducts the interview and supplies answers for revision when needed. Do not send the user to a file instead of explaining the decision.
+
+Before publication, summarize the concrete title, scope, and status changes in the conversation. If publication permission is missing, request it for those changes. Keep product decisions separate from publication permission and preserve authorization already given.
+
 ## Return the result
 
 Return the recommendation, proposed issue update, supporting evidence, and next useful action. State remaining uncertainty and execution limits. If no update is needed, explain why instead of rewriting the issue for style alone.
