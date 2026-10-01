@@ -25,13 +25,17 @@ If a necessary source is unavailable, report the missing evidence. Continue with
 
 State the intended user result before choosing a solution. Preserve decisions that the user already made. Do not ask the user to approve those decisions again.
 
-If a missing decision changes scope or behavior, propose an answer with its tradeoff. Ask one focused question at a time. Continue investigation that does not depend on the answer.
+If a missing decision changes scope or behavior, propose an answer with its tradeoff. Continue investigation that does not depend on the answer. In a direct user session, ask one focused question at a time.
 
 Keep routine implementation choices out of the interview unless they change cost, compatibility, permissions, or the intended result. A missing implementation plan does not itself block readiness.
 
 If the issue contains several independently useful changes, propose a smaller first issue. Explain what it proves and what remains. Do not silently replace the original goal with the smaller task.
 
-When delegated, return necessary questions to the parent agent. Do not treat the absence of a human answer as approval. You can still produce a draft that identifies the open decision.
+When delegated, do not conduct the user interview. Return the draft and decision questions to the parent agent. For each question, state why it matters, your recommendation, and the tradeoff.
+
+Include confirmed decisions and relevant evidence with the handoff. Do not wait for the user or treat a missing answer as approval. The parent can use the separate `interview-issue` skill or conduct the conversation directly.
+
+After the parent supplies answers, revise and review the draft. Do not repeat resolved questions unless new evidence contradicts the answer.
 
 ## Draft the issue
 
