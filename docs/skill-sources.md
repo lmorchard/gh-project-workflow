@@ -49,3 +49,27 @@ The draft omits tier labels, marker requirements, write manifests, mandatory sub
 This adaptation is a draft. Static validation cannot establish that it guides implementation well. A real trial on issue 861 remains the next test.
 
 Les explicitly requested that the frozen-check scheme remain at a distance. It is deferred, not a planned layer to restore. Useful tests, diff review, and honest reports are the initial verification approach.
+
+## PR submission and review
+
+The new skills use the old [PR phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/open_pr.md) and [PR template](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/pr-body-template.md) as sources. They retain clear descriptions, explicit issue links, observed test results, and the distinction between local tests and hosted CI.
+
+The [comment procedure](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/address_comments.md) distinguishes actual defects from disputed suggestions and unrelated work. The new review skill retains that assessment. It leaves code changes and thread resolution for a later task.
+
+The old workflow separated an author from a reviewer. The new local fallback also requests a different recorded model. This is a project preference, not a measured guarantee of better review. Unknown model identity remains unknown, including for Copilot.
+
+On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
+
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. They also omit automatic repair loops and merge actions. Both skills pass static validation but still require a real trial.
+
+## Earlier dev-session guidance
+
+On 2026-09-30, we also read the local dev-session files under ~/.claude/skills/dev-session. The relevant sources were phases/pr.md and references/pr-body-template.md. These local sources have no pinned repository revision in this record.
+
+We retained whole-diff inspection, attention to generated files and lockfiles, and descriptions that explain decisions. We also retained assessment of review findings before changes. Neither automatic acceptance nor automatic dismissal of bot comments is useful.
+
+The older Copilot command names copilot-pull-request-reviewer directly. The installed gh interface instead documents @copilot for --add-reviewer. The new skill uses that interface and requires a read-back of review state.
+
+The older procedure waits for an increase in inline comment count. That misses completed reviews with no inline comments and does not identify the reviewed commit. The new skill examines review records and keeps pending review separate from unavailable access.
+
+We did not copy mandatory squashing, automatic rebasing, repeated force-pushing, or a fixed polling loop. We also did not copy the assumption that an assignee listing establishes review access. The actual request and saved review state provide better evidence.

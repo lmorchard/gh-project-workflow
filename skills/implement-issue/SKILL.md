@@ -75,7 +75,9 @@ This self-review is not independent review. If another reviewer supplies finding
 
 ## Return the result
 
-Return the issue URL, worktree path, branch, base revision, and final commit identifiers. Summarize the changes and the result for each success condition. Give the executed commands and observed results, including failures and checks not executed.
+Return the issue URL, worktree path, branch, base revision, and final commit identifiers.
+
+Include the implementation model when session metadata identifies it. Otherwise, record it as unknown. This lets the parent select a different model for later local review. Summarize the changes and the result for each success condition. Give the executed commands and observed results, including failures and checks not executed.
 
 State whether the changes are ready for PR preparation, incomplete, or awaiting a decision. Include existing failures, remaining human assessments, and unresolved risks that affect the result. Keep the report in plain technical English.
 

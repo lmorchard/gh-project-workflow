@@ -72,3 +72,13 @@ Automatic scheduling, background polling, custom session storage, attempt labels
 Les requested an implementation skill that uses ordinary development practices. It will plan against current code, use an isolated worktree, add useful tests, review changes, and report results. The skill ends with local commits for PR preparation.
 
 The frozen-check scheme from agent-sessions is deferred. This project does not plan to restore freeze commits, locked test files, or a separate validation system. Any later proposal for such machinery requires evidence of a problem that ordinary tests and review do not address.
+
+## Review approach
+
+PR submission will request Copilot review when available. If access is unavailable, the parent can dispatch a local reviewer in a fresh context. The local reviewer must use a different model from the implementer for this fallback.
+
+The parent records model identities from available session or dispatch information. If identity or model selection is unavailable, it reports the limit. A same-model second opinion does not silently replace the requested different-model review.
+
+Copilot is an external review service, but its underlying model can be unknown. We do not claim model diversity without evidence. This preference does not replace tests, human judgment, or review of the actual findings.
+
+Submission and review remain separate tasks. Review does not change code or merge the PR. No fixed report files or automated review loop are required.
