@@ -130,3 +130,9 @@ The issue 863 trial completed implementation, submission, Copilot follow-up, and
 The folder-management trial continued from definition and filing (#869) through implementation, independent review, PR #870, and merge. No product question or repeated authorization was needed. Favorable local and Copilot reviews and green hosted CI covered the exact merged head. The coordinator hit an agent-capacity limit, so the parent continued phase dispatch after its handoff. This tested continuity across skills, not a new automatic backlog selector. Live post-merge checks remained unperformed.
 
 After the issue 871 / PR #872 merge, Les reported that the manual smoke test seemed fine. This is user-reported evidence. The conversation does not specify which surfaces or scenarios were tested, so it does not establish completion of every project-required live check.
+
+## Draft parent delivery flow
+
+After the single-child trials, Les requested delivery across the remaining groups in decafclaw #843. The deliver-parent-issue draft coordinates decomposition, child definition and filing, express delivery, and parent completion checks. Its task selection stays within the selected parent and agreed scope. This is a bounded use of orchestration, not general backlog scheduling.
+
+The flow carries existing authorization across children and keeps material decisions in the user conversation. Each merge requires affirmative independent review and green hosted CI on the final changes. A final coverage check must establish the parent result before closure. The draft is not yet tested as a complete multi-child run.
