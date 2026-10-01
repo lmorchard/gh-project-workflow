@@ -9,6 +9,7 @@ Start with one useful operation. Then use operations to do a task, such as a PR 
 The repository contains these draft skills:
 
 - [reconsider-issue](skills/reconsider-issue/SKILL.md) reassesses an existing issue against current project evidence.
+- [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
 - [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
 - [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
