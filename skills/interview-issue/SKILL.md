@@ -51,4 +51,4 @@ Use active voice and familiar words. Define unfamiliar technical terms at first 
 
 When using `define-issue`, pass the updated draft and decisions back for its review. Do not restart research unless an answer invalidates existing evidence. Either skill can be used without installing the other.
 
-An interview does not authorize GitHub changes or implementation. Preserve authorization already given for a specific action. Do not interpret agreement with a product decision as permission to publish.
+An interview does not expand authorization. If the agreed flow includes publication, continue after the necessary decisions are settled. Do not ask for publication permission again merely because the interview ended. Preserve draft-only limits. Agreement with a product decision alone does not authorize unrelated actions or implementation.

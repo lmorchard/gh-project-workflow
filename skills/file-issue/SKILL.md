@@ -11,7 +11,7 @@ Publish the supplied draft without repeating issue definition. Use existing gh c
 
 Read the draft and the relevant project instructions. Identify the repository, title, body, and requested metadata. Metadata includes labels, parent issue, project, and project fields.
 
-Use authorization and decisions already present in the conversation. A request to file the draft authorizes issue creation. Do not ask for that permission again.
+Use authorization and decisions already present in the conversation. A request to file the draft authorizes issue creation. An agreed issue-preparation flow that includes publication also supplies this authorization. Do not require a separate filing command at the skill boundary. Preserve explicit draft-only and read-only limits.
 
 Do not infer a board status, priority, assignee, or label from the draft alone. Use the user request or applicable project conventions. If an optional value is unspecified, leave it unset.
 

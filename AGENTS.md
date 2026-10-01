@@ -20,6 +20,12 @@ Give each subagent the skill, necessary inputs, and the authorized scope. Return
 
 If a skill is incomplete, revise it here and let a subagent continue the task. If delegation is unavailable, report that limit. Only an explicit user exception permits the parent to act directly in the subject repository.
 
+## Authorization across issue tasks
+
+Les wants an agreed issue-preparation flow to continue through research, interviews, draft review, and publication without approval at every skill boundary. Carry that authorization and its limits into each subagent handoff. Once decisions are settled, publish the reviewed result within the agreed scope and report it.
+
+An explicit draft-only or read-only request still limits the work. Ask about unresolved product decisions or actions beyond the agreed scope, not merely because the next skill changes. Issue preparation does not authorize implementation or merge. Keep the existing merge policy.
+
 ## Writing
 
 Use [Writing rules](docs/writing.md) for documents and specifications. This project is trying ASD-STE100 with the available simple-english skill. Do not claim full compliance without a review against the official standard and dictionary.

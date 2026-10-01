@@ -49,7 +49,7 @@ After each answer, revise the proposal yourself and explain material changes. Ke
 
 When delegated, give the parent the proposed update and a short opening summary for the user. Include the first useful question, recommendation, tradeoff, and remaining decisions. The parent conducts the interview and supplies answers for revision when needed. Do not send the user to a file instead of explaining the decision.
 
-Before publication, summarize the concrete title, scope, and status changes in the conversation. If publication permission is missing, request it for those changes. Keep product decisions separate from publication permission and preserve authorization already given.
+Before publication, summarize the concrete title, scope, and status changes in the conversation. If the agreed flow already includes publication, continue within that scope without another permission request. Otherwise, request missing publication permission for those changes. Keep product decisions separate from publication permission and preserve authorization already given.
 
 ## Return the result
 

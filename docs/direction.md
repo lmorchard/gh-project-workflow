@@ -77,7 +77,7 @@ The frozen-check scheme from agent-sessions is deferred. This project does not p
 
 Les prefers interviews and interactive questions to reviewing draft files. The agent explains its findings and recommendation in the conversation. It asks focused questions about decisions that need user judgment, then updates the draft itself.
 
-Draft files support the conversation but are not required reading for approval. Before requesting publication permission, the agent summarizes the concrete changes. Existing decisions and permissions remain valid within their scope.
+Draft files support the conversation but are not required reading for approval. Before requesting publication permission, the agent summarizes the concrete changes. Existing decisions and permissions remain valid within their scope. Les wants an agreed issue-preparation flow to continue through publication without separate approval at every skill boundary. Explicit draft-only limits still apply. Product questions remain interactive; a change of skill alone is not a reason to stop.
 
 ## Review approach
 
