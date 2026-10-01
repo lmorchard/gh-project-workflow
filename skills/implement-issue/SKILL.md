@@ -31,7 +31,7 @@ Create a worktree and task branch using the project conventions. Do not reset or
 
 If resuming, confirm the supplied worktree and branch before editing. Read its existing changes and records. Resume authorized work rather than creating a second competing implementation.
 
-Install dependencies as the project directs. Use test configuration and isolated data where required. Do not copy credentials or connect to live services merely to make tests pass.
+Inspect prerequisites of the baseline commands, including code generation, frontend packages, and browser binaries when tests use them. Install declared dependencies as the project directs before starting the baseline. A Python test suite can require JavaScript tools too. Use test configuration and isolated data where required. Do not copy credentials or connect to live services merely to make tests pass.
 
 Establish the relevant baseline before implementation. A baseline records test results before your changes. Record existing failures and environment limits separately from new failures.
 
