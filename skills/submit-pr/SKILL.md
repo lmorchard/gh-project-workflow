@@ -35,7 +35,19 @@ Create the PR with explicit repository, head, base, title, and body. Set draft s
 
 Record the returned URL immediately. Read back the body, branch, base, and head commit. If a command fails, inspect GitHub before repeating creation.
 
-Apply requested board changes only after the PR exists. Report a board failure separately from PR creation. Do not add unrelated labels, assignees, or comments.
+## Mark the linked issue in review
+
+After the PR exists and is ready for review, move its linked implementation issue to the configured in-review state. Use the board supplied by the user or identified in project instructions. Existing issue membership can identify the board when there is only one.
+
+Read the board fields and status options before editing. Use the actual in-review option rather than assuming spelling or capitalization. If the destination is ambiguous, return that choice to the parent or user.
+
+Add the issue to the identified board if necessary, then change its status. This transition is part of submission unless the user restricts board writes. If the issue is already in review, leave it unchanged.
+
+Move only issues that this PR implements. Do not move a broader parent merely because the PR mentions it. If an issue is Done, report that state rather than moving it backward automatically.
+
+Do not mark unfinished work In review merely because a draft PR exists. Read back the changed status. Report missing configuration or failed updates separately from successful PR creation.
+
+Do not create a board or change its fields to make the transition possible. Continue with the review request when a board update fails. Do not add unrelated labels, assignees, or comments.
 
 ## Request Copilot review
 
@@ -61,7 +73,7 @@ The parent can use `review-changes` for local review. Supply the issue, base and
 
 Read current CI and review state for the published head. Report pending checks as pending and absent checks as absent. Do not substitute local test success for hosted results.
 
-Return the PR URL, head commit, worktree, and branch. Include the request time, requested reviewer, existing review identifiers, and observed CI and review state. Report requested board changes and incomplete operations.
+Return the PR URL, head commit, worktree, and branch. Include the request time, requested reviewer, existing review identifiers, and observed CI and review state. Report the confirmed board transition or why it was skipped or failed. Include other incomplete operations.
 
 If review or tests concern an earlier commit, state that limit. A later push requires a new assessment of affected checks and review coverage. Request another review when necessary rather than assuming it happens automatically.
 
