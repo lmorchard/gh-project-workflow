@@ -84,3 +84,5 @@ Copilot is an external review service, but its underlying model can be unknown. 
 The independent reviewer reports findings without changing code. Submission publishes the PR and requests review. The separate address-pr-review task waits up to 20 minutes and addresses available findings. A further review after corrections remains pending unless another cycle is requested.
 
 No fixed report files are required. None of these tasks merges the PR. A timeout remains an incomplete review, not approval.
+
+PR follow-up also watches hosted CI for the current commit. It corrects failures and repeats checks until CI passes or a concrete blocker requires user action. The review deadline does not limit CI repair or turn missing checks into success.

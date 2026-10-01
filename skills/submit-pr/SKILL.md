@@ -65,6 +65,6 @@ Return the PR URL, head commit, worktree, and branch. Include the request time, 
 
 If review or tests concern an earlier commit, state that limit. A later push requires a new assessment of affected checks and review coverage. Request another review when necessary rather than assuming it happens automatically.
 
-The parent can use `address-pr-review` to wait and address findings. Pass existing authorization for that task with the handoff. Do not repeat publication or ask for authorization already supplied.
+The parent can use `address-pr-review` to wait, address findings, and repair failing CI. Pass existing authorization for that task with the handoff. Do not repeat publication or ask for authorization already supplied.
 
 Do not wait for review, change code to address findings, merge, or enable automatic merge in this skill. Each follow-up task can also start from an existing PR without this handoff.

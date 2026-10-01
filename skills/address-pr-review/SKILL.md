@@ -1,11 +1,11 @@
 ---
 name: address-pr-review
-description: Read and address feedback on an existing pull request, waiting up to 20 minutes for a pending requested review. Assess findings, make scoped corrections, test, push, and report unresolved items without merging.
+description: Read and address feedback on an existing pull request, waiting up to 20 minutes for a pending requested review. Address findings and failing CI, test and push corrections, and watch until CI passes or a concrete blocker remains. Do not merge.
 ---
 
 # Address pull request review
 
-Use an existing pull request (PR) and its review feedback. This skill can follow `submit-pr` or start from a PR created elsewhere. It consumes findings rather than providing independent review.
+Use an existing pull request (PR) and its review feedback. This skill can follow `submit-pr` or start from a PR created elsewhere. It consumes findings rather than providing independent review. It also watches CI, the service that checks published commits, and corrects failures.
 
 ## Establish the task
 
@@ -16,6 +16,28 @@ For a local review report, identify the reviewed commit and evidence limits. Do 
 If no review exists or is requested, report that state. Do not wait for a review that nobody requested. The parent can request Copilot or use `review-changes` for a local review.
 
 If Copilot is unavailable, report the reason and return the fallback choice to the parent. Do not call a pending request unavailable. The local fallback uses a fresh reviewer context and a different recorded model under `review-changes`.
+
+## Watch and repair CI
+
+Monitor CI while waiting for review and after each push. Read checks for the current PR head, not an earlier successful commit. Use the installed watch command when available:
+
+```sh
+gh pr checks PR_URL --watch --interval 30 --fail-fast
+```
+
+Use a tool session that yields control so you can report progress and handle review feedback. After the watch ends, read all check results and the current head again. Watch completion alone does not prove success.
+
+If a check fails, read its job log before making changes. Distinguish a code defect from setup, permissions, service outages, and cancellation. Correct failures within the issue and required build setup without weakening checks.
+
+Execute affected local checks, commit corrections, and push to the same PR. Then watch checks for the new head. Continue until CI passes or a concrete blocker prevents further useful work.
+
+Do not repeat an unchanged failure without new evidence or a specific reason that a retry can help. Report unavailable credentials, persistent service failures, and decisions that require the user. Preserve completed fixes.
+
+Inspect all reported checks rather than only checks marked required. Report pending, canceled, skipped, and missing checks separately. A skipped optional job can be expected, but a missing required result is not success.
+
+If no checks exist, report that fact instead of claiming green CI. If the head changes during inspection, read results for the new head. Do not substitute local results for hosted CI.
+
+The 20-minute deadline applies to the requested review, not to CI repair. Do not reset that deadline after a push. A review timeout does not end useful CI repair work.
 
 ## Wait for the review
 
@@ -53,11 +75,11 @@ Do not file unrelated issues automatically. Report proposed follow-up work unles
 
 After a push, refresh CI and review information for the new head. Update the PR description if the changes invalidate its claims. Earlier review and test results still describe the earlier commit.
 
-If corrections need another Copilot review, request it and report it as pending. This invocation waits for one review cycle by default. Do not start unlimited 20-minute waits or repair cycles without a further request.
+If corrections need another Copilot review, request it and report it as pending. This invocation waits for one review cycle by default. Do not start another 20-minute review wait without a further request. Continue the CI repair cycle for the latest head.
 
 ## Report the result
 
-Return the PR URL, current head commit, corrections, and executed test results. Distinguish fixed, disputed, deferred, and unanswered findings. Include current CI and review state and whether the wait completed or timed out.
+Return the PR URL, current head commit, corrections, and executed test results. Distinguish fixed, disputed, deferred, and unanswered findings. Include current CI and review state and whether the review wait completed or timed out. State the commit whose hosted checks passed, or the concrete CI blocker.
 
 Record a new review request time when corrections require another review. Pass that time and the requested commit to the next invocation. Do not treat an earlier clean review as approval of later changes.
 
