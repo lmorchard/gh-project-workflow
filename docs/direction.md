@@ -110,3 +110,9 @@ Merge uses explicit user authorization and checks the current commit. It does no
 Les reported that agent-sessions tried a second GitHub account and later a GitHub App for agent contributions. A separate identity would distinguish agent actions from Les's actions in GitHub records. It could also let Les review contributions as a separate person.
 
 We may return to this approach after the individual tasks work well. First inspect the earlier work for useful parts and limits. Then define the permissions and account setup that this project needs. This is a future option, not a requirement for the current skills.
+
+## Possible next-task guidance
+
+Les proposed a skill that helps answer “what is next?” after using the individual skills. One possible starting point is advice based on the current issue or PR, available evidence, unresolved decisions, and existing authorization. It can explain which task fits and why.
+
+Automatic dispatch remains an open design choice. A recommendation does not grant permission to publish, implement, or merge. We will use the current trials to identify useful conditions before defining this skill. This proposal does not add a scheduler or require every task to pass through a fixed sequence.
