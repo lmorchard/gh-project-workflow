@@ -22,7 +22,7 @@ If a skill is incomplete, revise it here and let a subagent continue the task. I
 
 ## Authorization across issue tasks
 
-Les wants an agreed issue-preparation flow to continue through research, interviews, draft review, and publication without approval at every skill boundary. Carry that authorization and its limits into each subagent handoff. Once decisions are settled, publish the reviewed result within the agreed scope and report it.
+Les wants an agreed issue-preparation flow to continue through research, interviews, draft review, and publication without approval at every skill boundary. Carry that authorization and its limits into each subagent handoff. Once decisions are settled, publish the reviewed result within the agreed scope and report it. A subagent finishing a draft does not end the parent's authorized flow. Dispatch the next included task instead of waiting for the user to ask what is next.
 
 Interviews settle questions, not repeated authorization. Carry authorization forward through changes that Les reviews or weighs in on. Revisit authorization only when a significant change falls outside the reviewed or authorized scope.
 

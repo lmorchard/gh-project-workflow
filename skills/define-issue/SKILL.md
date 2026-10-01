@@ -80,6 +80,6 @@ State whether the draft is ready for implementation, needs a decision, or lacks 
 
 Return the draft, unresolved questions, and a short evidence summary. State which checks you executed and which you only inspected. If you propose a child issue, explain its relationship to the original issue.
 
-Return the reviewed draft without changing GitHub. If filing is requested directly or included in the agreed workflow, pass the draft and existing authorization to the separate `file-issue` operation. Do not repeat definition or ask for the same authorization again.
+Return the reviewed draft without changing GitHub. If filing is requested directly or included in the agreed workflow, pass the draft and existing authorization to the separate `file-issue` operation. Do not repeat definition or ask for the same authorization again. A completed draft is a handoff, not a stopping point when the authorized flow includes filing. The parent dispatches file-issue and reports the published result.
 
 The handoff includes the repository and requested parent, project, labels, and field values when supplied. Unspecified metadata remains unspecified. Neither skill requires the other to be installed.

@@ -45,6 +45,6 @@ When delegated, return the proposal, evidence, and questions to the parent. The 
 
 Keep the plan provisional where facts or decisions remain unresolved. Do not label every proposed child Ready simply because it appears in the plan. Report what is ready for definition or implementation and what depends on another decision.
 
-Decomposition alone does not authorize publication or implementation. If the agreed flow includes filing, pass reviewed children and existing authorization to [file-issue](../file-issue/SKILL.md). Do not ask again at that handoff. Preserve explicit draft-only limits and report partial publication without creating duplicates on retry.
+Decomposition alone does not authorize publication or implementation. If the agreed flow includes filing, pass reviewed children and existing authorization to [file-issue](../file-issue/SKILL.md). Do not ask again at that handoff. After the selected child completes definition, continue to filing within the agreed flow. Do not end with an unpublished draft merely because a subagent finished its assigned phase. Preserve explicit draft-only limits and report partial publication without creating duplicates on retry.
 
 Use ordinary issue bodies and native child relationships for published work. No custom manifest, scheduler, fixed report template, or additional approval document is required.
