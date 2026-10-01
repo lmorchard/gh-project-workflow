@@ -6,7 +6,13 @@ The tasks include issues, project boards, code changes, pull requests (PRs), and
 
 Start with one useful operation. Then use operations to do a task, such as a PR review. Combine tasks only after real use shows a benefit.
 
-The repository contains draft [define-issue](skills/define-issue/SKILL.md) and [interview-issue](skills/interview-issue/SKILL.md) skills. We did not select a CLI language or command names. The CLI is not implemented.
+The repository contains these draft skills:
+
+- [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
+- [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
+- [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
+
+Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.
 
 ## Requirements
 

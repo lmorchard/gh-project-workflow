@@ -8,7 +8,7 @@ The [define-issue skill](../skills/define-issue/SKILL.md) researches, drafts, an
 
 The [interview-issue skill](../skills/interview-issue/SKILL.md) helps the parent discuss those questions with the user. It can also start from a rough idea. It updates the draft as the user supplies answers.
 
-The parent can then return the draft and decisions for another issue review. Neither skill requires a scheduler or custom control program. Neither depends on the other being installed.
+The parent can then return the draft and decisions for another issue review. After authorization, `file-issue` publishes the reviewed draft. No skill requires a scheduler or another skill to be installed.
 
 ## When to ask
 

@@ -57,7 +57,7 @@ Keep the original issue text separate from proposed edits. Do not erase the orig
 
 ## Review and revise the draft
 
-Before returning or filing the draft, review it as the next implementer. Make corrections yourself rather than asking the user to edit. Use these review questions:
+Before returning the draft, review it as the next implementer. Make corrections yourself rather than asking the user to edit. Use these review questions:
 
 - Does the opening state the problem and intended result?
 - Can the reader understand the scope without this conversation?
@@ -80,4 +80,6 @@ State whether the draft is ready for implementation, needs a decision, or lacks 
 
 Return the draft, unresolved questions, and a short evidence summary. State which checks you executed and which you only inspected. If you propose a child issue, explain its relationship to the original issue.
 
-By default, return a draft without changing GitHub. If the user explicitly requests filing or updates, use that authorization and preserve unrelated content. Issue definition alone does not authorize comments, labels, board changes, or code edits.
+Return the reviewed draft without changing GitHub. If filing is also requested, pass the draft and existing authorization to the separate `file-issue` operation. Do not repeat definition or ask for the same authorization again.
+
+The handoff includes the repository and requested parent, project, labels, and field values when supplied. Unspecified metadata remains unspecified. Neither skill requires the other to be installed.
