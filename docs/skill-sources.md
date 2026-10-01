@@ -83,3 +83,11 @@ The cycle includes assessment, corrections, tests, commits, pushes, and factual 
 Timeout and partial-failure behavior remain untested in a live skill trial. Static validation does not establish that the wait or reply procedure succeeds on GitHub.
 
 Les requested a separate follow-up skill for waiting and corrections. This makes the task usable on PRs created outside this workflow. The handoff carries request time, commit, review identifiers, and existing authorization without a new file format.
+
+## Interview guidance
+
+The interview skill adapts guidance from agent-sessions at revision `4379832`. Its [intake phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/intake.md) orders questions around the intended result and success conditions. It also records reasons for decisions and rejected alternatives. The new skill uses concrete examples to clarify vague answers without requiring formal criteria grammar or approval of each test.
+
+The [rethink phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/rethink.md) carries lessons from failed attempts into the next interview. The new skill retains those lessons and confirmed decisions without requiring a restart or retirement procedure. The [triage phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/triage.md) keeps the user conversation with the parent while subagents research and propose changes.
+
+These adaptations omit fixed question counts, mandatory discovery reports, tier labels, and separate decision logs. The agent maintains the draft while the user answers questions about intent and tradeoffs.
