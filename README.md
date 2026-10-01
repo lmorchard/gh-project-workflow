@@ -8,6 +8,16 @@ Start with one useful operation. Then use operations to do a task, such as a PR 
 
 The repository contains draft [define-issue](skills/define-issue/SKILL.md) and [interview-issue](skills/interview-issue/SKILL.md) skills. We did not select a CLI language or command names. The CLI is not implemented.
 
+## Requirements
+
+GitHub operations require GitHub CLI (`gh`) in the agent environment. Install `gh` and sign in with `gh auth login`. Use `gh auth status` to make sure that authentication succeeds.
+
+The account must have access to the target repository. Project-board operations also require access to the target project. Authentication alone does not grant permission to change issues or board items.
+
+Code investigation requires Git and a local checkout of the target project. The skills currently use existing `git` and `gh` commands. The planned project CLI does not replace these requirements.
+
+## Project documents
+
 Read these documents:
 
 - [Project direction](docs/direction.md) records decisions and open questions.
