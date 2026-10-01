@@ -81,6 +81,6 @@ The parent records model identities from available session or dispatch informati
 
 Copilot is an external review service, but its underlying model can be unknown. We do not claim model diversity without evidence. This preference does not replace tests, human judgment, or review of the actual findings.
 
-The independent reviewer reports findings without changing code. Submission waits up to 20 minutes for one Copilot review, then addresses available findings. A further review after corrections remains pending unless another cycle is requested.
+The independent reviewer reports findings without changing code. Submission publishes the PR and requests review. The separate address-pr-review task waits up to 20 minutes and addresses available findings. A further review after corrections remains pending unless another cycle is requested.
 
-No fixed report files are required. Neither task merges the PR. A timeout remains an incomplete review, not approval.
+No fixed report files are required. None of these tasks merges the PR. A timeout remains an incomplete review, not approval.

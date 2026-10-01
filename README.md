@@ -12,7 +12,8 @@ The repository contains these draft skills:
 - [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
 - [implement-issue](skills/implement-issue/SKILL.md) produces tested, committed changes for PR preparation.
-- [submit-pr](skills/submit-pr/SKILL.md) publishes committed work, waits for Copilot review, and addresses findings.
+- [submit-pr](skills/submit-pr/SKILL.md) publishes committed work and requests Copilot review.
+- [address-pr-review](skills/address-pr-review/SKILL.md) waits for requested review and addresses findings on an existing PR.
 - [review-changes](skills/review-changes/SKILL.md) assesses changes in a fresh reviewer context without editing them.
 
 Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.

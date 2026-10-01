@@ -60,7 +60,7 @@ The old workflow separated an author from a reviewer. The new local fallback als
 
 On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
 
-The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. Submission includes one requested wait-and-correction cycle, but omits unbounded repair loops and merge actions. Both skills pass static validation but still require a real trial.
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. Both skills pass static validation but still require a real trial.
 
 ## Earlier dev-session guidance
 
@@ -76,8 +76,10 @@ We did not copy mandatory squashing, automatic rebasing, repeated force-pushing,
 
 ## Bounded Copilot wait
 
-Les requested a wait of up to 20 minutes followed by corrections to review findings. The submit-pr skill now records the deadline and polls or watches for a completed review. It does not use inline comment counts as the completion signal.
+Les requested a wait of up to 20 minutes followed by corrections to review findings. The submit-pr skill records the request time and commit. The address-pr-review skill uses that handoff to poll or watch for a completed review. It does not use inline comment counts as the completion signal.
 
 The cycle includes assessment, corrections, tests, commits, pushes, and factual replies within scope. Disputed findings remain open. If corrections require another review, the skill requests it and reports it as pending rather than starting an unlimited loop.
 
 Timeout and partial-failure behavior remain untested in a live skill trial. Static validation does not establish that the wait or reply procedure succeeds on GitHub.
+
+Les requested a separate follow-up skill for waiting and corrections. This makes the task usable on PRs created outside this workflow. The handoff carries request time, commit, review identifiers, and existing authorization without a new file format.
