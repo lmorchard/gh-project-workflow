@@ -1,41 +1,48 @@
 # First experiment
 
-Proposal from the founding discussion on 2026-09-30. The bottom-up approach is agreed; this particular starting task has not yet been selected or implemented.
+This document proposes a first task from the discussion on 2026-09-30. Les agreed to start with individual operations. We did not select or implement this task.
 
-## Candidate task
+## Proposed task
 
-Collect complete PR review context, then use it to address feedback on an existing PR. This is useful without first building issue intake, board management, or an execution loop, and it exercises a clear split between fetching information and judging what it means.
+Get all review information for an existing pull request (PR). A PR proposes changes for review. Then use that information to assess and correct problems from the review.
 
-Start with the retrieval operation alone. Follow with the skill procedure after the operation proves useful. Independent review of the underlying code remains a distinct activity from addressing someone else's comments.
+The first tool will only read information. Skill instructions can use that tool after it proves useful. An independent code review remains a separate task from corrections to review comments.
 
-## Candidate operation
+## Proposed read operation
 
-Given a PR URL or explicit repository and PR number, collect the PR description, base and head identifiers, reviews, inline threads, resolution state, and top-level comments. Include relevant check status if needed by the chosen task. Preserve source identifiers and URLs so the agent can trace a finding back to GitHub.
+The input is a PR URL, or a repository name and PR number. A repository stores project files and their history. The result includes the PR description and identifiers for its base and head commits.
 
-Handle pagination and expose retrieval failures. Do not present a partial collection as complete. Record the head observed for the collection and detect movement during retrieval where practical; GitHub reads are not a single snapshot taken at one instant.
+The base is the target version for the proposed changes. The head is the latest proposed version. The result also includes reviews, comment threads, thread status, and comments outside threads.
 
-The first operation should be read-only. Replying, resolving threads, pushing fixes, and updating PR content are separate changes to consider after the read path works. Command names and output schema should emerge from this task rather than an interface intended to cover every future task.
+A thread groups comments about one code location. Keep source identifiers and URLs with each result. If the task requires automated check results, include their status.
 
-## Candidate skill procedure
+Get all pages of results. Report failed requests. Do not describe a partial collection as all available information.
 
-Use collected context to distinguish feedback requiring a fix, feedback needing discussion, and work outside the PR's scope. Check the code rather than accepting every review suggestion. After authorized fixes, run appropriate verification and refresh context for the new head.
+Record the head identifier for the collection. Where practical, detect a changed head during the read. Separate GitHub reads do not form a single snapshot.
 
-Carry forward the predecessor's useful distinction: disputing a finding does not itself establish that the finding is resolved. The exact reply and thread-resolution policy should be decided when we design commands that change GitHub data.
+Replies, thread resolution, code uploads, and PR edits remain separate operations for later design. Thread resolution marks a discussion as finished. The first read operation does not change GitHub data.
 
-## How to evaluate it
+## Proposed skill procedure
 
-Use a real PR, plus small tests for situations the live example does not cover. Check that:
+The agent uses the results to identify necessary corrections, questions, and problems outside the PR scope. The agent examines the code before accepting a review suggestion. After authorized corrections, the agent does the relevant tests and gets current PR information.
 
-- Multiple pages of feedback are collected without omission or duplication.
-- Top-level comments and reviews without inline threads remain visible.
-- Missing permissions, failed requests, and absent checks remain distinguishable.
-- Results identify their source and commit, and the tool reports if the PR head changes.
-- A new session can understand the outstanding feedback without information available only in the previous conversation.
+Disagreement with a finding does not establish that the problem is resolved. We will decide reply and thread-resolution rules when we design commands that change GitHub data. Command names and result formats remain open.
 
-Record what the tool saved the agent from doing, what it missed, and what remained a judgment call. Passing parser tests alone does not establish that the phase is useful.
+## Evaluation
 
-## When the experiment is done
+Use a real PR and small tests for other situations. Make sure that the results meet these conditions:
 
-The experiment succeeds when it makes one real review-feedback task easier and more reliable, with its limitations recorded. It does not need a demonstration of every workflow phase, automatic issue selection, background waiting, agent spawning, or merge automation.
+- The collection contains all pages without duplicate feedback.
+- Comments outside threads and reviews without threads remain visible.
+- Missing permissions, failed requests, and absent checks produce different results.
+- Results identify their source and commit.
+- The tool reports a changed head when it detects one.
+- A new session can understand the feedback without information from an earlier conversation.
 
-Use the result to choose the next operation. Do not build a system for choosing and running tasks to demonstrate this one.
+Record the steps that the tool removes from the agent task. Record omissions and decisions that still require judgment. Passing tests alone does not establish that the task is easier.
+
+## Completion
+
+The experiment succeeds when it makes one real review task easier and more reliable. Record its limits. Use the results to select the next operation.
+
+The experiment does not require every phase of the workflow. It does not require automatic task selection, background polling, additional agents, or automatic merges. Do not add a system that controls all tasks to demonstrate this one.

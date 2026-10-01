@@ -1,69 +1,77 @@
 # Findings from agent sessions
 
-These notes preserve useful lessons from agent-sessions without copying its entire design. Reviewed on 2026-09-30 against agent-sessions commit `4379832`. References below point to that revision so subsequent edits do not silently change the evidence.
+This document records lessons from agent-sessions. We read its records on 2026-09-30 at commit `4379832`. The links identify that version so later edits do not change the sources.
 
-The predecessor's findings include recorded experiments and incidents. This review read those records; it did not rerun their experiments or independently validate every historical claim.
+The source records include experiments and incidents. We did not do those experiments again. This review does not independently establish every historical claim.
 
-## The workflow predates the harness
+## The workflow existed before the control program
 
-The original design identified dev-session as supplying most of the per-issue workflow. It treated acceptance criteria and verification as important additions and placed the code that chooses and runs board tasks outside the skill.
+The original design identified dev-session as the source of most steps for one issue. An issue is a GitHub record of a requested change. The design added acceptance criteria, which state the conditions for success.
 
-Implication for this project: extract useful operations and workflow guidance first. Neither requires a program that chooses and runs queued tasks.
+The design kept automatic task selection outside the skill. An agent skill supplies instructions to an agent. This supports an initial project with useful operations and instructions, without automatic task selection.
 
 Source: [design, origin and dev-session analysis](https://github.com/lmorchard/agent-sessions/blob/4379832/docs/design.md).
 
-## The current skill requires its driver
+## The current skill requires its control program
 
-The write-manifest reference requires the agent to record requested GitHub changes in a file for the driver to perform with its own credentials. The GitHub Projects reference uses that mechanism for board transitions. The review-comment phase assumes unresolved threads have already been supplied in context and exits so the driver can choose the next step.
+The old skill records requested GitHub changes in a file. A separate program reads that file and makes the changes with its own credentials. The board procedure uses this method too.
 
-Implication: copying the Markdown directory would not produce a self-contained skill. Each extracted phase needs clear inputs, a way to fetch the information it needs, and commands that works without the driver.
+The review procedure expects the program to supply comments before the agent starts. It stops so the program can select the next step. Copying the skill files alone does not remove these dependencies.
+
+Each new phase requires explicit inputs and a way to get the necessary information. A phase is a task such as a PR review. A pull request (PR) proposes changes for review.
 
 Sources: [write manifest](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/write-manifest.md), [board integration](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/github-projects.md), [addressing comments](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/address_comments.md).
 
-## Evidence must establish the claim being made
+## Evidence must support the stated result
 
-The predecessor records recurring cases where nearby evidence satisfied the wrong condition: local tests stood in for CI, absence of threads stood in for review completion, or evidence described a different commit from the one being shipped. It also records failures where missing data appeared positive.
+The findings record local tests used as evidence of successful CI. CI is a service that does automated project checks. They also record missing review threads treated as evidence that a review finished.
 
-Implication: tools should collect and identify evidence precisely, including the commit it describes and whether retrieval is complete. An empty result, unavailable result, and successful check are different outcomes. The agent still has to decide whether the evidence establishes the intended behavior.
+Other results described a different commit from the one sent to GitHub. A commit records a version of files in Git. Some results treated missing data as success.
+
+A tool must identify the source and commit for its results. It must distinguish an empty result from a failed request. The agent still decides whether the evidence supports the intended behavior.
 
 Sources: [recurring defect classes 1 and 2](https://github.com/lmorchard/agent-sessions/blob/4379832/docs/findings.md), [merge gate procedure](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/grade_gate.md).
 
-## Tests need to detect the intended failure
+## Tests must detect the intended problem
 
-The findings record checks that passed without the requested work, guards satisfied by text in comments, and tests that missed absence of the object being tested. They distinguish regression protection from evidence of new behavior.
+The findings record tests that passed without the requested change. Some tests accepted text in comments as evidence of behavior. Other tests missed the absence of the object under test.
 
-Implication: exercise a helper's meaningful failure cases, including missing or incomplete data. For a change, explain how verification demonstrates the requested outcome; a green test suite alone may not do that. This does not imply every task needs a separate commit recording the original checks and a file used to detect later changes to them.
+Tests for existing behavior and tests for new behavior answer different questions. A passing test suite does not always prove the requested result. Useful tests include missing data and incomplete data.
+
+This lesson does not require the full old procedure for every task. That procedure recorded original checks in a separate commit. It also used a file to detect later changes to those checks.
 
 Source: [defect classes 5 and 6 and rules about oracles](https://github.com/lmorchard/agent-sessions/blob/4379832/docs/findings.md).
 
-## More instructions did not reliably improve behavior
+## More instructions did not always improve behavior
 
-The predecessor's evidence ledger reports wording experiments where additions made no difference or performed worse than their absence. It also describes important wording that helped, including the frozen-check amendment rule. Its conclusion is not that instructions are useless, but that plausible wording is not evidence of better behavior.
+The recorded experiments compared different instructions. Some additions produced no improvement or worse results. Other instructions helped, such as the rule for changes to previously agreed checks.
 
-Implication: retain useful guidance with its provenance, avoid duplicating every incident as a new rule, and evaluate behavioral changes through actual use and targeted comparisons. The predecessor explicitly distinguishes wording experiments from real use that establishes whether an agent actually performs a procedure.
+Useful instructions remain worth keeping with their sources. A new instruction for every incident can add text without better results. Experiments with wording and observations of real use supply different evidence.
 
 Source: [defect class 4, evidence ledger, and measurement limits](https://github.com/lmorchard/agent-sessions/blob/4379832/docs/findings.md).
 
 ## New sessions reveal missing information
 
-The predecessor records failures discovered when a new agent session read a specification, rather than sharing the author's unstated knowledge.
+The findings record problems that appeared when a new agent session read a specification. A specification states the required behavior and limits. The new session did not share unstated information from the author.
 
-Implication: test a phase on an ordinary issue or PR in a fresh session. A successful continuation inside the authoring conversation is weaker evidence that the handoff works independently.
+A trial in the same conversation does not establish that another session can do the task. Use an ordinary issue or PR in a new session. Record the information that the new session lacks.
 
 Source: [operating rules and fresh context finding](https://github.com/lmorchard/agent-sessions/blob/4379832/docs/findings.md).
 
-## Tools for repeatable operations remain valuable
+## Tools for repeatable operations remain useful
 
-The founding discussion explicitly retained the wins from extracting scriptable Git and GitHub procedures into tools. Existing code offers candidate implementations and failure cases for review context, board lookup, workspaces, and writes. That is a reason to inspect and selectively reuse code, not evidence that every current module belongs here.
+The founding discussion retained the useful results from Git and GitHub tools. Existing code offers examples for PR information, boards, workspaces, and changes to GitHub. These examples are candidates for reuse, not a requirement to copy every module.
 
-Implication: prefer tools that do one operation and return control to the agent. Keep scheduling, support for multiple agent runtimes, locks shared across machines, spending limits, and automatic recovery out of the initial project.
+The initial tools will do specified operations and return control to the agent. Automatic scheduling and support for multiple agent applications remain outside the initial project. Shared locks, spending limits, and automatic recovery also remain outside it.
 
-Sources: founding discussion on 2026-09-30; [predecessor driver sources](https://github.com/lmorchard/agent-sessions/tree/4379832/src/agent_sessions/driver).
+Sources: founding discussion on 2026-09-30 and [predecessor driver sources](https://github.com/lmorchard/agent-sessions/tree/4379832/src/agent_sessions/driver).
 
-## Docs should explain decisions without copying live status
+## Documents must not duplicate live status
 
-The predecessor repeatedly encountered written file lists and status claims that drifted from their live sources. It also found that historical explanations inside instructions read by the agent could reintroduce obsolete behavior into the agent's context.
+The findings record file lists and status descriptions that became incorrect after code changes. Historical explanations inside skill instructions also supplied obsolete behavior to agents. Both problems came from text that no longer matched its purpose.
 
-Implication: keep rationale and historical evidence in docs, operational instructions in the skill, and current work state in its actual source. Date historical observations and link their evidence. Avoid copying the predecessor's instruction files as a starting set of rules.
+Keep reasons and historical evidence in documents. Keep operating instructions in the skill. Keep current task status in the system that records it.
+
+Date historical observations and link to their evidence. Do not copy the old instructions as the rules for this project. Use the [Writing rules](writing.md) for the ASD-STE100 trial.
 
 Source: [documentation and skill-authoring conventions](https://github.com/lmorchard/agent-sessions/blob/4379832/CLAUDE.md).

@@ -1,13 +1,18 @@
 # gh-project-workflow
 
-A new effort to pair an agent skill with a CLI for everyday Git and GitHub project work: defining and filing issues, managing boards, implementing changes, reviewing PRs, and merging authorized changes.
+This project will pair an agent skill with a command-line interface (CLI) for Git and GitHub tasks. An agent skill is a set of instructions for an agent. A CLI accepts commands as text.
 
-Build from useful operations to useful phases. Combine operations into larger workflows only after the pieces have proved useful in real work.
+The tasks include issues, project boards, code changes, pull requests (PRs), and merges. A pull request proposes changes for review. A merge adds approved changes to a target branch.
 
-This project starts with documentation. No skill, CLI interface, implementation language, or orchestration system has been selected or implemented yet.
+Start with one useful operation. Then use operations to do a task, such as a PR review. Combine tasks only after real use shows a benefit.
 
-- [Direction](docs/direction.md): decisions from the founding discussion and the intended skill–CLI boundary.
-- [Findings from agent-sessions](docs/findings.md): evidence and lessons to carry forward, with source references.
-- [First experiment](docs/first-experiment.md): a proposed bounded starting point and how to evaluate it.
+This repository contains documents only. We did not select an implementation language or command names. We did not implement a skill or CLI.
 
-The sibling `agent-sessions` repository remains a reference implementation and experiment. We will bring useful ideas over one at a time.
+Read these documents:
+
+- [Project direction](docs/direction.md) records decisions and open questions.
+- [Findings from agent-sessions](docs/findings.md) records lessons and their sources.
+- [First experiment](docs/first-experiment.md) describes a proposed task.
+- [Writing rules](docs/writing.md) describes the ASD-STE100 trial.
+
+The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.

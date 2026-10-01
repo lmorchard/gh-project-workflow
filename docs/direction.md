@@ -1,57 +1,58 @@
 # Project direction
 
-Captured from the founding discussion with Les on 2026-09-30.
-
-The purpose is to help a person and an agent move work from an idea to a reviewed, merged change. The project should help with individual tasks before we build a system that chooses and runs tasks unattended.
+This document records the discussion with Les on 2026-09-30. The project will help a person and an agent take an idea through code review and merge. A merge adds approved changes to a target branch.
 
 ## Why start separately
 
-In agent-sessions, the workflow grew into Bash scripts and then a Python harness. Moving repeatable operations into tools produced useful wins. The concern is that running the whole workflow unattended became the main design concern before the individual phases and operations were sufficiently useful on their own.
+In agent-sessions, the workflow grew into Bash scripts and then a Python program that controlled agents. Tools for repeatable operations produced useful results. Les questioned whether automatic control became the main concern before individual tasks were useful enough.
 
-This concern motivates the experiment. We have not measured which approach works better. A sibling repository gives us room to reconsider commands and workflow assumptions while retaining the predecessor as evidence and reference.
+This concern motivates the new project. We did not measure which approach is better. A separate repository lets us reconsider the design and keep agent-sessions as a reference.
 
 ## Agreed direction
 
-Pair an agent skill with a CLI utility. Let the skill guide judgment and let code carry out repeatable operations reliably. Build and try individual operations and phases before combining them. Capture findings first; avoid copying the whole existing skill or the code that runs it.
+An agent skill supplies instructions to an agent. A command-line interface (CLI) accepts commands as text. This project will pair a skill with a CLI for repeatable operations.
 
-The lifecycle in scope includes defining and filing issues, managing project boards, implementing PRs, reviewing PRs, and merging PRs. This is a list of useful tasks, not a requirement to implement all phases before delivering value.
+The tasks include issue definition, issue creation, project boards, code changes, pull request review, and merge. A pull request (PR) proposes changes for review. Each task must be useful before we combine it with other tasks.
 
-## Responsibility boundary
+We will record findings first. We will not copy the entire old skill or its control program. The first useful tool does not require all phases of the workflow.
 
-The agent interprets intent, clarifies scope, chooses actions, implements changes, and evaluates substantive review findings. The CLI accepts explicit inputs, performs a specific operation, and returns facts and confirmed results.
+## Agent and CLI responsibilities
 
-Potential CLI responsibilities include collecting complete issue or PR context, preparing a worktree, preserving issue text during updates, looking up board field identifiers, publishing a PR, and checking the required conditions before performing a requested merge. These are candidates, not committed subcommand names.
+The agent interprets requests, defines scope, chooses actions, changes code, and assesses review findings. The CLI accepts explicit inputs and does a specified operation. It returns facts and the result of the operation.
 
-The CLI should not call a model, select the next issue, infer human approval, or decide which phase runs next. Those features are outside the initial effort. Existing git and gh commands remain available; a wrapper should earn its place by eliminating repeated coordination or a demonstrated failure mode.
+Possible operations include issue reads, PR reads, workspace creation, issue updates, board updates, PR creation, and requested merges. These are proposals. We did not select command names.
 
-The old driver limited what the agent could change. It gave the agent read-only GitHub credentials and used separate code to perform writes. Instructions alone cannot enforce that restriction. This project initially relies on the agent application's permissions and the user's authorization. Stronger restrictions for unattended use would need a separate design.
+The initial CLI will not call a model, select the next issue, or infer human approval. It will not select the next phase. Existing git and gh commands remain available.
+
+The old control program gave the agent read-only GitHub credentials. Separate code made the requested changes with other credentials. Instructions alone cannot enforce that restriction.
+
+This project initially relies on permissions in the agent application and authorization from the user. Stronger restrictions for unattended use require a separate design. A skill does not replace those restrictions.
 
 ## Development sequence
 
-1. Make one operation reliable and useful independently.
-2. Pair operations with enough skill guidance to complete one real phase.
-3. Exercise handoffs in fresh sessions and discover what information is actually needed.
-4. Combine steps when repeated use shows that doing so would help.
+Use this sequence:
 
-Each phase should be able to start from an ordinary existing issue or PR. It should not require that all preceding work passed through this system. Use issues, branches, commits, PRs, and board fields to leave information for the next session where possible.
+1. Make one operation useful by itself.
+2. Use the operation and skill instructions to do one real task.
+3. Try the task in a new session to find missing information.
+4. Combine steps when repeated use shows a benefit.
+
+Each phase must accept an ordinary existing issue or PR. Earlier tasks do not need this system. Use GitHub records and Git history to leave information for the next session where possible.
 
 ## Proposed design principles
 
-These principles guide the first experiments; their exact behavior remains to be tested.
+These principles are proposals for the first experiments. They describe desired behavior, not implemented features. Real use will supply evidence for changes.
 
-- Return structured facts and actionable errors. Distinguish absence, pending work, and failed retrieval.
-- Make changes explicit and check that they succeeded. Where supported, use expected versions or commit IDs to detect changes since the last read.
-- Make retries safe where possible. Report partial completion rather than claiming that every step succeeded or that none took effect.
-- Keep readiness to implement, verification strength, and authorization distinct.
-- Keep plans and check results only as detailed as the task needs. Keep useful evidence without requiring all the old workflow's files and steps.
-- Treat a merge as an authorized action with current evidence, rather than an automatic consequence of an agent's favorable verdict.
+We propose that tools distinguish missing data, pending activity, and failed requests. A result must not show success when a request failed. When a change succeeds, the tool reports what changed.
 
-## Decisions still open
+We propose that tools use expected versions or commit identifiers to detect changes after a read, where supported. A commit records a version of files in Git. Its identifier names that version.
 
-The implementation language, packaging, command names, initial operation, and installable skill structure are not selected. Define, triage, implement, review, and merge are candidate entry points, not a fixed set of skill commands.
+We propose that retries do not create duplicate changes where prevention is possible. If only some steps succeed, the tool reports those steps. It does not claim that all steps succeeded or that none took effect.
 
-A proposed first experiment is documented separately in [First experiment](first-experiment.md). There is no commitment to a scheduler, background polling loop, custom session store, attempt labels, or a special format for reporting merge decisions.
+We propose separate decisions about task readiness, evidence, and permission. Plans and test records can be as short as the task permits. A favorable review does not itself authorize a merge.
 
-## Writing style
+## Open decisions
 
-Use simple technical English. Les identified increasingly intricate jargon as a failing of agent-sessions. Describe the action, the information it needs, and the result in ordinary words. Keep necessary technical terms, explain unfamiliar ones, and avoid inventing names for concepts that a short sentence can explain.
+We did not select the language, package format, command names, initial operation, or skill structure. The [First experiment](first-experiment.md) document proposes a starting task. It is not a commitment to that task.
+
+Automatic scheduling, background polling, custom session storage, attempt labels, and a special merge-result format remain outside the initial effort. Les also requested an ASD-STE100 trial. The [Writing rules](writing.md) describe that trial and its limits.
