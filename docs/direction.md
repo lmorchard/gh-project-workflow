@@ -125,4 +125,4 @@ The draft express-issue skill passes evidence, source revisions, review results,
 
 The express-issue draft defaults to review follow-up and includes merge only when explicitly authorized. It includes local review before submission with a different recorded model. An unavailable model identity returns a review choice to the user instead of silently changing that requirement.
 
-The issue 863 trial completed implementation, submission, Copilot follow-up, and a separately authorized merge. It did not exercise the coordinator or local review. The full express path remains untested.
+The issue 863 trial completed implementation, submission, Copilot follow-up, and a separately authorized merge. The issue 865 trial then exercised express-issue through review follow-up, including different-model local review, a Copilot finding, correction, and current-head review and CI. Neither trial establishes the express merge endpoint or all recovery paths.

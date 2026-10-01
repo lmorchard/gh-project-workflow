@@ -79,7 +79,7 @@ Do not file unrelated issues automatically. Report proposed follow-up work unles
 
 After a push, refresh CI and review information for the new head. Update the PR description if the changes invalidate its claims. Earlier review and test results still describe the earlier commit.
 
-If corrections need another Copilot review, request it and report it as pending. This invocation waits for one review cycle by default. Do not start another 20-minute review wait without a further request. Continue the CI repair cycle for the latest head.
+If corrections need another Copilot review, inspect current-head requests, timeline events, and completed reviews first. Reuse an automatic request and its timestamp instead of duplicating it. If no applicable request or review exists, request one. Report the observed review state. This invocation waits for one review cycle by default. Do not start another 20-minute review wait without a further request. Continue the CI repair cycle for the latest head.
 
 ## Report the result
 
