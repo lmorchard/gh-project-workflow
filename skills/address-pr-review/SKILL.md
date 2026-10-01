@@ -59,6 +59,10 @@ At the deadline, report a timeout and the last observed state. Address available
 
 Read the completed review body, inline discussions, and relevant top-level comments. Get all result pages. Assess each finding against the issue and current code before changing anything.
 
+Treat requested changes in a human COMMENTED review as actionable, including reviews from the PR author. GitHub's review state does not determine whether a finding needs a response. Address these requests with the same care as CHANGES_REQUESTED findings. Do not require the user to submit a formal change request. A comment with no requested change does not require a code edit.
+
+Address available human findings while a Copilot request remains pending. Those findings do not complete the Copilot wait. Before reporting completion, read human feedback again and address new requests within scope. Report unresolved requests even if CI is green or Copilot found no problems.
+
 Use these responses:
 
 - Fix a demonstrated problem within the agreed scope.
