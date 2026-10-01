@@ -51,7 +51,7 @@ Do not create a board or change its fields to make the transition possible. Cont
 
 ## Request Copilot review
 
-This workflow requests Copilot review unless the user selects another reviewer. Inspect the current requests and completed reviews first. Do not submit another request for the same commit merely because the response is pending.
+This workflow requests Copilot review unless the user selects another reviewer. Inspect current requests, completed reviews, and review-request timeline events first. Repository automation can request Copilot immediately after PR creation. An empty requested-reviewer list does not prove that no request exists. If a current-head request is already recorded, retain its timestamp and hand it to follow-up without another request. Do not submit another request for the same commit merely because the response is pending.
 
 On versions that support it, use this command with the actual PR URL:
 
