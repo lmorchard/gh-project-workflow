@@ -1,5 +1,5 @@
 ---
-name: decompose-issue
+name: decompose-parent-issue
 description: Break a broad existing issue into bounded child tasks grounded in current code, completed work, and actual callers. Explain dependencies, recommend the next child, and show how the tasks satisfy the parent goal. Do not implement or publish by default.
 ---
 

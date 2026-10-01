@@ -19,7 +19,7 @@ A request to complete the parent includes maintaining its progress and closing i
 
 ## Reconcile the remaining work
 
-Compare the parent goal with current target-branch code, related changes, tests, and child results. Use [reconsider-issue](../reconsider-issue/SKILL.md) when evidence challenges the parent's content or status. Use [decompose-issue](../decompose-issue/SKILL.md) when useful task boundaries or coverage are missing.
+Compare the parent goal with current target-branch code, related changes, tests, and child results. Use [reconsider-issue](../reconsider-issue/SKILL.md) when evidence challenges the parent's content or status. Use [decompose-parent-issue](../decompose-parent-issue/SKILL.md) when useful task boundaries or coverage are missing.
 
 Reuse an existing decomposition when it still fits. Maintain a compact map from each parent requirement to completed work, an existing child, remaining work, or an explicit exclusion. Do not mistake a previously proposed list for a complete current inventory.
 

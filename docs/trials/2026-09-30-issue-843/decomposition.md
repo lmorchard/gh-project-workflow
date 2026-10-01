@@ -1,6 +1,6 @@
 # Read-only decomposition of decafclaw #843
 
-Evidence snapshot: 2026-10-01. Live main is `8d8cc161364993d59de30b69472f42510333870b`; local checkout is `41811db089682a2952aa9573efeedfa263a3b05a` (clean, stale). Inspected GitHub tarball at the live SHA in `/tmp/decaf-843-src`; no fetch/reset/worktree/source/GitHub/service mutations. Parent: https://github.com/lmorchard/decafclaw/issues/843 . Read parent body/comments, native children, child definitions and merged PR metadata. Only native children currently found: #861 and #863, both closed. Related merged PRs: #862 (`9909cf1`) and #864 (current main). Read project CLAUDE.md. Applied decompose-issue skill. This is a candidate decomposition, not filed issues or Ready declarations.
+Evidence snapshot: 2026-10-01. Live main is `8d8cc161364993d59de30b69472f42510333870b`; local checkout is `41811db089682a2952aa9573efeedfa263a3b05a` (clean, stale). Inspected GitHub tarball at the live SHA in `/tmp/decaf-843-src`; no fetch/reset/worktree/source/GitHub/service mutations. Parent: https://github.com/lmorchard/decafclaw/issues/843 . Read parent body/comments, native children, child definitions and merged PR metadata. Only native children currently found: #861 and #863, both closed. Related merged PRs: #862 (`9909cf1`) and #864 (current main). Read project CLAUDE.md. Applied the skill now named decompose-parent-issue (decompose-issue at the time of this trial). This is a candidate decomposition, not filed issues or Ready declarations.
 
 ## Delivered credit
 

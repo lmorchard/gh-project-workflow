@@ -11,7 +11,7 @@ The repository contains these draft skills:
 - [reconsider-issue](skills/reconsider-issue/SKILL.md) reassesses an existing issue against current project evidence.
 - [deliver-parent-issue](skills/deliver-parent-issue/SKILL.md) coordinates a bounded parent through child delivery and completion checks.
 - [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
-- [decompose-issue](skills/decompose-issue/SKILL.md) maps a broad issue into bounded children and a parent completion condition.
+- [decompose-parent-issue](skills/decompose-parent-issue/SKILL.md) maps a broad issue into bounded children and a parent completion condition.
 - [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
 - [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
