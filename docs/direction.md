@@ -39,6 +39,16 @@ Use this sequence:
 
 Each phase must accept an ordinary existing issue or PR. Earlier tasks do not need this system. Use GitHub records and Git history to leave information for the next session where possible.
 
+## Keep the process useful
+
+Les observed that agent-sessions sought less documentation ceremony but introduced new ceremonies along the way. Ceremony means required steps or records that add little practical value. A simpler workflow can become complex again through individually reasonable additions.
+
+A required document or step must help someone make a decision, do the task, or continue it later. Use an existing issue, commit, or test result when it supplies that information. Do not require another record merely to prove that the process occurred.
+
+Keep trial records when they answer a real question about a skill. Do not turn the records from these first experiments into mandatory files for every task. Remove or combine steps when actual use shows that they duplicate effort.
+
+This principle does not require another checklist, approval, or report. Judge the process by the useful work it supports and the effort it requires.
+
 ## Proposed design principles
 
 These principles are proposals for the first experiments. They describe desired behavior, not implemented features. Real use will supply evidence for changes.
