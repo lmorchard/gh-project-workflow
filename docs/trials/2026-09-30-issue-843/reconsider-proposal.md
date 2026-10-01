@@ -6,7 +6,7 @@ Issue state recommendation: **Open**. Board recommendation: **Backlog, tentative
 
 ## Proposed title
 
-Complete typed REST routes and migrate remaining frontend callers to the generated client
+Complete typed API calls used by the web UI
 
 ## Proposed body
 
@@ -29,16 +29,22 @@ Other generated operations still lack usable contracts. For example, `wrapperApi
 
 Frontend calls remain hand-written in `conversation-store.js`, and authentication login/logout still use `fetch`. The session migration establishes response typing for one caller; it does not establish request typing or typed coverage of the remaining REST API.
 
+### Confirmed scope
+
+Les selected the web UI boundary in the reconsideration interview. Completion covers REST endpoints used by the web UI and their actual callers. Endpoints without web UI callers remain follow-up work outside this issue. This boundary ties completion to observable caller behavior instead of requiring every backend endpoint to migrate first.
+
+Web UI calls with non-JSON responses remain in scope unless a later decision explicitly excludes them. Legacy aliases matter here only when the web UI uses them. An inventory of callers must identify these cases before claiming completion. This scope decision does not authorize publication or implementation.
+
 ### Remaining work
 
-- Give the remaining route groups explicit path/query parameters and request/response contracts, incrementally.
+- Give the remaining routes used by the web UI explicit path/query parameters and request/response contracts, incrementally.
 - Migrate their frontend callers to the generated methods without discarding the generated types.
 - Preserve endpoint behavior, authentication rules, and the existing browser-build and session regressions.
 - Add checks for each migrated group that exercise generated arguments and demonstrate that incompatible contract changes fail at unchanged callers.
 
-### Proposed success conditions
+### Success conditions
 
-- Generated methods expose the actual inputs and output contracts for the routes covered by the original REST migration.
+- Generated methods expose the actual inputs and output contracts for REST routes used by the web UI.
 - Their frontend callers use those contracts.
 - Deliberate incompatible changes to consumed request or response fields fail the frontend check for the expected type error. Compatible additions need not fail.
 - Runtime tests preserve the routes’ behavior and demonstrate that migrated generated calls send the required path/query/body data.
@@ -48,7 +54,7 @@ Frontend calls remain hand-written in `conversation-store.js`, and authenticatio
 
 Define a first remaining route group rather than treating this parent as one ready implementation task. A useful next slice is conversation reads: type the relevant path/query/response contracts and migrate their consumers. Keep other route groups tracked by this parent.
 
-Confirm how completion will account for non-JSON responses and legacy aliases. Do not silently drop them from the original scope.
+Identify non-JSON responses and legacy aliases among actual web UI calls during decomposition. Record endpoints outside the confirmed boundary as follow-up work.
 
 ## Evidence and execution limits
 
@@ -65,4 +71,4 @@ Confirm how completion will account for non-JSON responses and legacy aliases. D
 
 No blocking ambiguity in the skill. It requires current-revision evidence and correctly separates child completion from parent completion. It leaves umbrella board-status conventions to judgment, so the Backlog recommendation remains tentative.
 
-Recommend conversation reads as the next slice: it demonstrates path/query/response typing, while login/logout would be smaller. Parent closure does not depend on choosing that slice now; it is clearly incomplete. Resolve treatment of non-JSON routes and legacy aliases before claiming the whole goal complete.
+Recommend conversation reads as the next slice: it demonstrates path/query/response typing, while login/logout would be smaller. Parent closure does not depend on choosing that slice now; it is clearly incomplete. The web UI boundary is confirmed. Identify its callers before claiming the whole goal complete.
