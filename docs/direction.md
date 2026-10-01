@@ -94,3 +94,9 @@ Les requires green CI and prefers Copilot review. A literal approving review is 
 A completed review with no findings can be sufficient even when its state is COMMENTED. Missing Copilot review remains an explicit limit, not an automatic prohibition. Unresolved defects, human objections, and repository protection rules still require attention.
 
 Merge uses explicit user authorization and checks the current commit. It does not bypass GitHub rules or weaken checks. The result includes confirmed merge, issue, and board state.
+
+## Future agent identity
+
+Les reported that agent-sessions tried a second GitHub account and later a GitHub App for agent contributions. A separate identity would distinguish agent actions from Les's actions in GitHub records. It could also let Les review contributions as a separate person.
+
+We may return to this approach after the individual tasks work well. First inspect the earlier work for useful parts and limits. Then define the permissions and account setup that this project needs. This is a future option, not a requirement for the current skills.

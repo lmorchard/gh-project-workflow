@@ -11,6 +11,8 @@ Merge the requested pull request (PR) only after checking its current state. Use
 
 Read the project instructions, PR, linked issue, and any review handoff. Confirm the target repository, base branch, current head commit, and merge authorization. A head commit identifies the latest proposed version.
 
+If the PR is already merged, skip the merge action and continue with result confirmation. Read existing CI and review evidence. Missing historical evidence must be reported, but does not prevent an authorized board correction. If the PR is closed without a merge, report that state. Do not reopen it without authorization.
+
 Read hosted CI results for that head. CI is the service that checks published commits. Require green CI before merging.
 
 Inspect all reported checks, not only those marked required. Distinguish passed, pending, failed, canceled, skipped, and absent results. An expected optional skip is not a failure, but missing required evidence is not success.
@@ -45,7 +47,11 @@ Do not enable automatic merge merely to avoid a failed immediate merge. If a req
 
 ## Confirm the result
 
-Read back the PR state, merge commit, and merge time. Confirm the linked issue state and requested board status. Change board fields only under existing authorization or applicable project conventions.
+Read back the PR state, merge commit, and merge time. Confirm the linked issue state.
+
+After a confirmed merge, move the completed implementation issue to the project board's configured Done state. Inspect the available status options and project conventions first. If automation already made the change, leave it unchanged. Read back the result. Do not guess an unclear status mapping or add the issue to an unrelated board. Report missing access or an unclear mapping without treating the merge as failed.
+
+Apply this step when completing an earlier merge too. Keep the broader parent issue and its board status unchanged unless its full scope is complete and the update is authorized.
 
 Close only issues that this PR completes. Do not close the parent of a completed child issue unless its full scope is also done. Do not create comments merely to repeat the merge record.
 
