@@ -52,7 +52,7 @@ Web UI calls with non-JSON responses remain in scope unless a later decision exp
 
 ### Confirmed next child
 
-Les selected one conversation lookup by ID and its real web UI caller as the next child. Give that call usable generated parameter and response types while preserving existing behavior. Conversation listing and other routes remain outside this child and tracked by the parent.
+Research found no web UI caller for GET /api/conversations/{id}. Les selected GET /api/sticky/{conv_id} and its existing sticky-state.js caller instead. Give that call usable generated parameter and response types while preserving existing behavior. Other routes and widget-data schema redesign remain outside this child. This correction to the published next-child description is not yet published.
 
 Identify non-JSON responses and legacy aliases among actual web UI calls during decomposition. Record endpoints outside the confirmed boundary as follow-up work.
 
@@ -71,4 +71,4 @@ Identify non-JSON responses and legacy aliases among actual web UI calls during 
 
 No blocking ambiguity in the skill. It requires current-revision evidence and correctly separates child completion from parent completion. It leaves umbrella board-status conventions to judgment, so the Backlog recommendation remains tentative.
 
-The user selected one conversation lookup by ID and its web UI caller as the next child. This adds evidence for generated request parameters after the completed session response example. Parent closure does not depend on choosing that slice now; it is clearly incomplete. The web UI boundary is confirmed. Identify its callers before claiming the whole goal complete.
+The user selected the sticky-widget lookup by conversation ID after research found no web UI caller for the metadata lookup. This adds evidence for generated request parameters after the completed session response example. Parent closure does not depend on choosing that slice now; it is clearly incomplete. The web UI boundary is confirmed. Identify its callers before claiming the whole goal complete.
