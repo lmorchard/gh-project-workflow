@@ -27,7 +27,7 @@ Preserve confirmed decisions and historical context. Do not reduce scope merely 
 
 Recommend keeping, revising, closing, or splitting the issue, with a specific reason. Distinguish closure because work is complete from closure because work is obsolete or duplicated. Name the replacement when recommending closure as a duplicate.
 
-Recommend issue state and board status separately when both are relevant. Use the project's actual status names. Explain readiness from remaining decisions and evidence, not from issue age or size alone.
+Recommend issue state and board status separately when both are relevant. Use the project's actual status names. Distinguish a parent that tracks several tasks from a task ready for implementation. If parent-status conventions are unclear, make the recommendation conditional instead of declaring the current status wrong. Explain readiness from remaining decisions and evidence, not from issue age or size alone.
 
 If several useful changes remain, suggest boundaries and the next useful task. Do not produce an entire child-issue backlog unless requested. Use issue definition for a task that needs implementation detail. Use an interview when a user decision prevents further progress. These are possible next steps, not mandatory phases.
 
