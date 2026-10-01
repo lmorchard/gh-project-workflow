@@ -24,6 +24,8 @@ If a skill is incomplete, revise it here and let a subagent continue the task. I
 
 Les wants an agreed issue-preparation flow to continue through research, interviews, draft review, and publication without approval at every skill boundary. Carry that authorization and its limits into each subagent handoff. Once decisions are settled, publish the reviewed result within the agreed scope and report it.
 
+Interviews settle questions, not repeated authorization. Carry authorization forward through changes that Les reviews or weighs in on. Revisit authorization only when a significant change falls outside the reviewed or authorized scope.
+
 An explicit draft-only or read-only request still limits the work. Ask about unresolved product decisions or actions beyond the agreed scope, not merely because the next skill changes. Issue preparation does not authorize implementation or merge. Keep the existing merge policy.
 
 ## Writing
