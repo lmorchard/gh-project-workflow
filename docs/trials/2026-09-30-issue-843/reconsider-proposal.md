@@ -50,9 +50,9 @@ Web UI calls with non-JSON responses remain in scope unless a later decision exp
 - Runtime tests preserve the routes’ behavior and demonstrate that migrated generated calls send the required path/query/body data.
 - Normal project checks and existing browser-loading regressions pass.
 
-### Next boundary to define
+### Confirmed next child
 
-Define a first remaining route group rather than treating this parent as one ready implementation task. A useful next slice is conversation reads: type the relevant path/query/response contracts and migrate their consumers. Keep other route groups tracked by this parent.
+Les selected one conversation lookup by ID and its real web UI caller as the next child. Give that call usable generated parameter and response types while preserving existing behavior. Conversation listing and other routes remain outside this child and tracked by the parent.
 
 Identify non-JSON responses and legacy aliases among actual web UI calls during decomposition. Record endpoints outside the confirmed boundary as follow-up work.
 
@@ -71,4 +71,4 @@ Identify non-JSON responses and legacy aliases among actual web UI calls during 
 
 No blocking ambiguity in the skill. It requires current-revision evidence and correctly separates child completion from parent completion. It leaves umbrella board-status conventions to judgment, so the Backlog recommendation remains tentative.
 
-Recommend conversation reads as the next slice: it demonstrates path/query/response typing, while login/logout would be smaller. Parent closure does not depend on choosing that slice now; it is clearly incomplete. The web UI boundary is confirmed. Identify its callers before claiming the whole goal complete.
+The user selected one conversation lookup by ID and its web UI caller as the next child. This adds evidence for generated request parameters after the completed session response example. Parent closure does not depend on choosing that slice now; it is clearly incomplete. The web UI boundary is confirmed. Identify its callers before claiming the whole goal complete.
