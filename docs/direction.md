@@ -91,7 +91,11 @@ PR follow-up also watches hosted CI for the current commit. It corrects failures
 
 Les requires green CI and prefers Copilot review. A literal approving review is not required by this workflow. The agent often submits PRs as the user, and GitHub does not let authors approve their own PRs.
 
-A completed review with no findings can be sufficient even when its state is COMMENTED. Missing Copilot review remains an explicit limit, not an automatic prohibition. Unresolved defects, human objections, and repository protection rules still require attention.
+Green CI alone does not permit an autonomous merge. The agent also needs affirmative review evidence within existing merge authorization, or explicit user permission to merge the PR.
+
+A favorable review can come from a person, Copilot, or an independent local reviewer. A COMMENTED review can qualify if its text recommends approval or clearly reports a completed review with no findings. Silence, an empty comment list, and a review timeout do not qualify.
+
+Permission to implement or submit does not imply permission to merge. Existing explicit merge permission remains valid within its scope, so the agent does not need to ask again. Unresolved defects, human objections, and repository protection rules still require attention.
 
 Merge uses explicit user authorization and checks the current commit. It does not bypass GitHub rules or weaken checks. The result includes confirmed merge, issue, and board state.
 

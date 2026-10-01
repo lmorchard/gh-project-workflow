@@ -1,6 +1,6 @@
 ---
 name: merge-pr
-description: Merge an authorized pull request after confirming green CI for its current head and assessing review findings. Prefer Copilot review without requiring a literal approval, then confirm merge, issue, and board state.
+description: Merge an authorized pull request after confirming green CI for its current head and assessing review findings. Require affirmative review evidence or explicit permission to merge. Prefer Copilot without requiring GitHub APPROVED state, then confirm merge, issue, and board state.
 ---
 
 # Merge a pull request
@@ -25,9 +25,15 @@ If no CI exists, report that the green-CI condition cannot be established. Do no
 
 Prefer a completed Copilot review for the current change. Read the review body, inline discussions, and relevant top-level comments. Get all pages of results.
 
-A completed COMMENTED review can satisfy this preference. Do not require the literal APPROVED state or ask the author to approve their own PR. Assess findings and the commit reviewed instead.
+Require affirmative review evidence or explicit user permission to merge this PR. Green CI and a lack of feedback are insufficient. General permission to implement, submit, or address review does not supply permission to merge.
 
-Copilot is preferred, not mandatory. If its review is absent, timed out, or unavailable, report that fact and the available review evidence. Absence alone does not block an explicitly authorized merge when CI and other project requirements pass.
+Affirmative review evidence includes a favorable human review, a favorable Copilot review, or a favorable independent local review. A COMMENTED review can qualify when its text recommends approval or clearly reports a completed review with no findings. An empty comment list, a timeout, or the COMMENTED state alone does not qualify. Do not require the literal APPROVED state or ask the author to approve their own PR.
+
+A favorable review satisfies this condition only within existing user authorization to merge. Explicit permission such as “merge this PR when CI passes” also satisfies the condition. Retain that permission unless the user changes it or later changes fall outside its scope. Do not ask for the same permission again.
+
+If neither affirmative review evidence nor explicit merge permission exists, stop before merging. Report the missing condition to the user or parent. Cite the review or permission that supports the merge in the result. No separate approval document is required.
+
+Copilot is preferred, not mandatory. If its review is absent, timed out, or unavailable, report that fact and the available review evidence. If Copilot is absent, require another favorable review within existing merge authorization or explicit user permission to merge this PR.
 
 A same-model second opinion remains distinct from the different-model local fallback. Do not claim model diversity without evidence. Do not invent an approval requirement to compensate for an unknown model.
 
