@@ -60,7 +60,7 @@ The old workflow separated an author from a reviewer. The new local fallback als
 
 On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
 
-The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. They also omit automatic repair loops and merge actions. Both skills pass static validation but still require a real trial.
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. Submission includes one requested wait-and-correction cycle, but omits unbounded repair loops and merge actions. Both skills pass static validation but still require a real trial.
 
 ## Earlier dev-session guidance
 
@@ -73,3 +73,11 @@ The older Copilot command names copilot-pull-request-reviewer directly. The inst
 The older procedure waits for an increase in inline comment count. That misses completed reviews with no inline comments and does not identify the reviewed commit. The new skill examines review records and keeps pending review separate from unavailable access.
 
 We did not copy mandatory squashing, automatic rebasing, repeated force-pushing, or a fixed polling loop. We also did not copy the assumption that an assignee listing establishes review access. The actual request and saved review state provide better evidence.
+
+## Bounded Copilot wait
+
+Les requested a wait of up to 20 minutes followed by corrections to review findings. The submit-pr skill now records the deadline and polls or watches for a completed review. It does not use inline comment counts as the completion signal.
+
+The cycle includes assessment, corrections, tests, commits, pushes, and factual replies within scope. Disputed findings remain open. If corrections require another review, the skill requests it and reports it as pending rather than starting an unlimited loop.
+
+Timeout and partial-failure behavior remain untested in a live skill trial. Static validation does not establish that the wait or reply procedure succeeds on GitHub.
