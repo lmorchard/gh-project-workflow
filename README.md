@@ -41,6 +41,7 @@ Read these documents:
 - [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
 - [Skill sources](docs/skill-sources.md) records ideas adapted from agent-sessions.
 - [Trial results](docs/trials/2026-09-30-issue-843/review.md) records the first use of the skill.
+- [Parent delivery retrospective](docs/trials/2026-10-02-parent-843-delivery.md) records the completed #843 trial and proposed improvements.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial.
 
 The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.
