@@ -6,7 +6,8 @@ judges whether a review is favorable or whether work may merge.
 
 A part that could not be read is null and has an entry in "errors". An empty
 list means GitHub returned nothing. Exit status: 0 when every part was read,
-2 when some parts failed, 1 when the PR itself could not be read.
+2 when some parts failed, 1 when the PR or commit itself could not be read.
+verify-commit exits 3 when the commit was read and an expectation is false.
 """
 
 import argparse
@@ -216,21 +217,83 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
     return result, 2 if errors else 0
 
 
+def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
+    """Resolve a published commit and compare it with what the caller expects it to be."""
+    try:
+        commit = gh(["api", f"repos/{repo}/commits/{rev}"])
+    except GhError as error:
+        result = {"repo": repo, "rev": rev, "errors": [{"part": "commit", "error": str(error)}]}
+        if "No commit found" in str(error):
+            result["note"] = "GitHub gives this error for an unpushed or missing commit and for an ambiguous or too-short prefix. Check that the commit is pushed, then retry with the full SHA."
+        return result, 1
+
+    sha = commit["sha"]
+    message = commit["commit"]["message"]
+    errors = []
+    expectations = {}
+    result = {
+        "repo": repo,
+        "rev": rev,
+        "sha": sha,
+        "subject": message.splitlines()[0] if message else "",
+        "author_date": commit["commit"]["author"]["date"],
+        "parents": [parent["sha"] for parent in commit.get("parents") or []],
+        "expectations": expectations,
+        "errors": errors,
+    }
+
+    if subject is not None:
+        expectations["subject_matches"] = result["subject"] == subject.strip()
+
+    if on is not None:
+        try:
+            # "behind" or "identical" means the commit is in the branch's history.
+            status = gh(["api", f"repos/{repo}/compare/{on}...{sha}", "--jq", "{status}"])["status"]
+            expectations["on_branch"] = status in ("behind", "identical")
+        except (GhError, TypeError, KeyError) as error:
+            errors.append({"part": "on_branch", "error": str(error)})
+            expectations["on_branch"] = None
+
+    if pr_head is not None:
+        pr_repo, number = pr_head
+        try:
+            head = gh(["pr", "view", str(number), "--repo", pr_repo, "--json", "headRefOid"])["headRefOid"]
+            result["pr_head"] = head
+            expectations["is_pr_head"] = head == sha
+        except (GhError, TypeError, KeyError) as error:
+            errors.append({"part": "is_pr_head", "error": str(error)})
+            expectations["is_pr_head"] = None
+
+    if False in expectations.values():
+        return result, 3
+    return result, 2 if errors else 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="ghflow", description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     state = commands.add_parser("pr-state", help="Report CI, review requests, and reviews for a PR's current head.")
     state.add_argument("pr", help="PR URL, or PR number with --repo")
     state.add_argument("--repo", help="OWNER/NAME when giving a PR number")
+    verify = commands.add_parser("verify-commit", help="Resolve a published commit and check that it is the one you expect.")
+    verify.add_argument("rev", help="commit SHA or prefix")
+    verify.add_argument("--repo", required=True, help="OWNER/NAME")
+    verify.add_argument("--subject", help="expected first line of the commit message")
+    verify.add_argument("--on", metavar="BRANCH", help="branch whose history should contain the commit")
+    verify.add_argument("--pr-head", metavar="PR", help="PR URL or number whose current head should be the commit")
     args = parser.parse_args(argv)
 
     if args.command == "pr-state":
         repo, number = parse_pr(args.pr, args.repo)
         result, status = pr_state(repo, number)
-        json.dump(result, sys.stdout, indent=2)
-        sys.stdout.write("\n")
-        return status
-    return 1
+    elif args.command == "verify-commit":
+        pr_head = parse_pr(args.pr_head, args.repo) if args.pr_head else None
+        result, status = verify_commit(args.repo, args.rev, args.subject, args.on, pr_head)
+    else:
+        return 1
+    json.dump(result, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+    return status
 
 
 if __name__ == "__main__":

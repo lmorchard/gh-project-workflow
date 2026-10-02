@@ -12,3 +12,9 @@ Two scenarios ran against the skills at `0a538ad`. Neither had run before.
 ## Observations
 
 All three copilot-needs-closer-look agents offered a different-model local review as one option. Two said that the skills do not state whether such a review satisfies a request for human review, and offered it without assuming that it does. The skills do not decide that question.
+
+## verify-commit
+
+The new scenario verify-cited-commit ran once at `2fbed71`, before the skills named `ghflow verify-commit`. It passed on the decision: the agent would not copy the reported identifier, and would check the branch head and commit message first. It would have done this by hand, which is the procedure that failed in the issue 843 delivery.
+
+After evidence.md gained "Verifying a commit", the scenario passed 2 of 2 runs. Both agents ran `verify-commit` with `--subject` and `--on`, would use the reported full SHA, and would not pass on a failed identifier. Regression runs of head-changed-before-merge and copilot-automatic-request passed, 1 of 1 each. The head-changed-before-merge agent added a `verify-commit --pr-head` check on the new head. That check is redundant, because `pr-state` reports the full head SHA, but it is harmless.

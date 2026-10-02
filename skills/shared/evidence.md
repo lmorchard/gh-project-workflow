@@ -34,6 +34,12 @@ Use `latest_review_requests` to decide whether a review request exists and wheth
 
 A part that the tool could not read is `null` and has an entry in `errors`. Exit status 2 means some parts failed. Treat a `null` part as unread, not as empty. The tool does not judge whether a review is favorable; read the review bodies yourself.
 
+## Verifying a commit
+
+Before you put a commit identifier from a report or handoff into a handoff, a record, or a merge, verify it. Run `python3 cli/ghflow.py verify-commit SHA --repo OWNER/NAME` from this skills repository. Add the facts that you expect: `--subject` with the first line of the commit message, `--on BRANCH` for the branch that should contain it, and `--pr-head PR_URL` when it should be the PR's current head. Use the full SHA that the tool reports.
+
+Exit status 0 means the commit exists and each expectation holds. Exit status 3 means an expectation is false. Exit status 1 means GitHub did not find the commit, which can mean it is not pushed. Do not pass on an identifier that failed. Read the branch again or return the mismatch to the agent that reported it.
+
 ## Writes to GitHub
 
 Before you create something, search for an existing equivalent. On resumption, inspect the recorded URL first.

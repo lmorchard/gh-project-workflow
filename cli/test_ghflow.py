@@ -1,6 +1,6 @@
 import unittest
 
-from ghflow import GhError, pr_state
+from ghflow import GhError, pr_state, verify_commit
 
 HEAD = "a" * 40
 OLD = "b" * 40
@@ -159,6 +159,74 @@ class PrTests(unittest.TestCase):
         result, status = pr_state("o/r", 7, **fake(pr(), fail={"pr"}))
         self.assertEqual(status, 1)
         self.assertEqual(result["errors"][0]["part"], "pr")
+
+
+def commit_fake(message="Fix the thing\n\nDetails.", compare="behind", head=HEAD, fail=()):
+    def gh(args):
+        path = args[1] if args[0] == "api" else None
+        if args[0] == "pr":
+            if "pr" in fail:
+                raise GhError("not found")
+            return {"headRefOid": head}
+        if "/compare/" in path:
+            if "compare" in fail:
+                raise GhError("HTTP 404")
+            return {"status": compare}
+        if "commit" in fail:
+            raise GhError("No commit found for SHA: abc (HTTP 422)")
+        return {"sha": HEAD, "commit": {"message": message, "author": {"date": "2026-10-02T12:00:00Z"}}, "parents": [{"sha": OLD}]}
+
+    return {"gh": gh}
+
+
+class VerifyCommitTests(unittest.TestCase):
+    def test_resolves_prefix_to_full_commit(self):
+        result, status = verify_commit("o/r", "aaaaaaa", **commit_fake())
+        self.assertEqual((result["sha"], result["subject"], result["parents"]), (HEAD, "Fix the thing", [OLD]))
+        self.assertEqual(result["expectations"], {})
+        self.assertEqual(status, 0)
+
+    def test_all_expectations_hold(self):
+        result, status = verify_commit("o/r", "aaaaaaa", subject="Fix the thing", on="main", pr_head=("o/r", 7), **commit_fake())
+        self.assertEqual(result["expectations"], {"subject_matches": True, "on_branch": True, "is_pr_head": True})
+        self.assertEqual(status, 0)
+
+    def test_wrong_subject_exits_3(self):
+        result, status = verify_commit("o/r", "aaaaaaa", subject="Something else", **commit_fake())
+        self.assertFalse(result["expectations"]["subject_matches"])
+        self.assertEqual(status, 3)
+
+    def test_commit_not_in_branch_history(self):
+        for compare in ("ahead", "diverged"):
+            result, status = verify_commit("o/r", "aaaaaaa", on="main", **commit_fake(compare=compare))
+            self.assertFalse(result["expectations"]["on_branch"])
+            self.assertEqual(status, 3)
+
+    def test_identical_to_branch_is_on_it(self):
+        result, _ = verify_commit("o/r", "aaaaaaa", on="main", **commit_fake(compare="identical"))
+        self.assertTrue(result["expectations"]["on_branch"])
+
+    def test_pr_head_moved(self):
+        result, status = verify_commit("o/r", "aaaaaaa", pr_head=("o/r", 7), **commit_fake(head=OLD))
+        self.assertEqual(result["pr_head"], OLD)
+        self.assertFalse(result["expectations"]["is_pr_head"])
+        self.assertEqual(status, 3)
+
+    def test_failed_expectation_read_is_null(self):
+        result, status = verify_commit("o/r", "aaaaaaa", on="main", **commit_fake(fail={"compare"}))
+        self.assertIsNone(result["expectations"]["on_branch"])
+        self.assertEqual(result["errors"][0]["part"], "on_branch")
+        self.assertEqual(status, 2)
+
+    def test_false_expectation_outranks_read_error(self):
+        _, status = verify_commit("o/r", "aaaaaaa", subject="Other", on="main", **commit_fake(fail={"compare"}))
+        self.assertEqual(status, 3)
+
+    def test_missing_commit_exits_1_with_prefix_note(self):
+        result, status = verify_commit("o/r", "abc", **commit_fake(fail={"commit"}))
+        self.assertEqual(status, 1)
+        self.assertNotIn("sha", result)
+        self.assertIn("full SHA", result["note"])
 
 
 if __name__ == "__main__":
