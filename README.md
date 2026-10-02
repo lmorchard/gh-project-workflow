@@ -48,6 +48,7 @@ Read these documents:
 - [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
 - [Skill sources](docs/skill-sources.md) records ideas adapted from agent-sessions.
 - [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
+- [Skill scenarios](evals/README.md) checks whether agents make the decisions that the skills intend.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.
 - [Skill style](docs/skill-style.md) describes how to write and revise skills.
 
