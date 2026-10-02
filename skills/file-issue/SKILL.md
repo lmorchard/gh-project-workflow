@@ -37,6 +37,8 @@ Create the issue in the explicit target repository. Include parent or project fl
 
 Read the saved issue back. Make sure the title and body match the prepared content and the requested relationships exist. Add any missing metadata to that issue. Set a requested project status only after project membership exists, following [Board status](../shared/board-status.md).
 
+Read back project membership even when no project was requested. A project's auto-add workflow can add the issue on creation. Report membership that nobody requested, and return the choice to remove it to the parent or user.
+
 Establish a parent through the native relationship. Do not edit the parent body or add a comment to create the link. Preserve unrelated metadata.
 
 ## Resume after an error
