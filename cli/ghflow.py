@@ -8,6 +8,7 @@ A part that could not be read is null and has an entry in "errors". An empty
 list means GitHub returned nothing. Exit status: 0 when every part was read,
 2 when some parts failed, 1 when the PR or commit itself could not be read.
 verify-commit exits 3 when the commit was read and an expectation is false.
+board set-status exits 3 when it refuses a backward move.
 """
 
 import argparse
@@ -61,6 +62,15 @@ def parse_pr(ref, repo):
     if ref.isdigit() and repo:
         return repo, int(ref)
     raise SystemExit("Give a PR URL, or a PR number with --repo OWNER/NAME.")
+
+
+def parse_issue(ref, repo):
+    match = re.match(r"https://github\.com/([^/]+/[^/]+)/issues/(\d+)", ref)
+    if match:
+        return match.group(1), int(match.group(2))
+    if ref.isdigit() and repo:
+        return repo, int(ref)
+    raise SystemExit("Give an issue URL, or an issue number with --repo OWNER/NAME.")
 
 
 def check_state(item):
@@ -269,6 +279,97 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
     return result, 2 if errors else 0
 
 
+ISSUE_ITEMS_QUERY = """
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    issue(number: $number) {
+      url
+      projectItems(first: 50) {
+        nodes {
+          id
+          project { id }
+          fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh):
+    """Move one issue to a status on one board, refusing backward moves, and read the result back."""
+    result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status, "errors": []}
+
+    def fail(part, error):
+        result["errors"].append({"part": part, "error": str(error)})
+        return result, 1
+
+    def read_item():
+        """Return the issue URL and its item on this board as (item_id, status), or None."""
+        repo_owner, name = repo.split("/")
+        data = gh(["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"])
+        issue = data["data"]["repository"]["issue"]
+        for node in issue["projectItems"]["nodes"]:
+            if node["project"]["id"] == project_id:
+                return issue["url"], (node["id"], (node.get("fieldValueByName") or {}).get("name"))
+        return issue["url"], None
+
+    try:
+        project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
+        fields = gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"])["fields"]
+        field = next(f for f in fields if f["name"] == "Status")
+    except StopIteration:
+        return fail("status_field", "The board has no Status field.")
+    except (GhError, TypeError, KeyError) as error:
+        return fail("board", error)
+
+    options = [option["name"] for option in field["options"]]
+    result["options"] = options
+    matches = [name for name in options if name == status] or [name for name in options if name.lower() == status.lower()]
+    if len(matches) != 1:
+        return fail("status", f"No single Status option matches {status!r}.")
+    target = matches[0]
+    result["target"] = target
+
+    try:
+        url, item = read_item()
+    except (GhError, TypeError, KeyError) as error:
+        return fail("issue", error)
+    result["before"] = item[1] if item else None
+    result["added"] = False
+
+    if item and item[1] == target:
+        result.update(action="unchanged", after=target, readback_matches=True)
+        return result, 0
+    if item and item[1] in options and options.index(item[1]) > options.index(target) and not allow_backward:
+        result.update(action="refused", after=item[1])
+        result["reason"] = f"{item[1]} to {target} is a backward move. Pass --allow-backward only with a reason and authorization."
+        return result, 3
+
+    try:
+        if item is None:
+            item_id = gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"])["id"]
+            result["added"] = True
+        else:
+            item_id = item[0]
+        option_id = next(option["id"] for option in field["options"] if option["name"] == target)
+        gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
+            "--single-select-option-id", option_id, "--format", "json"])
+    except (GhError, TypeError, KeyError) as error:
+        return fail("write", error)
+    result["action"] = "set"
+
+    try:
+        _, item = read_item()
+        result["after"] = item[1] if item else None
+    except (GhError, TypeError, KeyError) as error:
+        result["errors"].append({"part": "readback", "error": str(error)})
+        result["after"] = None
+    result["readback_matches"] = result["after"] == target
+    return result, 0 if result["readback_matches"] else 2
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="ghflow", description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
@@ -281,6 +382,15 @@ def main(argv=None):
     verify.add_argument("--subject", help="expected first line of the commit message")
     verify.add_argument("--on", metavar="BRANCH", help="branch whose history should contain the commit")
     verify.add_argument("--pr-head", metavar="PR", help="PR URL or number whose current head should be the commit")
+    board = commands.add_parser("board", help="Project board operations.")
+    board_commands = board.add_subparsers(dest="board_command", required=True)
+    set_status = board_commands.add_parser("set-status", help="Move one issue to a board status, refusing backward moves, and read it back.")
+    set_status.add_argument("issue", help="issue URL, or issue number with --repo")
+    set_status.add_argument("--repo", help="OWNER/NAME when giving an issue number")
+    set_status.add_argument("--owner", required=True, help="login that owns the project board")
+    set_status.add_argument("--project", required=True, type=int, help="project board number")
+    set_status.add_argument("--status", required=True, help="target Status option name")
+    set_status.add_argument("--allow-backward", action="store_true", help="permit a backward move; use only with a reason and authorization")
     args = parser.parse_args(argv)
 
     if args.command == "pr-state":
@@ -289,6 +399,9 @@ def main(argv=None):
     elif args.command == "verify-commit":
         pr_head = parse_pr(args.pr_head, args.repo) if args.pr_head else None
         result, status = verify_commit(args.repo, args.rev, args.subject, args.on, pr_head)
+    elif args.command == "board":
+        repo, number = parse_issue(args.issue, args.repo)
+        result, status = board_set_status(repo, number, args.owner, args.project, args.status, args.allow_backward)
     else:
         return 1
     json.dump(result, sys.stdout, indent=2)

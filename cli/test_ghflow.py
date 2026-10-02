@@ -1,6 +1,6 @@
 import unittest
 
-from ghflow import GhError, pr_state, verify_commit
+from ghflow import GhError, board_set_status, pr_state, verify_commit
 
 HEAD = "a" * 40
 OLD = "b" * 40
@@ -227,6 +227,117 @@ class VerifyCommitTests(unittest.TestCase):
         self.assertEqual(status, 1)
         self.assertNotIn("sha", result)
         self.assertIn("full SHA", result["note"])
+
+
+BOARD_OPTIONS = ["Backlog", "Ready", "In progress", "In review", "Done"]
+
+
+class FakeBoard:
+    """A board with one Status field. `status` is None when the issue is not on the board."""
+
+    def __init__(self, status=None, on_board=True, fail=(), sticky=True):
+        self.status = status
+        self.on_board = on_board
+        self.fail = set(fail)
+        self.sticky = sticky
+        self.writes = []
+
+    def __call__(self, args):
+        if args[:2] == ["project", "view"]:
+            return {"id": "P1"}
+        if args[:2] == ["project", "field-list"]:
+            options = [{"id": f"opt-{i}", "name": name} for i, name in enumerate(BOARD_OPTIONS)]
+            return {"fields": [{"id": "F0", "name": "Title"}, {"id": "F1", "name": "Status", "options": options}]}
+        if args[:2] == ["project", "item-add"]:
+            self.writes.append("add")
+            self.on_board = True
+            return {"id": "ITEM"}
+        if args[:2] == ["project", "item-edit"]:
+            if "write" in self.fail:
+                raise GhError("HTTP 403")
+            option = args[args.index("--single-select-option-id") + 1]
+            self.writes.append(option)
+            if self.sticky:
+                self.status = BOARD_OPTIONS[int(option.split("-")[1])]
+            return {}
+        if self.writes and "readback" in self.fail:
+            raise GhError("HTTP 502")
+        nodes = [{"id": "OTHER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Done"}}]
+        if self.on_board:
+            value = {"name": self.status} if self.status else {}
+            nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
+        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5", "projectItems": {"nodes": nodes}}}}}
+
+
+def set_status(board, status, **kwargs):
+    return board_set_status("o/r", 5, "o", 6, status, gh=board, **kwargs)
+
+
+class BoardSetStatusTests(unittest.TestCase):
+    def test_forward_move_sets_and_reads_back(self):
+        board = FakeBoard("In progress")
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["before"], result["action"], result["after"]), ("In progress", "set", "In review"))
+        self.assertTrue(result["readback_matches"])
+        self.assertEqual(board.writes, ["opt-3"])
+        self.assertEqual(status, 0)
+
+    def test_option_name_matched_case_insensitively(self):
+        result, _ = set_status(FakeBoard("Backlog"), "in progress")
+        self.assertEqual(result["target"], "In progress")
+
+    def test_unknown_option_exits_1_with_options(self):
+        board = FakeBoard("Backlog")
+        result, status = set_status(board, "Doing")
+        self.assertEqual(status, 1)
+        self.assertEqual(result["options"], BOARD_OPTIONS)
+        self.assertEqual(board.writes, [])
+
+    def test_same_status_is_unchanged_without_write(self):
+        board = FakeBoard("In review")
+        result, status = set_status(board, "In review")
+        self.assertEqual(result["action"], "unchanged")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 0)
+
+    def test_backward_move_refused(self):
+        board = FakeBoard("Done")
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("refused", "Done"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+
+    def test_backward_move_allowed_with_flag(self):
+        result, status = set_status(FakeBoard("Done"), "In review", allow_backward=True)
+        self.assertEqual((result["action"], result["after"], status), ("set", "In review", 0))
+
+    def test_issue_without_status_moves_forward(self):
+        result, status = set_status(FakeBoard(None), "Backlog")
+        self.assertEqual((result["before"], result["after"], status), (None, "Backlog", 0))
+
+    def test_issue_not_on_board_is_added(self):
+        board = FakeBoard(on_board=False)
+        result, status = set_status(board, "In progress")
+        self.assertTrue(result["added"])
+        self.assertEqual(board.writes, ["add", "opt-2"])
+        self.assertEqual((result["after"], status), ("In progress", 0))
+
+    def test_failed_write_exits_1(self):
+        result, status = set_status(FakeBoard("Backlog", fail={"write"}), "In progress")
+        self.assertEqual(result["errors"][0]["part"], "write")
+        self.assertEqual(status, 1)
+
+    def test_write_that_does_not_stick_exits_2(self):
+        result, status = set_status(FakeBoard("Backlog", sticky=False), "In progress")
+        self.assertEqual(result["after"], "Backlog")
+        self.assertFalse(result["readback_matches"])
+        self.assertEqual(status, 2)
+
+    def test_failed_readback_exits_2(self):
+        result, status = set_status(FakeBoard("Backlog", fail={"readback"}), "In progress")
+        self.assertIsNone(result["after"])
+        self.assertEqual(result["errors"][0]["part"], "readback")
+        self.assertEqual(status, 2)
 
 
 if __name__ == "__main__":

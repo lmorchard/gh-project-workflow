@@ -18,3 +18,9 @@ All three copilot-needs-closer-look agents offered a different-model local revie
 The new scenario verify-cited-commit ran once at `2fbed71`, before the skills named `ghflow verify-commit`. It passed on the decision: the agent would not copy the reported identifier, and would check the branch head and commit message first. It would have done this by hand, which is the procedure that failed in the issue 843 delivery.
 
 After evidence.md gained "Verifying a commit", the scenario passed 2 of 2 runs. Both agents ran `verify-commit` with `--subject` and `--on`, would use the reported full SHA, and would not pass on a failed identifier. Regression runs of head-changed-before-merge and copilot-automatic-request passed, 1 of 1 each. The head-changed-before-merge agent added a `verify-commit --pr-head` check on the new head. That check is redundant, because `pr-state` reports the full head SHA, but it is harmless.
+
+## board set-status
+
+The new scenario board-transition-cli ran once at `dd3488a`, before board-status.md named `ghflow board set-status`. It passed on the decision but applied the transition with the written procedure. After board-status.md replaced steps 2 and 4 to 6 with the tool, the scenario passed 2 of 2 runs. Regression runs of stale-handoff-board and already-merged-board-stale passed, 1 of 1 each, and both used the tool.
+
+A subagent then ran the tool on decafclaw issue 894, on board 6, with authorization for two runs that should not write. `--status "In review"` exited 0 with action `unchanged`. `--status "in progress"` exited 3 with action `refused` and matched the actual option "In progress". An independent read showed In review before and after. The agent noted that a refusal reported no `after` value although the skill asks for one. The tool now reports the live status as `after` on a refusal. The first real write is planned for the Done transition when PR 898 merges.
