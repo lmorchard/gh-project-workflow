@@ -27,6 +27,6 @@ SITUATION
 What do you do next, and why? Name the skill rule that decides it. Do not run commands or change anything.
 ```
 
-Compare the answer with the Expected and Not acceptable sections. Record the scenario, skill commit, model, and result. An answer passes when it reaches the expected decision for the expected reasons. Note when an answer passes for a wrong reason, because that points to unclear text.
+Compare the answer with the Expected and Not acceptable sections. Record the scenario, skill commit, model, and result in a dated file in `results/`. An answer passes when it reaches the expected decision for the expected reasons. Note when an answer passes for a wrong reason, because that points to unclear text.
 
 One run is a sample, not proof. When a scenario fails, run it again before you change the skill. A rule that fails repeatedly is unclear or missing.

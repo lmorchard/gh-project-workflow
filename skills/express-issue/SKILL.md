@@ -31,6 +31,8 @@ Dispatch [implement-issue](../implement-issue/SKILL.md) when implementation rema
 
 Plan reviewer selection before implementation when possible. Before submission, dispatch [review-changes](../review-changes/SKILL.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. The reviewer must use a different model from the implementer, as [Review](../shared/review.md) describes. If that is not possible, return the review choice to the user and continue independent preparation meanwhile. Do not skip the review silently.
 
+If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer, as [Authorization](../shared/authorization.md) describes under handoffs. Do not review the changes yourself.
+
 Return actionable local findings to the implementation agent, on the same task branch, with affected checks run again. Return disputed findings and scope changes to the parent interview. After corrections, have the reviewer assess the changed code and the unresolved findings. Do not repeat completed checks without a new reason. If the same blocker persists without progress, report it instead of cycling.
 
 When resuming with an existing PR, use current independent review evidence if it satisfies the review plan. Do not demand a retroactive pre-submission review just to replay the sequence. Report any unmet review requirement and resolve it explicitly.
