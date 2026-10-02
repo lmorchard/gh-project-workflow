@@ -24,7 +24,7 @@ These coordinators combine the skills above:
 - [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
 - [deliver-parent-issue](skills/deliver-parent-issue/SKILL.md) coordinates a bounded parent through child delivery and completion checks.
 
-Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.
+Each task skill can be used by itself on an ordinary issue or PR. Skills link to shared references in [skills/shared](skills/shared/) for authorization, evidence, review, and board-status rules, so use them from a full checkout of this repository. We did not select a CLI language or command names. The CLI is not implemented.
 
 ## Requirements
 
@@ -48,6 +48,7 @@ Read these documents:
 - [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
 - [Skill sources](docs/skill-sources.md) records ideas adapted from agent-sessions.
 - [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
-- [Writing rules](docs/writing.md) describes the ASD-STE100 trial.
+- [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.
+- [Skill style](docs/skill-style.md) describes how to write and revise skills.
 
 The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.

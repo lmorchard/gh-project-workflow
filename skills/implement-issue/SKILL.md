@@ -5,94 +5,75 @@ description: Implement a specified GitHub issue in an isolated worktree, assess 
 
 # Implement an issue
 
-Produce tested, committed changes for the requested issue. A commit records a version of project files. Return enough evidence for another agent to prepare a pull request (PR).
+Produce tested, committed changes for the requested issue, with enough evidence for another agent to prepare a PR. This skill ends with a local branch and a report. Do not push, open a PR, merge, or remove the worktree.
 
-This skill ends with a local branch and a report. It does not include publishing a PR, external review, or merge. Preserve separately authorized next actions for the parent or next operation.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
 
 ## Read the issue and current code
 
-Read the project instructions, issue body, and relevant comments. Identify the intended result, scope limits, success conditions, and confirmed decisions. Do not require labels or documents from another skill.
+Read the project instructions, the issue body, and relevant comments. Identify the intended result, scope limits, success conditions, and confirmed decisions. Do not require labels or documents from another skill.
 
-Inspect relevant code and tests at the current revision. Treat issue file references and earlier test results as historical evidence until examined. Determine whether the reported problem remains.
+Inspect the relevant code and tests at the current revision, and determine whether the reported problem still exists. If part of the issue is already satisfied, record the evidence and implement only what remains. If nothing remains, report that. Do not create unrelated work to justify a commit.
 
-If part of the issue is already satisfied, record the evidence and implement only the remaining requirements. If no change remains, report that result. Do not create unrelated work to justify a commit.
-
-Resolve routine implementation choices from current code and project conventions. If a missing decision changes scope or user behavior, explain the question and recommend an answer. Do not silently redefine the issue.
-
-When delegated, return necessary questions to the parent agent. In a direct session, ask the user. The parent can use `interview-issue`, but this skill does not require it.
+Resolve routine implementation choices from the current code and project conventions. If a missing decision changes scope or user-visible behavior, explain the question and recommend an answer instead of redefining the issue.
 
 ## Prepare an isolated workspace
 
-A worktree is a separate checkout connected to a Git repository. Inspect the current status, branches, and existing worktrees before making changes. Preserve unrelated work.
+Inspect the current status, branches, and existing worktrees before you change anything. Preserve unrelated work.
 
-Determine the intended base branch from the project or request. Refresh its remote reference when access permits. Do not assume that the branch is named main or that the current checkout is the correct base.
+Determine the base branch from the project or the request. Do not assume it is `main` or that the current checkout is the right base. Refresh its remote reference when access permits.
 
-Create a worktree and task branch using the project conventions. Do not reset or switch the shared checkout. Do not use another session's worktree merely because its name matches the issue.
+Create a worktree and task branch following project conventions. Do not reset or switch the shared checkout. Do not reuse another session's worktree because its name matches the issue.
 
-If resuming, confirm the supplied worktree and branch before editing. Read its existing changes and records. Resume authorized work rather than creating a second competing implementation.
+If resuming, confirm the supplied worktree and branch before you edit, and read their existing changes. Continue that work instead of starting a competing implementation.
 
-Inspect prerequisites of the baseline commands, including code generation, frontend packages, and browser binaries when tests use them. Install declared dependencies as the project directs before starting the baseline. A Python test suite can require JavaScript tools too. Do not run dependency installation concurrently with tests that use or copy those dependencies. Check whether gate commands reinstall packages before running gates in parallel. Use test configuration and isolated data where required. Do not copy credentials or connect to live services merely to make tests pass.
+Prepare what the baseline checks need, such as generated code, frontend packages, and browser binaries. A Python test suite can need JavaScript tools too. Install declared dependencies as the project directs, before the baseline. Do not run an installation at the same time as tests that use or copy those dependencies; some gate commands reinstall packages, so check before running gates in parallel. Use test configuration and isolated data where required. Do not copy credentials or connect to live services to make tests pass.
 
-Establish the relevant baseline before implementation. A baseline records test results before your changes. Record existing failures and environment limits separately from new failures.
-
-If a baseline problem prevents meaningful verification, investigate or report the blocker. Independent implementation can continue when it remains useful. Do not describe incomplete verification as success.
+Run the relevant baseline before implementation. Record existing failures and environment limits separately from new failures. If a baseline problem prevents meaningful verification, investigate or report it. Independent implementation can continue, but incomplete verification is not success.
 
 ## Mark implementation in progress
 
-When implementation starts, move the issue to the configured in-progress state if a project board is available. Use the board supplied by the user or identified in project instructions. Existing issue membership can identify the board when there is only one.
-
-Read the board fields and status options before editing. Use its actual in-progress option rather than assuming spelling or capitalization. If multiple boards or status options are ambiguous, return that choice to the parent or user.
-
-Add the issue to the identified board if necessary, then change its status. This transition is part of the implementation task unless the user restricts GitHub writes. If the issue is already in progress, leave it unchanged.
-
-Read back the status to make sure that the change succeeded. If access fails or no suitable state exists, report the problem and continue useful implementation. Do not create a board or change its fields to make the transition possible.
-
-Do not move an issue merely because you inspected it or found no remaining work. On resumption, preserve a later state such as In review or Done. Do not move it backward without a reason and authorization.
+When implementation starts, move the issue to In progress, following [Board status](../shared/board-status.md). On resumption, keep a later state such as In review or Done. If the update fails, report it and continue implementation.
 
 ## Plan the change and its evidence
 
-Make a short plan against the current code. Connect each planned change to an issue requirement. Prefer small steps that demonstrate useful behavior across the relevant components.
+Make a short plan against the current code. Connect each planned change to an issue requirement. Prefer small steps that show useful behavior across the relevant components.
 
-For each success condition, identify a test, command, or human assessment. Distinguish existing checks from checks that you must add. Record what each check establishes and its expected result.
+For each success condition, name a test, command, or human assessment, what it establishes, and its expected result. Mark which checks exist and which you must add. Keep tests of new behavior separate from tests that protect existing behavior. Missing tests or setup errors do not demonstrate the reported bug.
 
-Keep tests for new behavior separate from tests that protect existing behavior. A passing test suite does not by itself prove the new result. Missing tests or setup errors do not demonstrate the reported bug.
-
-Use the project's record format when it has one. Otherwise, keep brief notes with the task. Do not create a fixed set of planning files for every issue.
+Use the project's record format if it has one. Otherwise keep brief notes with the task. Do not create a fixed set of planning files.
 
 ## Implement and test
 
-Obey the project's test-first rules. For a bug fix, demonstrate the relevant failure before changing the implementation when feasible. Make sure that the failure comes from the reported behavior, not a broken setup.
+Follow the project's test-first rules. For a bug fix, demonstrate the failure before changing the implementation when feasible. Make sure the failure comes from the reported behavior, not a broken setup.
 
-Implement the smallest change that satisfies the issue. Add tests for the intended behavior and relevant error cases. Keep unrelated cleanup outside the task.
+Make the smallest change that satisfies the issue. Add tests for the intended behavior and relevant error cases. Leave unrelated cleanup out.
 
-Execute the specific checks for each changed behavior and read their output. Then do the broader checks required by the project. Use project commands rather than copying their internal steps into a new test procedure.
+Run the specific checks for each changed behavior and read their output. Then run the broader checks the project requires, using the project's commands.
 
-Change tests when the intended behavior requires it, and explain why. Do not remove useful assertions merely to make the suite pass. If the issue requirement itself is wrong, return that decision to the parent or user.
+Change a test when the intended behavior requires it, and explain why. Do not remove useful assertions to make the suite pass. If an issue requirement itself is wrong, return that decision to the parent or user.
 
-If a requirement needs human judgment, prepare the requested example or demonstration. State what remains for the person to assess. An automated result does not replace that judgment.
+If a requirement needs human judgment, prepare the example or demonstration and state what the person must assess.
 
 ## Review and commit
 
-Inspect the complete task diff, not only the last edited file. Compare the branch with its intended base through their shared ancestor. Include uncommitted and newly created files in the review.
+Inspect the complete task diff from the merge base, including uncommitted and new files. Look for incomplete changes, missed callers, error cases, unrelated edits, and missing documentation. Check that changed tests still establish the intended behavior. Fix what you find within scope, and run the affected checks again.
 
-Look for incomplete changes, missed callers, error cases, unrelated edits, and missing documentation. Examine changed tests for assertions that no longer establish the intended behavior. Correct findings within scope.
+If the base changes or conflicts need resolution, reassess which results still apply.
 
-After relevant edits, execute the affected checks again. If the base changes or conflicts require resolution, reassess which results remain valid. Do not reuse evidence for code that the check did not examine.
+Stage only the intended files and inspect the staged diff. Commit logical changes following project conventions. If a commit hook changes tested files, run the affected checks again. Make sure the commits contain the changes your report describes.
 
-Stage only intended files and inspect the staged diff. Commit logical changes according to project conventions. Do not describe a partial or failing implementation as ready for PR preparation.
-
-Record the tested revision and remaining working-tree changes. If a commit hook changes tested files, execute the affected checks again. Make sure that the commit contains the changes described in the report.
-
-This self-review is not independent review. If another reviewer supplies findings, distinguish that review from your own checks. Do not claim independent verification when none occurred.
+This self-review is not independent review. Do not claim independent verification when none occurred.
 
 ## Return the result
 
-Return the issue URL, worktree path, branch, base revision, and final commit identifiers. Include the confirmed board transition or explain why it was skipped or failed.
+Return:
 
-Include the implementation model when session metadata identifies it. Otherwise, record it as unknown. This lets the parent select a different model for later local review. Summarize the changes and the result for each success condition. Give the executed commands and observed results, including failures and checks not executed.
+- The issue URL, worktree path, branch, base revision, final commits, the revision you tested, and any remaining uncommitted changes.
+- The board transition result, or why it was skipped or failed.
+- The implementation model from session metadata, or "unknown". The parent uses it to choose a different model for review.
+- The changes, and the result for each success condition.
+- The commands you ran and their results, including failures and checks you did not run.
+- Status: ready for PR preparation, incomplete, or awaiting a decision. A partial or failing implementation is not ready. Include existing failures, remaining human assessments, and unresolved risks.
 
-State whether the changes are ready for PR preparation, incomplete, or awaiting a decision. Include existing failures, remaining human assessments, and unresolved risks that affect the result. Keep the report in plain technical English.
-
-If interrupted or blocked, preserve the worktree and report completed work and the next useful action. Do not publish comments or make further board changes merely to report a blocker. The initial in-progress transition does not authorize other GitHub changes.
-
-Do not push, open a PR, merge, or remove the worktree as part of this skill. Hand off separately requested actions with their authorization. Do not ask for approval that the user already gave.
+If blocked or interrupted, preserve the worktree and report completed work and the next useful action. Do not post comments or make further board changes to report a blocker. Hand separately authorized next actions back to the parent.

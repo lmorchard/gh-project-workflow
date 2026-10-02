@@ -5,62 +5,46 @@ description: Publish a reviewed issue draft with GitHub CLI, add requested paren
 
 # File an issue
 
-Publish the supplied draft without repeating issue definition. Use existing gh commands. Return the issue URL and the confirmed results of requested changes.
+Publish the supplied draft with existing `gh` commands, add the requested relationships and fields, and confirm the saved result. Do not repeat issue definition or begin implementation.
+
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. A request to file the draft, or an agreed flow that includes publication, authorizes issue creation.
 
 ## Establish the requested changes
 
-Read the draft and the relevant project instructions. Identify the repository, title, body, and requested metadata. Metadata includes labels, parent issue, project, and project fields.
+Read the draft and the relevant project instructions. Identify the repository, title, body, and requested metadata: labels, parent issue, project, and project fields. The draft can come from [define-issue](../define-issue/SKILL.md), another tool, or the user.
 
-Use authorization and decisions already present in the conversation. A request to file the draft authorizes issue creation. An agreed issue-preparation flow that includes publication also supplies this authorization. Do not require a separate filing command at the skill boundary. Preserve explicit draft-only and read-only limits.
+Take metadata from the user's request or the project's conventions, not from the draft alone. Leave unspecified optional values, such as board status, priority, assignee, and labels, unset.
 
-Do not infer a board status, priority, assignee, or label from the draft alone. Use the user request or applicable project conventions. If an optional value is unspecified, leave it unset.
-
-If a missing decision changes the issue meaning, return that question to the parent or user. Do not rewrite scope during filing. The draft can come from `define-issue`, another tool, or the user.
-
-When delegated, return missing decisions to the parent agent. Do not attempt a user interview from the subagent. Do not treat agreement with an issue idea as authorization to publish it.
+If a missing decision changes what the issue means, return the question to the parent or user. Do not rewrite scope during filing.
 
 ## Inspect GitHub before writing
 
-Use `gh auth status` to make sure that authentication succeeds. Do not print credentials or change accounts to bypass a permission error. If authentication fails, report the required action.
+Run `gh auth status`. Do not print credentials. If authentication fails, report the required action.
 
-Inspect installed command help for the operations you need. Do not assume that commands require manual identifier lookup. Some versions support parent links and project field names directly.
+Check the installed help for the operations you need. Some `gh` versions support parent links and project field names directly, without manual identifier lookups.
 
-Search the target repository for a possible existing issue before creation. Include closed issues when they can contain the same request. If resuming, inspect the recorded issue URL first.
+Search the target repository for an existing issue with the same request, including closed issues. A matching title does not prove a duplicate; compare intent and scope. If an equivalent issue exists, report it instead of creating another or replacing its body.
 
-A title match alone does not prove that two issues are duplicates. Compare intent and scope before choosing the next action. If an equivalent issue exists, report it rather than creating another or silently replacing its body.
+If a project is requested, read its identity and fields. Project titles can be ambiguous, so select the board by owner and number.
 
-If a project is requested, read its identity and fields. A project title can be ambiguous. Prefer the project owner and number when selecting its board.
+## Create the issue
 
-## Prepare the exact content
+Write the body to a UTF-8 file, separate from the title, and pass it with `--body-file`. Preserve the reviewed text, links, commands, and scope. Quote shell arguments safely.
 
-Write the issue body to a local UTF-8 file. Keep the title separate from the body. Preserve the reviewed text, links, commands, and scope.
+Before the first write, note the operations you intend. A short session note is enough.
 
-Use `--body-file` instead of placing multiline content inside a shell command. This preserves newlines and literal code text. Quote shell arguments safely.
+Create the issue in the explicit target repository. Include parent or project flags when their targets are unambiguous. Record the returned URL immediately.
 
-Record the intended operations before the first write. A short session note is sufficient. Do not create a custom state store for one filing.
+Read the saved issue back. Make sure the title and body match the prepared content and the requested relationships exist. Add any missing metadata to that issue. Set a requested project status only after project membership exists, following [Board status](../shared/board-status.md).
 
-## Create and complete the issue
-
-Create the issue in the explicit target repository. Include supported parent or project flags when their targets are unambiguous. Record the returned issue URL immediately.
-
-After creation, read the saved issue. Make sure that its title and body match the prepared content. Make sure that requested relationships exist rather than relying only on the creation response.
-
-Complete missing requested metadata on that existing issue. If project status is requested, apply it after project membership exists. Use the actual field and option names from the board.
-
-Do not edit the parent body merely to establish a parent relationship. Do not add a comment when a native relationship supplies the requested link. Preserve unrelated metadata.
+Establish a parent through the native relationship. Do not edit the parent body or add a comment to create the link. Preserve unrelated metadata.
 
 ## Resume after an error
 
-A failed command can leave some requested changes completed. A missing response does not prove that creation failed. Read GitHub before repeating a write.
-
-If an issue URL was returned, inspect that issue first. If no URL is available, search recent issues and compare their content with the intended draft. Do not create again while the first result remains uncertain.
-
-If only the parent link or board update failed, retry that operation on the existing issue. Do not delete a successfully created issue to undo a later error. Report completed operations separately from failed or uncertain operations.
-
-If current content differs from the expected draft, investigate before overwriting it. Another user or process can change an issue between reads. Do not claim that all changes succeed or fail together. Another process can still change the issue during filing.
+If an issue URL was returned, inspect that issue first. If not, search recent issues and compare their content with the draft before you create anything. If only the parent link or board update failed, retry that step on the existing issue.
 
 ## Confirm and report
 
-Read back the title, body, parent relationship, project membership, and requested fields that apply. Report the issue URL and the confirmed changes. Identify failed or uncertain steps with the information needed to resume.
+Read back the title, body, parent relationship, project membership, and requested fields. Report the issue URL and the confirmed changes. Report failed or uncertain steps with what is needed to resume.
 
-Do not claim that filing establishes implementation readiness or test success. Do not begin implementation. If trial notes were requested, record useful tool findings without copying live board status into general documentation.
+Filing does not show that the issue is ready for implementation or that any test passes. If trial notes were requested, record what you learned about the tools without copying live board status into general documentation.

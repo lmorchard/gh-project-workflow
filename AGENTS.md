@@ -32,4 +32,6 @@ An explicit draft-only or read-only request still limits the work. Ask about unr
 
 Use [Writing rules](docs/writing.md) for documents and specifications. This project is trying ASD-STE100 with the available simple-english skill. Do not claim full compliance without a review against the official standard and dictionary.
 
+Write and revise skills with [Skill style](docs/skill-style.md). Put a rule that several skills share in `skills/shared/`, not in each skill.
+
 Keep facts, command names, identifiers, and quoted errors unchanged. Define necessary technical terms at first use. Do not invent terms when ordinary words are sufficient.

@@ -5,46 +5,42 @@ description: Break a broad existing issue into bounded child tasks grounded in c
 
 # Break an issue into useful tasks
 
-Produce a concrete path from the current project to the parent issue's intended result. Preserve confirmed scope. Prefer independently useful changes that can be implemented and reviewed separately.
+Produce a concrete path from the current project to the parent issue's intended result. Keep the confirmed scope, and prefer changes that are useful by themselves and can be implemented and reviewed separately. Decomposition alone does not authorize publication or implementation.
+
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
 
 ## Establish what remains
 
-Read the parent issue, comments, existing children, related PRs, and project instructions. Identify current target and checkout revisions. Inspect the relevant target revision without resetting the user's checkout.
+Read the parent issue and comments, existing children, related PRs, and project instructions. Inspect the current target revision.
 
-Compare completed work with the parent's success conditions. Credit delivered behavior without treating a merged child as proof of parent completion. If the parent needs reconsideration, apply [reconsider-issue](../reconsider-issue/SKILL.md) without repeating settled interviews.
+Compare completed work with the parent's success conditions. Credit delivered behavior, but a merged child does not prove the parent complete. If the parent itself needs reassessment, apply [reconsider-issue](../reconsider-issue/SKILL.md) without repeating settled interviews.
 
-Inspect actual callers, interfaces, tests, and relevant error paths. Do not invent consumers to fit a proposed task. For migrations, identify the concrete operations and their consumers before choosing groups. Include indirect requests and nonstandard transports where they affect the agreed boundary. A migrated operation can still have other unmigrated callers. For type-safety work, inspect whether each actual entry point is included in type checks.
+Inspect actual callers, interfaces, tests, and relevant error paths. Do not invent consumers to fit a proposed task. For a migration, identify the concrete operations and their consumers before choosing groups. Include indirect requests and nonstandard transports where they affect the boundary. A migrated operation can still have unmigrated callers. For type-safety work, check whether each actual entry point is included in type checks.
 
-Create a compact coverage map appropriate to the task. Link each remaining requirement or operation to completed work, an existing child, a proposed child, or an explicit exclusion. Name search coverage and uncertainty. Do not call the decomposition exhaustive when evidence is incomplete.
+Make a compact coverage map. Link each remaining requirement or operation to completed work, an existing child, a proposed child, or an explicit exclusion. State what your search covered and where uncertainty remains. Do not call the decomposition exhaustive when the evidence is incomplete.
 
 ## Choose the child boundaries
 
-Group changes by useful behavior, shared constraints, and review size. Prefer a working path through backend and consumer over separate layers that cannot demonstrate the intended result. Split a group when it contains independently useful changes or materially different risks.
+Group changes by useful behavior, shared constraints, and review size. Prefer a working path through backend and consumer over separate layers that cannot demonstrate the result. Split a group when it holds independently useful changes or materially different risks. Let the work decide how many children there are; avoid both one giant replacement issue and one issue per endpoint. Explain the grouping when the alternatives differ in cost or sequencing.
 
-Give each proposed child a title, intended result, exact included operations or behavior, limits, success conditions, and dependencies. Include source references where they establish the scope. Do not prescribe routine implementation details or duplicate the full parent body in every child.
+Give each proposed child a title, intended result, the exact operations or behavior it includes, limits, success conditions, and dependencies. Add source references where they establish scope. Leave out routine implementation details and do not copy the full parent body into each child.
 
-Separate actual prerequisites from preferred order. A shared file alone does not establish a dependency. Reuse an existing child when its scope matches; do not propose duplicate issues for completed or active work.
+Separate real prerequisites from preferred order; a shared file alone is not a dependency. Reuse an existing child when its scope matches. Do not propose duplicates of completed or active work.
 
-Avoid both one giant replacement issue and automatic one-issue-per-endpoint fragmentation. Explain the grouping when alternatives affect cost or sequencing. Do not select a fixed number of children before inspecting the work.
-
-Recommend one next child with a reason. Detail it enough for [define-issue](../define-issue/SKILL.md) to prepare an implementable draft without repeating the scope discussion. Mark unresolved decisions and uncertain later boundaries explicitly.
+Recommend one next child, with a reason. Detail it enough for [define-issue](../define-issue/SKILL.md) to prepare an implementable draft without repeating the scope discussion. Mark unresolved decisions and uncertain later boundaries.
 
 ## Establish parent completion
 
-Explain how the completed and proposed children satisfy every agreed parent success condition. Include any final integration check needed to establish the whole result. Closing all listed children is insufficient if requirements remain uncovered.
+Explain how the completed and proposed children satisfy every agreed success condition of the parent. Include any final integration check needed to establish the whole result. Closing every listed child is not enough if requirements remain uncovered.
 
-For behavior that does not fit the proposed implementation approach, return a scope or design question. Do not silently exclude it or replace the desired result with an easier test. Separate follow-up work outside the agreed boundary from work required to close the parent.
+If some behavior does not fit the proposed approach, return a scope or design question. Do not silently exclude it or replace the desired result with an easier test. Separate follow-up work outside the boundary from work required to close the parent.
 
-Review the decomposition for gaps, overlapping ownership, circular dependencies, and unsupported claims. Correct those problems before returning it. State which tests you ran and which assertions you only inspected.
+Review the decomposition for gaps, overlapping ownership, circular dependencies, and unsupported claims, and fix them before returning it.
 
 ## Discuss and hand off
 
-Explain the proposed groups and recommended next child in the conversation. Ask one focused question at a time when user judgment changes the result. Include a recommendation and tradeoff. Use [interview-issue](../interview-issue/SKILL.md) when useful, without requiring a separate interview phase or file review.
+Explain the proposed groups and the recommended next child in the conversation. [interview-issue](../interview-issue/SKILL.md) can guide the questions; a separate interview phase or file review is not required. When delegated, return the proposal, evidence, and questions to the parent. Carry confirmed decisions forward and revise the affected groups rather than restarting.
 
-When delegated, return the proposal, evidence, and questions to the parent. The parent conducts the interview. Carry confirmed decisions forward and revise the affected groups rather than restarting the decomposition.
+Keep the plan provisional where facts or decisions are unresolved. Report which children are ready for definition or implementation and which depend on another decision. Do not mark every proposed child Ready because it appears in the plan.
 
-Keep the plan provisional where facts or decisions remain unresolved. Do not label every proposed child Ready simply because it appears in the plan. Report what is ready for definition or implementation and what depends on another decision.
-
-Decomposition alone does not authorize publication or implementation. If the agreed flow includes filing, pass reviewed children and existing authorization to [file-issue](../file-issue/SKILL.md). Do not ask again at that handoff. After the selected child completes definition, continue to filing within the agreed flow. Do not end with an unpublished draft merely because a subagent finished its assigned phase. Preserve explicit draft-only limits and report partial publication without creating duplicates on retry.
-
-Use ordinary issue bodies and native child relationships for published work. No custom manifest, scheduler, fixed report template, or additional approval document is required.
+If the agreed flow includes filing, pass reviewed children to [file-issue](../file-issue/SKILL.md), and continue to filing after the selected child completes definition. Publish with ordinary issue bodies and native child relationships. No manifest, scheduler, or report template is needed.

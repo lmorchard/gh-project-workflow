@@ -5,56 +5,46 @@ description: Reassess an existing issue against current code, tests, related wor
 
 # Reconsider an issue
 
-Determine what remains valid about an issue and what work remains. Preserve its intended result while correcting outdated claims. Return proposed changes supported by current evidence.
+Determine what remains valid about an issue and what work remains. Keep its intended result while correcting outdated claims, and return a proposed update supported by current evidence. Reconsideration alone does not authorize edits, comments, status changes, child issues, or implementation.
 
-## Establish the evidence
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
 
-Read the project instructions, issue body, comments, and relevant linked issues and pull requests. Include child issues and their actual results. Inspect supplied project-board information without expanding the task into a board audit.
+## Gather the evidence
 
-Identify the current target branch revision and the local checkout revision. If they differ, inspect the relevant target revision before drawing conclusions. Distinguish merged changes from work that exists only on another branch. Do not reset the user's checkout to obtain current evidence.
+Read the project instructions, the issue body and comments, and relevant linked issues and PRs. Include child issues and their actual results. Use supplied board information without expanding the task into a board audit.
 
-Inspect code and test assertions that support or contradict material claims. Follow relevant dependencies and callers far enough to assess the intended behavior. Separate implementation evidence, executed tests, historical CI results, and deployment evidence. CI is the service that checks published commits.
-
-Record source revisions and links with the findings. State which checks you executed and which you only read. If access or evidence is missing, report the limit. Do not interpret an unavailable source as proof that work is absent or complete.
+Inspect the code and test assertions that support or contradict material claims at the current target revision. Follow dependencies and callers far enough to assess the intended behavior. Keep implementation evidence, tests you ran, historical CI results, and deployment evidence separate.
 
 ## Reassess the issue
 
-Compare the original problem and success conditions with current evidence. Distinguish completed work, remaining work, outdated claims, and decisions that still need the user. Keep unresolved claims explicit when the evidence cannot settle them.
+Compare the original problem and success conditions with the current evidence. Sort what you find into completed work, remaining work, outdated claims, and decisions that still need the user. Leave claims explicitly unresolved when the evidence cannot settle them.
 
-A merged pull request or closed child issue does not prove that the parent goal is complete. A board status does not prove readiness. Compare the delivered behavior with the full intended result before recommending closure.
+Compare delivered behavior with the full intended result before recommending closure. Keep confirmed decisions and historical context. Do not reduce scope to make the issue look complete. If the original result is unclear, state the decision needed before proposing a new finish condition.
 
-Preserve confirmed decisions and historical context. Do not reduce scope merely to make the issue appear complete. If the original result is unclear, state the decision needed before proposing a new finish condition.
+Recommend keeping, revising, closing, or splitting the issue, with a specific reason. Distinguish closing completed work from closing obsolete or duplicate work, and name the replacement for a duplicate.
 
-Recommend keeping, revising, closing, or splitting the issue, with a specific reason. Distinguish closure because work is complete from closure because work is obsolete or duplicated. Name the replacement when recommending closure as a duplicate.
+Recommend the issue state and board status separately when both apply, using the project's actual status names. A parent that tracks several tasks differs from a task ready for implementation. If the project's parent-status conventions are unclear, make the recommendation conditional instead of calling the current status wrong. Base readiness on remaining decisions and evidence, not on the issue's age or size.
 
-Recommend issue state and board status separately when both are relevant. Use the project's actual status names. Distinguish a parent that tracks several tasks from a task ready for implementation. If parent-status conventions are unclear, make the recommendation conditional instead of declaring the current status wrong. Explain readiness from remaining decisions and evidence, not from issue age or size alone.
+If several useful changes remain, suggest boundaries and the next useful task. Produce a full child backlog only on request; [decompose-parent-issue](../decompose-parent-issue/SKILL.md) does that work. Use [define-issue](../define-issue/SKILL.md) for a task that needs implementation detail, and [interview-issue](../interview-issue/SKILL.md) when a user decision blocks progress. These are possible next steps, not required phases.
 
-If several useful changes remain, suggest boundaries and the next useful task. Do not produce an entire child-issue backlog unless requested. Use issue definition for a task that needs implementation detail. Use an interview when a user decision prevents further progress. These are possible next steps, not mandatory phases.
+## Prepare the proposed update
 
-## Prepare and review the proposed update
+For a substantial correction, return a revised title and body. For a small one, return the exact edit. Keep completed progress visible, and distinguish proposed scope from agreed scope.
 
-Return a revised title and body when the issue needs substantial correction. For a small correction, return the exact proposed edit. Keep completed progress visible and distinguish proposed scope from agreed scope.
+Include the remaining problem, known completed work, success conditions, and material open questions, in proportion to the issue. Issue text follows the project [Writing rules](../../docs/writing.md).
 
-Include the remaining problem, known completed work, success conditions, and material open questions. Keep the update proportional to the issue. Use short sentences and familiar words. Do not require a separate report file.
-
-Review the proposal against the evidence before returning it. Make sure that it preserves the original goal and does not repeat completed work. Make sure that status and closure recommendations agree with the remaining scope. Correct unsupported claims and unclear wording yourself.
+Review the proposal against the evidence before you return it. Make sure it keeps the original goal, does not repeat completed work, and that status and closure recommendations agree with the remaining scope. Fix unsupported claims and unclear wording yourself.
 
 ## Discuss the recommendation
 
-Use conversation as the default user review. Summarize what changed, what remains, and the recommended action before asking for input. Do not require the user to open a file, edit prose, or review the full draft.
+The user reviews in conversation, not by reading files. Summarize what changed, what remains, and the recommended action before asking for input. Ask about decisions that affect scope, behavior, completion, or status. After each answer, revise the proposal and explain material changes. Offer the full draft when it helps or the user asks.
 
-Ask one focused question at a time about decisions that affect scope, behavior, completion, or status. Explain the recommendation and its tradeoff in the question. Use existing answers and resolve factual questions through research. Do not invent questions merely to conduct an interview.
+When delegated, give the parent the proposed update and a short opening summary for the user. Include the first useful question with its recommendation and tradeoff, and the remaining decisions.
 
-After each answer, revise the proposal yourself and explain material changes. Keep the full draft available as supporting detail. Offer it when useful or requested, without making file review a required step. The separate `interview-issue` skill can guide this conversation, but is not required.
-
-When delegated, give the parent the proposed update and a short opening summary for the user. Include the first useful question, recommendation, tradeoff, and remaining decisions. The parent conducts the interview and supplies answers for revision when needed. Do not send the user to a file instead of explaining the decision.
-
-Before publication, summarize the concrete title, scope, and status changes in the conversation. If the agreed flow already includes publication, continue within that scope without another permission request. Otherwise, request missing publication permission for those changes. Keep product decisions separate from publication permission and preserve authorization already given.
+Before publication, summarize the concrete title, scope, and status changes. If the agreed flow includes publication, continue. Otherwise ask for publication permission for those changes. Keep product decisions separate from publication permission.
 
 ## Return the result
 
-Return the recommendation, proposed issue update, supporting evidence, and next useful action. State remaining uncertainty and execution limits. If no update is needed, explain why instead of rewriting the issue for style alone.
+Return the recommendation, the proposed update, supporting evidence, the next useful action, and remaining uncertainty. If no update is needed, explain why instead of rewriting the issue for style.
 
-When delegated, return decision questions to the parent with a recommendation and tradeoff. Do not attempt to interview the user from a subagent. Do not infer permission or a product decision from silence.
-
-Reconsideration alone does not authorize edits, comments, status changes, child issues, or implementation. Keep GitHub unchanged unless those actions are separately authorized. If an update is authorized, read the issue again before applying it and preserve intervening changes. Read back the result and report partial failures accurately.
+If an update is authorized, read the issue again before applying it and preserve intervening changes. Read back the result.

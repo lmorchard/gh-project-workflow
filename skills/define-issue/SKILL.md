@@ -5,43 +5,33 @@ description: Develop a request or existing GitHub issue into a scoped issue draf
 
 # Define an issue
 
-Produce an issue draft that another agent can understand without this conversation. Determine whether implementation can start or a decision is still necessary. Issue definition does not include implementation.
+Produce an issue draft that another agent can act on without this conversation, and say whether implementation can start. This skill does not change GitHub or implement anything.
+
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
 
 ## Read the request and evidence
 
-Read the project instructions and the supplied request. For an existing issue, read its body and comments. Read linked issues or pull requests when they affect scope or decisions.
+Read the project instructions and the request. For an existing issue, read its body and comments, and any linked issues or PRs that affect scope or decisions. For code investigation, follow [Research the current code](references/research.md).
 
-For code investigation, read [Research the current code](references/research.md).
+Inspect the relevant code and tests before you accept technical claims. Record the source revision and the files that support each finding.
 
-Inspect relevant code and tests before accepting technical claims. Record the source revision and specific files that support your findings. Distinguish observations from assumptions and reports in older comments.
-
-A board status or label is evidence of a previous decision, not proof of readiness. If board information is supplied, compare it with the issue. Do not expand one issue review into a board audit.
-
-Read test assertions before citing a test as evidence. Distinguish a proposed test from an existing test. If you do not execute a test, state that limit.
-
-If a necessary source is unavailable, report the missing evidence. Continue with independent investigation where useful. Do not infer success from missing results.
+If board information is supplied, compare it with the issue. Do not expand one issue review into a board audit.
 
 ## Resolve the task
 
-State the intended user result before choosing a solution. Preserve decisions that the user already made. Do not ask the user to approve those decisions again.
+State the intended user result before choosing a solution. Keep decisions the user already made, without asking for them again.
 
-If a missing decision changes scope or behavior, propose an answer with its tradeoff. Continue investigation that does not depend on the answer. In a direct user session, ask one focused question at a time.
-
-Keep routine implementation choices out of the interview unless they change cost, compatibility, permissions, or the intended result. A missing implementation plan does not itself block readiness.
+If a missing decision changes scope or behavior, propose an answer with its tradeoff. Continue the investigation that does not depend on it. Keep routine implementation choices out of the questions unless they change cost, compatibility, permissions, or the intended result. A missing implementation plan does not block readiness.
 
 If the issue contains several independently useful changes, propose a smaller first issue. Explain what it proves and what remains. Do not silently replace the original goal with the smaller task.
 
-When delegated, do not conduct the user interview. Return the draft and decision questions to the parent agent. For each question, state why it matters, your recommendation, and the tradeoff.
-
-Include confirmed decisions and relevant evidence with the handoff. Do not wait for the user or treat a missing answer as approval. The parent can use the separate `interview-issue` skill or conduct the conversation directly.
-
-After the parent supplies answers, revise and review the draft. Do not repeat resolved questions unless new evidence contradicts the answer.
+When delegated, return the draft, confirmed decisions, relevant evidence, and decision questions to the parent. The parent can settle them with [interview-issue](../interview-issue/SKILL.md). When answers arrive, revise and review the draft. Do not reopen resolved questions unless new evidence contradicts an answer.
 
 ## Draft the issue
 
-Use short sentences and familiar technical terms. Define unfamiliar terms at first use. Keep exact identifiers and commands unchanged.
+Issue text follows the project [Writing rules](../../docs/writing.md): familiar words, active voice, instruction sentences within 20 words and description sentences within 25. Define unfamiliar terms at first use. Keep identifiers and commands exact.
 
-Keep the draft proportional to the task. Include these facts in the structure that fits:
+Keep the draft proportional to the task. Include these facts in whatever structure fits:
 
 - The problem and intended result.
 - Included changes and explicit limits.
@@ -49,37 +39,27 @@ Keep the draft proportional to the task. Include these facts in the structure th
 - Dependencies, confirmed decisions, and unresolved questions.
 - Relevant source links and code references.
 
-A success condition describes observable behavior, not merely a file that exists or a command that succeeds. Explain what each proposed test establishes. Separate evidence of new behavior from tests that protect existing behavior.
+A success condition describes observable behavior, not merely a file that exists or a command that succeeds. Explain what each proposed test establishes, and separate evidence of new behavior from tests that protect existing behavior. Not every condition needs an existing automated test. Name the tests that implementation must add. Where human judgment is necessary, say what the person must assess.
 
-An existing automated test is not required for every condition. Name tests that implementation must add. If human judgment is necessary, state what the person must assess.
-
-Keep the original issue text separate from proposed edits. Do not erase the original intent when proposing a split. Do not put essential decisions only in a separate conversation or report.
+Keep the original issue text separate from proposed edits, and do not erase the original intent when proposing a split. Put essential decisions in the draft, not only in a conversation or report.
 
 ## Review and revise the draft
 
-Before returning the draft, review it as the next implementer. Make corrections yourself rather than asking the user to edit. Use these review questions:
+Before returning the draft, review it as the next implementer would, and make the corrections yourself:
 
 - Does the opening state the problem and intended result?
 - Can the reader understand the scope without this conversation?
 - Do success conditions demonstrate the intended result rather than a convenient substitute?
 - Are source facts, proposed tests, and unresolved decisions clearly separate?
-- Does the draft preserve confirmed decisions and exclude unrelated changes?
-- Can shorter sentences or ordinary words make the draft easier to use?
+- Does the draft keep confirmed decisions and exclude unrelated changes?
+- Can shorter sentences or ordinary words make it easier to use?
 
-Correct unsupported claims, missing context, repetition, and unclear wording. Use active voice and define unfamiliar technical terms. Keep instruction sentences within 20 words and description sentences within 25 words.
+Edits must preserve meaning, permission, scope, and uncertainty. Do not turn a proposal into a requirement. Leave routine implementation choices open when the success conditions are sufficient. Read the result again for contradictions and lost requirements.
 
-Make sure that edits preserve meaning, permission, scope, and uncertainty. Do not change a proposal into a requirement during editing. Leave routine implementation choices open when the success conditions are sufficient.
-
-After editing, read the result again for contradictions and lost requirements. Return the revised draft, not just a list of suggested edits. Mention material corrections and remaining limits briefly.
-
-If a correction requires a new user decision, state the question and your recommendation. Otherwise, continue without an extra approval step. This review does not grant permission to file the issue.
+If a correction needs a new user decision, return the question with a recommendation. Otherwise continue without an extra approval step.
 
 ## Return the result
 
-State whether the draft is ready for implementation, needs a decision, or lacks evidence. Give the specific reason. This assessment does not authorize implementation or merge.
+State whether the draft is ready for implementation, needs a decision, or lacks evidence, and why. Return the revised draft (not a list of suggested edits), unresolved questions, and a short evidence summary. Mention material corrections, and which checks you ran and which you only inspected. If you propose a child issue, explain its relationship to the original.
 
-Return the draft, unresolved questions, and a short evidence summary. State which checks you executed and which you only inspected. If you propose a child issue, explain its relationship to the original issue.
-
-Return the reviewed draft without changing GitHub. If filing is requested directly or included in the agreed workflow, pass the draft and existing authorization to the separate `file-issue` operation. Do not repeat definition or ask for the same authorization again. A completed draft is a handoff, not a stopping point when the authorized flow includes filing. The parent dispatches file-issue and reports the published result.
-
-The handoff includes the repository and requested parent, project, labels, and field values when supplied. Unspecified metadata remains unspecified. Neither skill requires the other to be installed.
+If filing is requested or included in the agreed flow, hand the draft to [file-issue](../file-issue/SKILL.md). Include the repository and any supplied parent, project, labels, and field values. Leave unspecified metadata unspecified.

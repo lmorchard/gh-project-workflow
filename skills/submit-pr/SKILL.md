@@ -5,78 +5,56 @@ description: Prepare and publish a pull request from committed issue work, confi
 
 # Submit a pull request
 
-Prepare a pull request (PR) from existing committed work. Request Copilot review after publication. Return the PR and review-request details for a follow-up task without waiting for findings or merging.
+Publish a PR from existing committed work, move the issue to In review, and request Copilot review. Hand off to a follow-up task without waiting for findings. Do not change code to address findings, merge, or enable automatic merge.
+
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout.
 
 ## Prepare the branch and description
 
-Read the issue, project instructions, and implementation report. Confirm the repository, worktree, branch, intended base, and authorization to publish. Use existing authorization without asking again.
+Read the issue, project instructions, and implementation report. Confirm the repository, worktree, branch, intended base, and authorization to publish.
 
-Inspect the working tree and task commits. Preserve unrelated or uncommitted work. Do not publish an incomplete change as ready for review.
+Inspect the working tree and task commits, and preserve unrelated or uncommitted work. Do not publish an incomplete change as ready for review.
 
-Refresh remote references and inspect changes on the intended base. Do not rebase merely to obtain a cleaner report. If integration is necessary, obey project rules and repeat affected checks after conflict resolution.
+Refresh remote references and inspect changes on the base. Do not rebase merely to get a cleaner history. If integration is necessary, follow the project rules and repeat the affected checks after resolving conflicts.
 
-Review the task diff through the shared ancestor of the base and task branches.
+Review the task diff from the merge base of the base and task branches. Inspect the full list of changed files, including generated output and lockfiles, and explain unexpected changes before you publish. Make sure that the published commits contain the tested changes. Report missing or stale test evidence instead of copying an earlier success claim.
 
-Inspect the full list of changed files, including generated output and lockfiles. Explain unexpected changes before publishing. Make sure that the published commits contain the tested changes. Report missing or stale test evidence rather than copying an earlier success claim.
+Write a title and body that explain the problem, the resulting behavior, the test evidence, and material limits. Use the repository template when one exists. Keep detail proportional to the change, and distinguish local tests from hosted CI.
 
-Write a title and body that explain the problem, resulting behavior, test evidence, and material limits. Use the repository template when present. Keep detail proportional to the change.
+Use a closing reference such as `Closes #N` only when the PR completes that issue. A child PR does not close its broader parent.
 
-Use a closing issue reference only when the PR completes that issue. A child issue does not authorize closing its broader parent. Distinguish local tests from hosted CI, the service that checks published commits.
-
-Keep the body in a UTF-8 file and use `--body-file`. A prepared PR body is sufficient for a preparation-only request. Do not push or create a PR without publication authorization.
+Write the body to a UTF-8 file and pass it with `--body-file`. For a preparation-only request, the prepared body is the result. Do not push or create a PR without publication authorization.
 
 ## Publish and confirm
 
-Use `gh auth status` and inspect relevant command help. Search for an existing PR for the exact repository, branch, and base. On resumption, inspect the known PR URL first.
+Run `gh auth status` and check the installed help for the commands you need. Search for an existing PR for the same repository, branch, and base. On resumption, inspect the known PR URL first.
 
-Push the intended branch explicitly, then make sure that the remote commit matches the intended local commit. Do not force-push over unexpected remote work. Resolve the difference before publishing.
+Push the branch explicitly, then make sure that the remote commit matches the intended local commit. If the remote has unexpected work, resolve the difference before publishing. Do not force-push over it.
 
-Create the PR with explicit repository, head, base, title, and body. Set draft status when requested or when work remains incomplete. Do not use `gh pr create --dry-run` as a promise of no writes: it can push changes.
+Create the PR with an explicit repository, head, base, title, and body file. Make it a draft when requested or when work remains incomplete. Do not add labels, assignees, or comments that nobody requested. Do not use `gh pr create --dry-run` to avoid writes: it can push changes.
 
-Record the returned URL immediately. Read back the body, branch, base, and head commit. If a command fails, inspect GitHub before repeating creation.
+Record the returned URL immediately. Read back the body, branch, base, and head commit.
 
-## Mark the linked issue in review
+## Mark the issue in review
 
-After the PR exists and is ready for review, move its linked implementation issue to the configured in-review state. Use the board supplied by the user or identified in project instructions. Existing issue membership can identify the board when there is only one.
-
-Read the board fields and status options before editing. Use the actual in-review option rather than assuming spelling or capitalization. If the destination is ambiguous, return that choice to the parent or user.
-
-Add the issue to the identified board if necessary, then change its status. This transition is part of submission unless the user restricts board writes. If the issue is already in review, leave it unchanged.
-
-Move only issues that this PR implements. Do not move a broader parent merely because the PR mentions it. If an issue is Done, report that state rather than moving it backward automatically.
-
-Do not mark unfinished work In review merely because a draft PR exists. Read back the changed status. Report missing configuration or failed updates separately from successful PR creation.
-
-Do not create a board or change its fields to make the transition possible. Continue with the review request when a board update fails. Do not add unrelated labels, assignees, or comments.
+When the PR is ready for review, move the issue it implements to In review, following [Board status](../shared/board-status.md). A draft PR for unfinished work does not qualify. If the board update fails, report it and continue with the review request.
 
 ## Request Copilot review
 
-This workflow requests Copilot review unless the user selects another reviewer. Inspect current requests, completed reviews, and review-request timeline events first. Repository automation can request Copilot immediately after PR creation. An empty requested-reviewer list does not prove that no request exists. If a current-head request is already recorded, retain its timestamp and hand it to follow-up without another request. Do not submit another request for the same commit merely because the response is pending.
+Request Copilot review unless the user chose another reviewer. Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
 
-On versions that support it, use this command with the actual PR URL:
+Record the request time, the requested head, and existing review identifiers. Read back the request or the resulting review.
 
-```sh
-gh pr edit PR_URL --add-reviewer "@copilot"
-```
-
-Inspect installed help before relying on the flag. Request a reviewer, not a coding-agent assignment or a comment that asks Copilot to modify code. Do not change account subscriptions or repository policy to obtain access.
-
-Record the request time, requested head commit, and existing review identifiers. Read back the request or resulting review. Distinguish requested, pending, completed, unavailable, and failed.
-
-Inspect completed reviews and their commit identifiers, not only inline comment counts. A completed review can have no inline comments. Comments alone do not prove that the requested reviewer examined the current head.
-
-If access is unavailable, return the reason and the local-review handoff. A pending request or temporary network error does not establish lack of access. Do not recreate the PR when requesting review fails.
-
-The parent can use `review-changes` for local review. Supply the issue, base and head commits, repository, and known implementation model. Do not claim that another service necessarily uses a different underlying model.
+If Copilot is unavailable, return the reason and a handoff for local review with [review-changes](../review-changes/SKILL.md). Supply the issue, repository, base and head commits, and the implementation model if known. Do not recreate the PR because a review request failed.
 
 ## Report and hand off
 
-Read current CI and review state for the published head. Report pending checks as pending and absent checks as absent. Do not substitute local test success for hosted results.
+Read the CI and review state for the published head. Return:
 
-Return the PR URL, head commit, worktree, and branch. Include the request time, requested reviewer, existing review identifiers, and observed CI and review state. Report the confirmed board transition or why it was skipped or failed. Include other incomplete operations.
+- The PR URL, head commit, worktree, and branch.
+- The review request time, requested reviewer, and existing review identifiers.
+- The observed CI and review state.
+- The board transition result, or why it was skipped or failed.
+- Any other incomplete operations.
 
-If review or tests concern an earlier commit, state that limit. A later push requires a new assessment of affected checks and review coverage. Request another review when necessary rather than assuming it happens automatically.
-
-The parent can use `address-pr-review` to wait, address findings, and repair failing CI. Pass existing authorization for that task with the handoff. Do not repeat publication or ask for authorization already supplied.
-
-Do not wait for review, change code to address findings, merge, or enable automatic merge in this skill. Each follow-up task can also start from an existing PR without this handoff.
+The parent can run [address-pr-review](../address-pr-review/SKILL.md) next to wait for review, address findings, and repair CI. Pass the existing authorization with the handoff. Each follow-up task can also start from an existing PR without this handoff.
