@@ -22,7 +22,7 @@ Request a review with `gh pr edit PR_URL --add-reviewer "@copilot"` when the ins
 
 Before you request, inspect current review requests, completed reviews, and review-request timeline events. Repository automation can request Copilot as soon as the PR opens. An empty requested-reviewer list does not prove that no request exists. If a request for the current head exists, keep its timestamp and do not request again.
 
-A push does not trigger a new review automatically. When later changes need review, request it again under these rules.
+Repository automation varies: a push may or may not trigger a new review. After a push, check for an automatic request first. Request a review only when the changes need one and no request exists.
 
 Keep these states separate: requested, pending, completed, unavailable, and failed. A pending request or a temporary network error does not show that Copilot is unavailable.
 

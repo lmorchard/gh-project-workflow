@@ -25,7 +25,7 @@ Watch CI while you wait for review and after each push. Use the installed watch 
 gh pr checks PR_URL --watch --interval 30 --fail-fast
 ```
 
-Run it in a way that returns control, so you can report progress and handle review feedback.
+Run it in a way that returns control, so you can handle review feedback and user input. Report when a check finishes, a review arrives, or a decision is needed. Do not send updates that only repeat an unchanged pending state.
 
 If a check fails, read its job log before you change anything. Distinguish a code defect from setup problems, permissions, service outages, and cancellation. Fix failures within the issue and its required build setup, without weakening checks. Run the affected local checks, commit, push to the same PR, and watch the new head.
 
@@ -39,7 +39,7 @@ Otherwise, use the request time, requested head, and prior review identifiers fr
 
 A completed review from the requested reviewer for the requested commit ends the wait. If the head changes during the wait, identify which commit each review covers; the deadline does not restart.
 
-Poll GitHub about once a minute, or use a supported watch mechanism. Keep each wait short enough to report progress and accept user input. Do not send another review request on each poll. Handle temporary read errors within the deadline, and report persistent access failures rather than treating missing data as an empty review.
+Poll GitHub about once a minute, or use a supported watch mechanism. Keep each wait short enough to accept user input. Do not send another review request on each poll. Handle temporary read errors within the deadline, and report persistent access failures rather than treating missing data as an empty review.
 
 Stop waiting at the deadline or when the user interrupts. At a timeout, report the last observed state and address the available findings. A timeout is an incomplete review. It is not approval and does not show that Copilot is unavailable. The deadline applies only to the review; CI repair continues after it.
 
@@ -56,6 +56,8 @@ Respond to each finding in one of these ways:
 - Identify an unrelated problem for separate work. Propose a follow-up issue, but file it only if filing is authorized.
 
 A request to address review covers corrections and factual replies within the agreed scope. Return a new product decision or broader scope to the parent or user. Do not weaken a success condition to satisfy a suggestion.
+
+Make all accepted corrections, run the checks, and push them together. Each push restarts CI and can trigger another automatic review.
 
 Before you edit, confirm that the worktree and branch match the PR head. Work in that worktree or a new isolated one, and preserve unrelated work. Add or update useful tests, and run the affected checks plus the required project checks. Commit and push to the same PR branch. Inspect unexpected remote changes before you push, and do not force-push over another contributor's work.
 

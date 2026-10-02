@@ -35,6 +35,8 @@ Focus on these questions:
 - Do builds and generated files match the code that users receive?
 - Do documentation and setup instructions match the change?
 
+When the change touches a shared function, interface, or branch, find every caller, not only the callers in the diff. For each caller, compare behavior before and after the change for success, empty, and malformed inputs or responses.
+
 Run useful targeted checks where the environment permits. Record setup failures separately from product defects. Passing tests do not prove that no defects exist.
 
 Evaluate existing review findings instead of accepting them. Distinguish a demonstrated defect from a question, a preference, or an unrelated existing problem. Avoid speculative redesign outside the issue.
@@ -43,7 +45,7 @@ Evaluate existing review findings instead of accepting them. Distinguish a demon
 
 For each finding, give the file and lines, the triggering condition, the observed or reasoned result, and its practical impact. Explain how it conflicts with the intended behavior. Suggest a correction without implementing it.
 
-If you found no actionable defects, say so. Do not invent a finding to justify the review. Include untested behavior and evidence limits either way.
+If you found no actionable defects, say so. Do not invent a finding to justify the review. Either way, state which callers and paths you traced and which behavior you did not test. A favorable review covers only what it traced.
 
 Return the reviewed base and head, the model identities and their sources, the findings, and the checks you ran. If the head changed during review, say that the result covers the earlier commit. Keep the report short, in the conversation or a requested location. Return user decisions to the parent.
 

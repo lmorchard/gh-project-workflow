@@ -38,6 +38,10 @@ The folder-management trial continued from definition and filing (#869) through 
 
 After the issue 871 / PR #872 merge, Les reported that the manual smoke test seemed fine. This is user-reported evidence. The conversation does not specify which surfaces or scenarios were tested, so it does not establish completion of every project-required live check. Skills: `1e4b5a0` (inferred).
 
-## Parent delivery (in progress on 2026-10-02)
+## 2026-10-01 to 2026-10-02: parent delivery of issue 843
 
-A deliver-parent-issue run worked through a parent issue with 15 children. Skills: `3e753f0`. The run's retrospective will supply the subject issues, results, and limits.
+deliver-parent-issue delivered children #875 through #884 of [issue 843](https://github.com/lmorchard/decafclaw/issues/843), then closed the parent after a fresh coverage audit. Skills: `3e753f0`. Issue 843 has 17 children in total. Child #873 closed on 2026-10-01 before the deliver-parent-issue draft existed. This repository has no record of how #873 was delivered.
+
+Final checks passed on merged main: 4,237 Python tests with two skips, and 395 JavaScript tests. No deployment or final manual smoke test occurred. The ten children took about 11 hours, and later Python CI jobs took about 20 minutes each.
+
+The [retrospective](2026-10-02-issue-843-delivery.md) records the lessons. Its scenario checks and the resulting skill changes are in [Retrospective scenarios](../../evals/results/2026-10-02-retro.md).
