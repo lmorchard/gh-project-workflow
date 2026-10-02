@@ -63,9 +63,21 @@ We propose separate decisions about task readiness, evidence, and permission. Pl
 
 ## Open decisions
 
-We selected issue definition for the first skill trial. The [First experiment](first-experiment.md) describes the task and evaluation. The CLI language, package format, command names, and first CLI operation remain open.
+We selected issue definition for the first skill trial. The [First experiment](first-experiment.md) describes the task and evaluation. The [CLI decision](#cli-decision) selects the first CLI operations. The CLI language, package format, and command names remain open.
 
 Automatic scheduling, background polling, custom session storage, attempt labels, and a special merge-result format remain outside the initial effort. Les also requested an ASD-STE100 trial. The [Writing rules](writing.md) describe that trial and its limits.
+
+## CLI decision
+
+On 2026-10-02, Les decided that the project will build a small deterministic CLI. It will do these three operations:
+
+- Read the state of a PR for its current head: each check result, review requests including automatic requests, and completed reviews with their commits.
+- Verify that a commit identifier exists and names the expected commit before an agent uses it in a handoff, report, or merge.
+- Apply a board status transition to one issue: identify the board, use the actual status option, refuse a backward move, and read the result back.
+
+The issue 843 delivery supplied the evidence. A stale handoff moved the parent backward on the board, an agent copied a commit identifier incorrectly, and Copilot request detection needed repeated corrections. Skill text alone did not prevent these errors. The [delivery retrospective](trials/2026-10-02-parent-843-delivery.md) records them.
+
+The CLI does not select tasks, call a model, schedule work, or infer approval. It is not a general harness. The skills continue to use existing git and gh commands for other operations. When an operation exists, the relevant skills will use it instead of their written procedure.
 
 ## Implementation scope
 
