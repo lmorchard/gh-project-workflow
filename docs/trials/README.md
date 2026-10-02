@@ -52,11 +52,11 @@ The parent coordinated express-issue for [issue 894](https://github.com/lmorchar
 
 The first commit split one long browser test into 21 isolated scenarios. It also exposed two failures that the old test had hidden: invalid canvas test data, and an intended 404 after a folder is pruned. The first local review found the coverage preserved but measured a large slowdown on two cores. Les then replaced the wall-clock success condition with a structural one: one client build per run, one Chromium launch per worker, and one context and at most one server per scenario, enforced by the tests. A second commit met it, and a second local review found no defects.
 
-Copilot reviewed both heads with no findings. Its headline changed from "Approval recommended" at `142af1b` to "Needs a closer look" at `783ea99`, which asks for human review. Whether that headline counts as affirmative review is not yet decided.
+Copilot reviewed both heads with no findings. Its headline changed from "Approval recommended" at `142af1b` to "Needs a closer look" at `783ea99`, which asks for human review. Les later decided that this headline is not affirmative review. The current skill text already produced that decision in scenario runs ([results](../../evals/results/2026-10-02-copilot-headline.md)).
 
 Hosted `lint-and-test` took 1106 s at the base, 948 s at `142af1b`, and 1151 s at `783ea99`, one run each. PR #896 took 1161 s with a similar test count. Run-to-run variance appears as large as any effect, so these numbers do not establish a change. Local pinned runs showed the rework faster at every worker count.
 
-The same session filed [issue 897](https://github.com/lmorchard/decafclaw/issues/897) for the schedule race that #894 excluded. The board's auto-add workflow put it on board 6 without a request. Les then chose decafclaw's documented convention: new issues, triage items included, go on board 6 with priority and size. #894, #895, and #897 are in Backlog at P2.
+The same session filed [issue 897](https://github.com/lmorchard/decafclaw/issues/897) for the schedule race that #894 excluded. The board's auto-add workflow put it on board 6 without a request. Les then chose decafclaw's documented convention: new issues, triage items included, go on board 6 with priority and size. #894, #895, and #897 were then in Backlog at P2. Les later set #894 to P1.
 
 Lessons and resulting changes:
 
