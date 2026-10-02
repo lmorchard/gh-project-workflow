@@ -77,7 +77,7 @@ On 2026-10-02, Les decided that the project will build a small deterministic CLI
 
 The issue 843 delivery supplied the evidence. A stale handoff moved the parent backward on the board, an agent copied a commit identifier incorrectly, and Copilot request detection needed repeated corrections. Skill text alone did not prevent these errors. The [delivery retrospective](trials/2026-10-02-parent-843-delivery.md) records them.
 
-The CLI does not select tasks, call a model, schedule work, or infer approval. It is not a general harness. The skills continue to use existing git and gh commands for other operations. When an operation exists, the relevant skills will use it instead of their written procedure.
+All three operations exist in `cli/ghflow.py` as `pr-state`, `verify-commit`, and `board set-status`, and the shared references use them. The CLI does not select tasks, call a model, schedule work, or infer approval. It is not a general harness. The skills continue to use existing git and gh commands for other operations. When an operation exists, the relevant skills will use it instead of their written procedure.
 
 ## Implementation scope
 
@@ -112,6 +112,8 @@ Les requires green CI and prefers Copilot review. A literal approving review is 
 Green CI alone does not permit an autonomous merge. The agent also needs affirmative review evidence within existing merge authorization, or explicit user permission to merge the PR.
 
 A favorable review can come from a person, Copilot, or an independent local reviewer. A COMMENTED review can qualify if its text recommends approval or clearly reports a completed review with no findings. Silence, an empty comment list, and a review timeout do not qualify.
+
+On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. The current affirmative review rule already produces this decision ([scenario results](../evals/results/2026-10-02-copilot-headline.md)).
 
 Permission to implement or submit does not imply permission to merge. Existing explicit merge permission remains valid within its scope, so the agent does not need to ask again. Unresolved defects, human objections, and repository protection rules still require attention.
 
