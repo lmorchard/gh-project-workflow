@@ -30,6 +30,8 @@ When a watch command ends, read the results again. The end of a watch does not p
 
 Read a PR's state with `python3 cli/ghflow.py pr-state PR_URL`, run from this skills repository. It reports the current head, each check's state with required checks from rulesets, review requests from the timeline, and reviews with their commits. It matches a Copilot request to reviews authored by `copilot-pull-request-reviewer[bot]`.
 
+Use `latest_review_requests` to decide whether a review request exists and whether a later review answered it. `pending_review_requests` lists only reviewers that GitHub still shows as requested, and it can be empty while a request is live. Request events do not record a commit; after later pushes, compare the request time with the push times to decide which head it covers.
+
 A part that the tool could not read is `null` and has an entry in `errors`. Exit status 2 means some parts failed. Treat a `null` part as unread, not as empty. The tool does not judge whether a review is favorable; read the review bodies yourself.
 
 ## Writes to GitHub
