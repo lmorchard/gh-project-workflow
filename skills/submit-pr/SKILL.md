@@ -41,7 +41,7 @@ When the PR is ready for review, move the issue it implements to In review, foll
 
 ## Request Copilot review
 
-Request Copilot review unless the user chose another reviewer. Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
+Request Copilot review unless the user chose another reviewer. Read the current requests and reviews with `pr-state`, described in [Evidence](../shared/evidence.md). Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
 
 Record the request time, the requested head, and existing review identifiers. Read back the request or the resulting review.
 

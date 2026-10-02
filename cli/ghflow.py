@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Deterministic GitHub reads and writes for the gh-project-workflow skills.
+
+The command shells out to an authenticated `gh`. It reports facts and never
+judges whether a review is favorable or whether work may merge.
+
+A part that could not be read is null and has an entry in "errors". An empty
+list means GitHub returned nothing. Exit status: 0 when every part was read,
+2 when some parts failed, 1 when the PR itself could not be read.
+"""
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+
+CHECK_RUN_STATES = {
+    "SUCCESS": "passed",
+    "NEUTRAL": "passed",
+    "SKIPPED": "skipped",
+    "CANCELLED": "canceled",
+    "FAILURE": "failed",
+    "TIMED_OUT": "failed",
+    "STARTUP_FAILURE": "failed",
+    "ACTION_REQUIRED": "failed",
+    "STALE": "failed",
+}
+STATUS_CONTEXT_STATES = {
+    "SUCCESS": "passed",
+    "PENDING": "pending",
+    "EXPECTED": "pending",
+    "FAILURE": "failed",
+    "ERROR": "failed",
+}
+
+
+class GhError(Exception):
+    pass
+
+
+def run_gh(args):
+    """Run gh and return parsed JSON output."""
+    result = subprocess.run(["gh", *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise GhError((result.stderr or result.stdout).strip() or f"gh exited {result.returncode}")
+    return json.loads(result.stdout) if result.stdout.strip() else None
+
+
+def run_gh_paginated(path):
+    """Read every page of a REST list endpoint."""
+    pages = run_gh(["api", path, "--paginate", "--slurp"])
+    return [item for page in pages for item in page]
+
+
+def parse_pr(ref, repo):
+    match = re.match(r"https://github\.com/([^/]+/[^/]+)/pull/(\d+)", ref)
+    if match:
+        return match.group(1), int(match.group(2))
+    if ref.isdigit() and repo:
+        return repo, int(ref)
+    raise SystemExit("Give a PR URL, or a PR number with --repo OWNER/NAME.")
+
+
+def check_state(item):
+    if item.get("__typename") == "StatusContext":
+        return item.get("context"), STATUS_CONTEXT_STATES.get(item.get("state"), "unknown")
+    if item.get("status") != "COMPLETED":
+        return item.get("name"), "pending"
+    return item.get("name"), CHECK_RUN_STATES.get(item.get("conclusion"), "unknown")
+
+
+def summarize_ci(checks, required):
+    """Combine check states. "green" needs every check passed or skipped and no required check missing."""
+    if checks is None:
+        return None
+    states = {c["state"] for c in checks}
+    if not checks:
+        return "none"
+    if "failed" in states or "canceled" in states or "unknown" in states:
+        return "failing"
+    if any(c["state"] == "missing" for c in checks):
+        return "missing"
+    if "pending" in states:
+        return "pending"
+    return "green"
+
+
+def same_reviewer(requested, author):
+    """Match a requested reviewer to a review author.
+
+    GitHub records a Copilot request as "Copilot" but its reviews as
+    "copilot-pull-request-reviewer".
+    """
+    requested, author = requested.lower(), author.lower()
+    if requested == author:
+        return True
+    return requested == "copilot" and author.startswith("copilot")
+
+
+def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
+    errors = []
+
+    def part(name, read):
+        try:
+            return read()
+        except (GhError, json.JSONDecodeError, TypeError, KeyError) as error:
+            errors.append({"part": name, "error": str(error)})
+            return None
+
+    fields = "number,url,state,isDraft,mergeable,headRefOid,headRefName,baseRefName,reviewRequests,statusCheckRollup"
+    try:
+        pr = gh(["pr", "view", str(number), "--repo", repo, "--json", fields])
+    except GhError as error:
+        return {"repo": repo, "number": number, "errors": [{"part": "pr", "error": str(error)}]}, 1
+
+    head = pr["headRefOid"]
+    base = pr["baseRefName"]
+
+    def read_required():
+        rules = gh(["api", f"repos/{repo}/rules/branches/{base}"])
+        return sorted(
+            check["context"]
+            for rule in rules
+            if rule.get("type") == "required_status_checks"
+            for check in rule["parameters"]["required_status_checks"]
+        )
+
+    required = part("required_checks", read_required)
+
+    checks = []
+    for item in pr.get("statusCheckRollup") or []:
+        name, state = check_state(item)
+        checks.append({"name": name, "state": state, "required": None if required is None else name in required})
+    for name in required or []:
+        if not any(c["name"] == name for c in checks):
+            checks.append({"name": name, "state": "missing", "required": True})
+
+    def read_reviews():
+        reviews = gh_paginated(f"repos/{repo}/pulls/{number}/reviews")
+        comments = gh_paginated(f"repos/{repo}/pulls/{number}/comments")
+        counts = {}
+        for comment in comments:
+            review_id = comment.get("pull_request_review_id")
+            counts[review_id] = counts.get(review_id, 0) + 1
+        return [
+            {
+                "id": review["id"],
+                "author": review["user"]["login"],
+                "state": review["state"],
+                "submitted_at": review.get("submitted_at"),
+                "commit": review.get("commit_id"),
+                "covers_head": review.get("commit_id") == head,
+                "inline_comments": counts.get(review["id"], 0),
+                "body": review.get("body") or "",
+            }
+            for review in reviews
+        ]
+
+    reviews = part("reviews", read_reviews)
+
+    def read_requests():
+        events = gh_paginated(f"repos/{repo}/issues/{number}/timeline")
+        requests = []
+        for event in events:
+            if event.get("event") not in ("review_requested", "review_request_removed"):
+                continue
+            reviewer = (event.get("requested_reviewer") or {}).get("login") or (event.get("requested_team") or {}).get("slug")
+            requests.append({
+                "event": event["event"],
+                "reviewer": reviewer,
+                "requested_at": event.get("created_at"),
+                "actor": (event.get("actor") or {}).get("login"),
+            })
+        return requests
+
+    request_events = part("review_request_events", read_requests)
+
+    latest_requests = None
+    if request_events is not None:
+        latest = {}
+        for event in request_events:
+            if event["event"] == "review_requested":
+                latest[event["reviewer"]] = event
+            else:
+                latest.pop(event["reviewer"], None)
+        latest_requests = []
+        for reviewer, event in sorted(latest.items()):
+            answered = None
+            if reviews is not None:
+                answered = any(
+                    same_reviewer(reviewer, r["author"]) and (r["submitted_at"] or "") >= event["requested_at"]
+                    for r in reviews
+                )
+            latest_requests.append({"reviewer": reviewer, "requested_at": event["requested_at"], "answered": answered})
+
+    result = {
+        "repo": repo,
+        "number": pr["number"],
+        "url": pr["url"],
+        "state": pr["state"],
+        "is_draft": pr["isDraft"],
+        "mergeable": pr["mergeable"],
+        "head": head,
+        "head_branch": pr["headRefName"],
+        "base": base,
+        "ci": summarize_ci(checks, required),
+        "checks": checks,
+        "required_checks": required,
+        "pending_review_requests": [r.get("login") or r.get("slug") or r.get("name") for r in pr.get("reviewRequests") or []],
+        "latest_review_requests": latest_requests,
+        "review_request_events": request_events,
+        "reviews": reviews,
+        "errors": errors,
+    }
+    return result, 2 if errors else 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="ghflow", description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest="command", required=True)
+    state = commands.add_parser("pr-state", help="Report CI, review requests, and reviews for a PR's current head.")
+    state.add_argument("pr", help="PR URL, or PR number with --repo")
+    state.add_argument("--repo", help="OWNER/NAME when giving a PR number")
+    args = parser.parse_args(argv)
+
+    if args.command == "pr-state":
+        repo, number = parse_pr(args.pr, args.repo)
+        result, status = pr_state(repo, number)
+        json.dump(result, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return status
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

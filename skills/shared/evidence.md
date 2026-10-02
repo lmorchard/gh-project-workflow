@@ -26,6 +26,12 @@ Report each check as passed, pending, failed, canceled, skipped, or missing. An 
 
 When a watch command ends, read the results again. The end of a watch does not prove success. Local test results never substitute for hosted CI.
 
+## Reading PR state
+
+Read a PR's state with `python3 cli/ghflow.py pr-state PR_URL`, run from this skills repository. It reports the current head, each check's state with required checks from rulesets, review requests from the timeline, and reviews with their commits. It matches a Copilot request to reviews authored by `copilot-pull-request-reviewer[bot]`.
+
+A part that the tool could not read is `null` and has an entry in `errors`. Exit status 2 means some parts failed. Treat a `null` part as unread, not as empty. The tool does not judge whether a review is favorable; read the review bodies yourself.
+
 ## Writes to GitHub
 
 Before you create something, search for an existing equivalent. On resumption, inspect the recorded URL first.

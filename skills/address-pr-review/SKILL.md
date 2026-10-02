@@ -29,11 +29,11 @@ Run it in a way that returns control, so you can handle review feedback and user
 
 If a check fails, read its job log before you change anything. Distinguish a code defect from setup problems, permissions, service outages, and cancellation. Fix failures within the issue and its required build setup, without weakening checks. Run the affected local checks, commit, push to the same PR, and watch the new head.
 
-Continue until CI passes or a concrete blocker prevents useful work. Do not retry an unchanged failure without new evidence or a specific reason that a retry can help. Report missing credentials, persistent service failures, and decisions that need the user. Keep completed fixes.
+Continue until CI passes or a concrete blocker prevents useful work. Do not retry an unchanged failure without new evidence or a specific reason that a retry can help. Rerunning a failed job for such a reason is part of CI repair. Report missing credentials, persistent service failures, and decisions that need the user. Keep completed fixes.
 
 ## Wait for the review
 
-Inspect existing feedback first. If the requested review is already complete, go straight to its findings.
+Inspect existing feedback first, using `pr-state` from [Evidence](../shared/evidence.md) for review requests, reviews, and checks on the current head. If the requested review is already complete, go straight to its findings.
 
 Otherwise, use the request time, requested head, and prior review identifiers from the handoff or GitHub. Set the deadline 20 minutes after the request. If the request time is unknown, record that and wait once, for 20 minutes from now. On resumption, keep the recorded deadline. A push does not reset it.
 

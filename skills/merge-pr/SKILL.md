@@ -17,7 +17,7 @@ If the PR is already merged, skip to confirming the result. Report any missing h
 
 ## Require green CI
 
-Read hosted CI for the current head. Merge only when CI is green.
+Read hosted CI for the current head with `pr-state`, described in [Evidence](../shared/evidence.md). Merge only when CI is green.
 
 If CI is pending, wait with a tool that lets you report progress. If CI fails, return the failure for repair, or continue through separately authorized follow-up with [address-pr-review](../address-pr-review/SKILL.md).
 
