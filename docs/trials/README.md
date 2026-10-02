@@ -14,7 +14,7 @@ Add an entry with these facts:
 
 Keep the entry short. Put long agent output in a dated folder only when later review needs it.
 
-Entries before 2026-10-02 did not record the skill commit. For those entries, the commit is inferred from history: it is the commit before the one that recorded the trial, unless the entry says otherwise. Skills changed substantially in commit `b687ff3`, so results from earlier commits do not transfer directly to later skill text.
+Entries before 2026-10-02 did not record the skill commit. For those entries, the commit is inferred from history: it is the commit before the one that recorded the trial, unless the entry says otherwise. Skills changed substantially in commit `489efbd`, so results from earlier commits do not transfer directly to later skill text.
 
 ## 2026-09-30: issue 843 definition, filing, and decomposition
 
@@ -40,8 +40,8 @@ After the issue 871 / PR #872 merge, Les reported that the manual smoke test see
 
 ## 2026-10-01 to 2026-10-02: parent delivery of issue 843
 
-deliver-parent-issue delivered children #875 through #884 of [issue 843](https://github.com/lmorchard/decafclaw/issues/843), then closed the parent after a fresh coverage audit. Skills: `3e753f0`. Issue 843 has 17 children in total. Child #873 closed on 2026-10-01 before the deliver-parent-issue draft existed. This repository has no record of how #873 was delivered.
+deliver-parent-issue delivered children #875 through #884 of [issue 843](https://github.com/lmorchard/decafclaw/issues/843), then closed the parent after a fresh coverage audit. Skills: `3e753f0`. Issue 843 has 17 children in total. Seven children, #861 through #873, preceded this run.
 
 Final checks passed on merged main: 4,237 Python tests with two skips, and 395 JavaScript tests. No deployment or final manual smoke test occurred. The ten children took about 11 hours, and later Python CI jobs took about 20 minutes each.
 
-The [retrospective](2026-10-02-issue-843-delivery.md) records the lessons. Its scenario checks and the resulting skill changes are in [Retrospective scenarios](../../evals/results/2026-10-02-retro.md).
+The [delivery retrospective](2026-10-02-parent-843-delivery.md) records the lessons, completion evidence, scope decisions, and recovery facts. Its scenario checks and the resulting skill changes are in [Retrospective scenarios](../../evals/results/2026-10-02-retro.md).
