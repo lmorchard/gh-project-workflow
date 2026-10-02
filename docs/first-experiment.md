@@ -1,5 +1,7 @@
 # First experiment
 
+This trial is complete. The [trial results](trials/2026-09-30-issue-843/review.md) record its outcome.
+
 On 2026-09-30, Les selected issue definition as the first skill trial. The earlier PR review proposal is deferred. The trial uses [decafclaw issue 843](https://github.com/lmorchard/decafclaw/issues/843).
 
 ## Purpose

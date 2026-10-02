@@ -6,20 +6,23 @@ The tasks include issues, project boards, code changes, pull requests (PRs), and
 
 Start with one useful operation. Then use operations to do a task, such as a PR review. Combine tasks only after real use shows a benefit.
 
-The repository contains these draft skills:
+The repository contains these draft skills, in workflow order:
 
 - [reconsider-issue](skills/reconsider-issue/SKILL.md) reassesses an existing issue against current project evidence.
-- [deliver-parent-issue](skills/deliver-parent-issue/SKILL.md) coordinates a bounded parent through child delivery and completion checks.
-- [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
 - [decompose-parent-issue](skills/decompose-parent-issue/SKILL.md) maps a broad issue into bounded children and a parent completion condition.
 - [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
 - [interview-issue](skills/interview-issue/SKILL.md) resolves decisions with the user.
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
 - [implement-issue](skills/implement-issue/SKILL.md) produces tested, committed changes for PR preparation.
+- [review-changes](skills/review-changes/SKILL.md) assesses changes in a fresh reviewer context without editing them.
 - [submit-pr](skills/submit-pr/SKILL.md) publishes committed work and requests Copilot review.
 - [address-pr-review](skills/address-pr-review/SKILL.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
-- [review-changes](skills/review-changes/SKILL.md) assesses changes in a fresh reviewer context without editing them.
 - [merge-pr](skills/merge-pr/SKILL.md) confirms CI and review findings, merges authorized changes, and confirms the result.
+
+These coordinators combine the skills above:
+
+- [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
+- [deliver-parent-issue](skills/deliver-parent-issue/SKILL.md) coordinates a bounded parent through child delivery and completion checks.
 
 Each skill can be used by itself. We did not select a CLI language or command names. The CLI is not implemented.
 
@@ -31,6 +34,10 @@ The account must have access to the target repository. Project-board operations 
 
 Code investigation requires Git and a local checkout of the target project. The skills currently use existing `git` and `gh` commands. The planned project CLI does not replace these requirements.
 
+## Checks
+
+Run `make check` before you commit. It validates skill frontmatter, local Markdown links, and whitespace. It does not assess skill quality.
+
 ## Project documents
 
 Read these documents:
@@ -40,8 +47,7 @@ Read these documents:
 - [First experiment](docs/first-experiment.md) describes the issue-definition trial.
 - [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
 - [Skill sources](docs/skill-sources.md) records ideas adapted from agent-sessions.
-- [Trial results](docs/trials/2026-09-30-issue-843/review.md) records the first use of the skill.
-- [Parent delivery retrospective](docs/trials/2026-10-02-parent-843-delivery.md) records the completed #843 trial and proposed improvements.
+- [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial.
 
 The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.

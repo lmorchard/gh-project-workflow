@@ -18,6 +18,4 @@ Editing unclear prose does not require a user interview. The reviewing agent mak
 
 ## Status
 
-The first define-issue trial demonstrated a question returned to the parent and a revision after a confirmed scope decision. The separate interview skill is a new draft. It does not yet have an independent user-interview trial.
-
-No new interview is necessary for the session-check issue merely because this skill exists. Its scope is already confirmed. Filing that issue remains a separate authorized action.
+The first define-issue trial demonstrated a question returned to the parent and a revision after a confirmed scope decision. Later trials used conversation as the default review path. The [Trial records](trials/README.md) list them.

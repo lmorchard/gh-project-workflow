@@ -46,7 +46,7 @@ The old reference contradicts itself about small tasks. Its opening requires che
 
 The draft omits tier labels, marker requirements, write manifests, mandatory subagents, and a machine-readable merge verdict. It explicitly distinguishes self-review from independent review. Those omissions reduce machinery but do not preserve the old claim of independent verification.
 
-This adaptation is a draft. Static validation cannot establish that it guides implementation well. A real trial on issue 861 remains the next test.
+Static validation cannot establish that this adaptation guides implementation well. The [Trial records](trials/README.md) list the implementation trials.
 
 Les explicitly requested that the frozen-check scheme remain at a distance. It is deferred, not a planned layer to restore. Useful tests, diff review, and honest reports are the initial verification approach.
 
@@ -60,7 +60,7 @@ The old workflow separated an author from a reviewer. The new local fallback als
 
 On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
 
-The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. Both skills pass static validation but still require a real trial.
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. The [Trial records](trials/README.md) list the submission and follow-up trials.
 
 ## Earlier dev-session guidance
 

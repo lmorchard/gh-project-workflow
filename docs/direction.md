@@ -125,11 +125,7 @@ The draft express-issue skill passes evidence, source revisions, review results,
 
 The express-issue draft defaults to review follow-up and includes merge only when explicitly authorized. It includes local review before submission with a different recorded model. An unavailable model identity returns a review choice to the user instead of silently changing that requirement.
 
-The issue 863 trial completed implementation, submission, Copilot follow-up, and a separately authorized merge. The issue 865 trial then exercised express-issue through review follow-up, including different-model local review, a Copilot finding, correction, and current-head review and CI. The issue 867 trial exercised the express merge endpoint through PR #868. The user required both affirmative review and green CI. The coordinator waited for the final hosted check, then merged the exact reviewed commit with a matching-head condition. This successful case does not establish every rejection or recovery path. Live post-merge application checks remained unperformed.
-
-The folder-management trial continued from definition and filing (#869) through implementation, independent review, PR #870, and merge. No product question or repeated authorization was needed. Favorable local and Copilot reviews and green hosted CI covered the exact merged head. The coordinator hit an agent-capacity limit, so the parent continued phase dispatch after its handoff. This tested continuity across skills, not a new automatic backlog selector. Live post-merge checks remained unperformed.
-
-After the issue 871 / PR #872 merge, Les reported that the manual smoke test seemed fine. This is user-reported evidence. The conversation does not specify which surfaces or scenarios were tested, so it does not establish completion of every project-required live check.
+The [Trial records](trials/README.md) describe the express trials and their evidence limits.
 
 ## Draft parent delivery flow
 
