@@ -115,6 +115,8 @@ A favorable review can come from a person, Copilot, or an independent local revi
 
 On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. On 2026-10-03, Les also decided that a different-model local review does not answer that request; the merge decision goes to him. review.md states both ([scenario results](../evals/results/2026-10-03-cleanup-and-review-substitute.md)).
 
+On 2026-10-03, Les also decided that when Copilot is unavailable, a different-model local review is the review source without a question to him. This includes a request that GitHub does not record, as in the [identity trial](agent-identity.md#trial-results), and a Copilot review that times out.
+
 Permission to implement or submit does not imply permission to merge. Existing explicit merge permission remains valid within its scope, so the agent does not need to ask again. Unresolved defects, human objections, and repository protection rules still require attention.
 
 Merge uses explicit user authorization and checks the current commit. It does not bypass GitHub rules or weaken checks. The result includes confirmed merge, issue, and board state.

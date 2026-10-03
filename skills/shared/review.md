@@ -12,7 +12,7 @@ This workflow uses three review sources:
 
 The local review must use a different model from the implementer. Record each model identity from runtime or dispatch metadata. Do not infer it from an agent's name, writing style, or claims. A different agent name, a fresh context, or a changed reasoning setting does not make a different model.
 
-If either identity is unknown or a different model is unavailable, report that and return the review choice to the parent. A same-model second opinion can still help. Label it as same-model, and leave the different-model requirement unmet. A user-approved alternative stays explicit in later handoffs.
+If Copilot is unavailable, a different-model local review is the review source. Do not return that choice to the user. If either identity is unknown or a different model is unavailable, report that and return the review choice to the parent. A same-model second opinion can still help. Label it as same-model, and leave the different-model requirement unmet. A user-approved alternative stays explicit in later handoffs.
 
 No review source guarantees correct findings. Review does not replace tests or human judgment.
 
@@ -24,7 +24,7 @@ Before you request, inspect current review requests, completed reviews, and revi
 
 Repository automation varies: a push may or may not trigger a new review. After a push, check for an automatic request first. Request a review only when the changes need one and no request exists.
 
-Keep these states separate: requested, pending, completed, unavailable, and failed. A pending request or a temporary network error does not show that Copilot is unavailable.
+Keep these states separate: requested, pending, completed, unavailable, and failed. A pending request or a temporary network error does not show that Copilot is unavailable. A request command can exit 0 without recording a request, for example when the PR author has no Copilot access. If GitHub records no request after you read it back, treat Copilot as unavailable.
 
 A review is complete when the requested reviewer has submitted a review for the requested commit. Identify it by its author, commit, and submission time. It can have zero inline comments. CI completion, unrelated comments, and disappearance from the reviewer list do not show that Copilot finished.
 

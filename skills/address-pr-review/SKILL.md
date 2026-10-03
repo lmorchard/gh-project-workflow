@@ -15,7 +15,7 @@ Read the issue, PR, project instructions, current branch, and any supplied revie
 
 For a local review report, identify the commit it reviewed and its evidence limits. Do not wait for Copilot when local findings are the input. If the report covers an earlier commit, compare it with the current code before you make corrections.
 
-If no review exists or was requested, report that and do not wait. The parent can request Copilot or run [review-changes](../review-changes/SKILL.md). If Copilot is unavailable, report the reason and return the fallback choice to the parent.
+If no review exists or was requested, report that and do not wait. The parent can request Copilot or run [review-changes](../review-changes/SKILL.md). If Copilot is unavailable, report the reason. A different-model local review of the current head is the review evidence. If none covers the current head, hand off a review of the uncovered changes with [review-changes](../review-changes/SKILL.md) to the parent. Do not return the choice of fallback to the parent or user.
 
 ## Watch and repair CI
 
@@ -41,7 +41,7 @@ A completed review from the requested reviewer for the requested commit ends the
 
 Poll GitHub about once a minute, or use a supported watch mechanism. Keep each wait short enough to accept user input. Do not send another review request on each poll. Handle temporary read errors within the deadline, and report persistent access failures rather than treating missing data as an empty review.
 
-Stop waiting at the deadline or when the user interrupts. At a timeout, report the last observed state and address the available findings. A timeout is an incomplete review. It is not approval and does not show that Copilot is unavailable. The deadline applies only to the review; CI repair continues after it.
+Stop waiting at the deadline or when the user interrupts. At a timeout, report the last observed state and address the available findings. A timeout is an incomplete review. It is not approval and does not show that Copilot is unavailable. After a timeout, use a different-model local review of the current head as the review evidence, as when Copilot is unavailable. If none covers the current head, hand off a review of the uncovered changes with [review-changes](../review-changes/SKILL.md) to the parent, without asking the user. If a Copilot review arrives later, read it before merge. The deadline applies only to the review; CI repair continues after it.
 
 ## Address the findings
 
