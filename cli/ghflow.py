@@ -13,9 +13,11 @@ board set-status exits 3 when it refuses a backward move.
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 CHECK_RUN_STATES = {
     "SUCCESS": "passed",
@@ -370,6 +372,75 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     return result, 0 if result["readback_matches"] else 2
 
 
+def resolve_identity(env=None, config_paths=None):
+    """Resolve agent identity from environment variables and config files."""
+    if env is None:
+        env = os.environ
+    if config_paths is None:
+        config_paths = [
+            Path(".ghflow/identity.json"),
+            Path.home() / ".config" / "ghflow" / "identity.json",
+        ]
+
+    config_data = {}
+    for p in config_paths:
+        try:
+            expanded = Path(p).expanduser()
+            if expanded.is_file():
+                with open(expanded, "r", encoding="utf-8") as f:
+                    config_data = json.load(f)
+                break
+        except (OSError, json.JSONDecodeError):
+            continue
+
+    login = env.get("GHFLOW_IDENTITY_LOGIN") or env.get("GHFLOW_LOGIN") or config_data.get("login")
+    name = env.get("GHFLOW_IDENTITY_NAME") or env.get("GHFLOW_NAME") or config_data.get("name") or login
+    email = env.get("GHFLOW_IDENTITY_EMAIL") or env.get("GHFLOW_EMAIL") or config_data.get("email")
+    token_file = env.get("GHFLOW_TOKEN_FILE") or env.get("GHFLOW_IDENTITY_TOKEN_FILE") or config_data.get("token_file")
+
+    token_path = None
+    token_present = False
+    if token_file:
+        token_path = Path(token_file).expanduser()
+        token_present = token_path.is_file()
+    elif "GH_TOKEN" in env:
+        token_present = bool(env["GH_TOKEN"].strip())
+
+    return {
+        "login": login,
+        "name": name,
+        "email": email,
+        "token_file": str(token_path) if token_path else None,
+        "token_present": token_present,
+        "configured": bool(login or token_path or "GH_TOKEN" in env),
+    }
+
+
+def identity_env(identity, base_env=None):
+    """Build environment dict with GH_TOKEN, Git author/committer, and credential config."""
+    env = dict(os.environ if base_env is None else base_env)
+    token_file = identity.get("token_file")
+    if token_file and "GH_TOKEN" not in env:
+        p = Path(token_file).expanduser()
+        if p.is_file():
+            env["GH_TOKEN"] = p.read_text(encoding="utf-8").strip()
+
+    name = identity.get("name")
+    if name:
+        env.setdefault("GIT_AUTHOR_NAME", name)
+        env.setdefault("GIT_COMMITTER_NAME", name)
+
+    email = identity.get("email")
+    if email:
+        env.setdefault("GIT_AUTHOR_EMAIL", email)
+        env.setdefault("GIT_COMMITTER_EMAIL", email)
+
+    if "GH_TOKEN" in env and "GIT_CONFIG_PARAMETERS" not in env:
+        env["GIT_CONFIG_PARAMETERS"] = "'credential.https://github.com.helper=' 'credential.https://github.com.helper=!gh auth git-credential'"
+
+    return env
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="ghflow", description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
@@ -391,6 +462,10 @@ def main(argv=None):
     set_status.add_argument("--project", required=True, type=int, help="project board number")
     set_status.add_argument("--status", required=True, help="target Status option name")
     set_status.add_argument("--allow-backward", action="store_true", help="permit a backward move; use only with a reason and authorization")
+    ident = commands.add_parser("identity", help="Report or export the configured agent identity.")
+    ident.add_argument("--export", action="store_true", help="output shell export statements")
+    exec_cmd = commands.add_parser("exec", help="Run a command under the configured agent identity.")
+    exec_cmd.add_argument("exec_args", nargs=argparse.REMAINDER, help="command and arguments to run")
     args = parser.parse_args(argv)
 
     if args.command == "pr-state":
@@ -402,6 +477,39 @@ def main(argv=None):
     elif args.command == "board":
         repo, number = parse_issue(args.issue, args.repo)
         result, status = board_set_status(repo, number, args.owner, args.project, args.status, args.allow_backward)
+    elif args.command == "identity":
+        identity = resolve_identity()
+        if args.export:
+            env = identity_env(identity)
+            statements = []
+            if "GH_TOKEN" in env:
+                statements.append(f'export GH_TOKEN="{env["GH_TOKEN"]}"')
+            if "GIT_AUTHOR_NAME" in env:
+                statements.append(f'export GIT_AUTHOR_NAME="{env["GIT_AUTHOR_NAME"]}"')
+            if "GIT_COMMITTER_NAME" in env:
+                statements.append(f'export GIT_COMMITTER_NAME="{env["GIT_COMMITTER_NAME"]}"')
+            if "GIT_AUTHOR_EMAIL" in env:
+                statements.append(f'export GIT_AUTHOR_EMAIL="{env["GIT_AUTHOR_EMAIL"]}"')
+            if "GIT_COMMITTER_EMAIL" in env:
+                statements.append(f'export GIT_COMMITTER_EMAIL="{env["GIT_COMMITTER_EMAIL"]}"')
+            if "GIT_CONFIG_PARAMETERS" in env:
+                statements.append(f'export GIT_CONFIG_PARAMETERS="{env["GIT_CONFIG_PARAMETERS"]}"')
+            sys.stdout.write("\n".join(statements) + ("\n" if statements else ""))
+            return 0
+        json.dump(identity, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0 if identity["configured"] else 1
+    elif args.command == "exec":
+        cmd_args = args.exec_args
+        if cmd_args and cmd_args[0] == "--":
+            cmd_args = cmd_args[1:]
+        if not cmd_args:
+            sys.stderr.write("Give a command to run with exec.\n")
+            return 1
+        identity = resolve_identity()
+        env = identity_env(identity)
+        res = subprocess.run(cmd_args, env=env)
+        return res.returncode
     else:
         return 1
     json.dump(result, sys.stdout, indent=2)

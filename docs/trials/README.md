@@ -87,3 +87,15 @@ Lessons:
 - Leaving the implementer's risk note out of the reviewer's handoff let the review confirm it independently.
 - The submission agent stated that the automatic Copilot request "came from automation" because its actor was `lmorchard`. That actor does not show the cause; see [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1).
 - decafclaw's AGENTS.md asks for a live test in Mattermost and the web UI after merge. That remains for Les.
+
+## 2026-10-03: express delivery of issue 897 under MokaGnome
+
+The parent coordinated express-issue for [issue 897](https://github.com/lmorchard/decafclaw/issues/897) through review follow-up, without merge, using the machine account `MokaGnome`. Subagents performed all subject-repository writes using the classic token at `~/.config/ghflow/mokagnome.token`. Skills commit was `7c59ab7`.
+
+The task guarded four asynchronous functions in `schedule-page.js` against stale responses when a user selects another schedule. The first commit `8fa6b3f` added guards and eight component tests. An independent local review by Claude Sonnet found that `#onWikiSaved` did not guard against an A to B to A selection sequence. The implementer fixed the defect in commit `542db3d`, and a second local review confirmed the fix.
+
+The reviewer also noted an in-flight status race in `#runNow`. A subagent verified the race and filed follow-up [issue 904](https://github.com/lmorchard/decafclaw/issues/904) as `MokaGnome`.
+
+Subagents pushed the branch, submitted [PR #907](https://github.com/lmorchard/decafclaw/pull/907), moved issue 897 to In review on board 6, and verified green hosted CI. The subagent requested Copilot review. GitHub recorded no request because `MokaGnome` has no Copilot seat. Affirmative local review covered the published head commit `542db3d`.
+
+Les explicitly authorized the merge. A subagent merged PR #907 as `MokaGnome` with merge commit `6b66ce0`. The merge closed issue 897, and board automation set Done. Local worktrees and branches were preserved.

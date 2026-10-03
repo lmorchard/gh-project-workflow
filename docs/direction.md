@@ -129,6 +129,8 @@ We may return to this approach after the individual tasks work well. First inspe
 
 On 2026-10-03, research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1) found that only a machine user works with user-owned boards, and that it probably needs a paid Copilot seat. Les asked for a trial before a decision. [Agent identity](agent-identity.md) records the research and the trial proposal.
 
+On 2026-10-03, Les adopted the machine user identity after trials in a scratch repository and on decafclaw issue 897. Subagents run under a configured machine account such as `MokaGnome`. The configuration supports environment variables with a config file fallback. The CLI operations `identity` and `exec` in `ghflow.py` supply the credentials. For code review on agent pull requests, independent local review is the primary review source. Les can request a Copilot review manually when desired.
+
 ## Possible next-task guidance
 
 Les proposed a skill that helps answer “what is next?” after using the individual skills. One possible starting point is advice based on the current issue or PR, available evidence, unresolved decisions, and existing authorization. It can explain which task fits and why.

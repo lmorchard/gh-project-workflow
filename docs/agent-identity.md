@@ -109,9 +109,20 @@ Conclusions from the trial:
 
 Les chose to try `MokaGnome` on one real decafclaw issue before a decision on adoption. On 2026-10-03, Les added it to decafclaw board 6 with `scripts/add-board-writer.sh`. It already had Write access to decafclaw from agent-sessions. The token expires on 2026-11-02.
 
-## Open questions
+The parent coordinated `express-issue` for [issue 897](https://github.com/lmorchard/decafclaw/issues/897) through review follow-up without merge. Subagents performed all actions as `MokaGnome` using the classic token.
 
-1. The trial showed that agent PRs get no Copilot review without a seat. Can a machine account have a paid Copilot seat, and does Les accept that cost? If not, does Les accept agent PRs without Copilot review, or request reviews himself?
-2. Does Les accept a classic token with broad scopes?
-3. Do agents merge as the machine user, or does Les do every merge?
-4. Does `require_extra_approval_for_unattributed_changes` stay on if mixed-identity PRs become common?
+1. **Implementation:** Subagents created the worktree `fix/897-stale-schedule-responses` and committed `8fa6b3f` and `542db3d`. Both commits set author and committer to `MokaGnome`.
+2. **Review:** An independent review by Claude Sonnet found one race on post-save refresh with rapid selection changes. The implementer fixed it in commit `542db3d`, and a follow-up review confirmed the resolution.
+3. **Follow-up issue:** During review, the reviewer noted a separate status race on `#runNow`. An Opus subagent verified it and filed [issue 904](https://github.com/lmorchard/decafclaw/issues/904) as `MokaGnome`.
+4. **Submission and board status:** `submit-pr` pushed the branch, opened [PR #907](https://github.com/lmorchard/decafclaw/pull/907), and moved issue 897 to In review on board 6.
+5. **Review state and CI:** `submit-pr` requested Copilot review. GitHub recorded no request because `MokaGnome` has no Copilot seat. The affirmative local review covered the head. Hosted CI passed all checks.
+6. **Attribution:** GitHub records `MokaGnome` as the author of issue 904, author of PR 907, actor of the push, and author and committer of both commits.
+7. **Merge:** Les authorized the merge. `merge-pr` merged the PR as `MokaGnome` (`6b66ce0`). Issue 897 closed and board 6 status became Done.
+
+## Adoption decision
+
+On 2026-10-03, Les adopted the machine account identity for agents in this workflow.
+
+- **Configurable identity:** The identity configuration supports environment variables and config files. The shared reference [Agent identity](../skills/shared/identity.md) defines the rules.
+- **Review source:** Independent local review is the primary review source for agent pull requests. Les can request a Copilot review manually when desired.
+- **Merge authority:** Agents can merge authorized pull requests as the machine account when green CI and affirmative review exist.

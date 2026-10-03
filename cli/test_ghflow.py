@@ -1,6 +1,11 @@
+import io
+import json
+import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
-from ghflow import GhError, board_set_status, pr_state, verify_commit
+from ghflow import GhError, board_set_status, identity_env, main, pr_state, resolve_identity, verify_commit
 
 HEAD = "a" * 40
 OLD = "b" * 40
@@ -338,6 +343,77 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertIsNone(result["after"])
         self.assertEqual(result["errors"][0]["part"], "readback")
         self.assertEqual(status, 2)
+
+
+class IdentityTests(unittest.TestCase):
+    def test_identity_unconfigured_when_no_env_and_no_config(self):
+        ident = resolve_identity(env={}, config_paths=[])
+        self.assertFalse(ident["configured"])
+        self.assertIsNone(ident["login"])
+        self.assertIsNone(ident["token_file"])
+
+    def test_identity_from_config_file(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+            json.dump({"login": "BotUser", "email": "bot@example.com"}, f)
+            cfg_path = f.name
+        try:
+            ident = resolve_identity(env={}, config_paths=[cfg_path])
+            self.assertTrue(ident["configured"])
+            self.assertEqual(ident["login"], "BotUser")
+            self.assertEqual(ident["name"], "BotUser")
+            self.assertEqual(ident["email"], "bot@example.com")
+        finally:
+            os.unlink(cfg_path)
+
+    def test_identity_env_overrides_config(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+            json.dump({"login": "BotUser", "email": "bot@example.com"}, f)
+            cfg_path = f.name
+        try:
+            env = {"GHFLOW_IDENTITY_LOGIN": "EnvBot", "GHFLOW_IDENTITY_EMAIL": "env@example.com"}
+            ident = resolve_identity(env=env, config_paths=[cfg_path])
+            self.assertEqual(ident["login"], "EnvBot")
+            self.assertEqual(ident["email"], "env@example.com")
+        finally:
+            os.unlink(cfg_path)
+
+    def test_identity_env_sets_variables(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+            f.write("secret-token\n")
+            token_path = f.name
+        try:
+            ident = {
+                "login": "BotUser",
+                "name": "Bot User",
+                "email": "bot@example.com",
+                "token_file": token_path,
+            }
+            env = identity_env(ident, base_env={})
+            self.assertEqual(env["GH_TOKEN"], "secret-token")
+            self.assertEqual(env["GIT_AUTHOR_NAME"], "Bot User")
+            self.assertEqual(env["GIT_COMMITTER_NAME"], "Bot User")
+            self.assertEqual(env["GIT_AUTHOR_EMAIL"], "bot@example.com")
+            self.assertEqual(env["GIT_COMMITTER_EMAIL"], "bot@example.com")
+            self.assertIn("GIT_CONFIG_PARAMETERS", env)
+        finally:
+            os.unlink(token_path)
+
+    def test_identity_command_export(self):
+        ident = {
+            "login": "BotUser",
+            "name": "Bot User",
+            "email": "bot@example.com",
+            "token_file": None,
+            "configured": True,
+        }
+        with patch("ghflow.resolve_identity", return_value=ident):
+            stdout = io.StringIO()
+            with patch("sys.stdout", stdout):
+                status = main(["identity", "--export"])
+            self.assertEqual(status, 0)
+            out = stdout.getvalue()
+            self.assertIn('export GIT_AUTHOR_NAME="Bot User"', out)
+            self.assertIn('export GIT_AUTHOR_EMAIL="bot@example.com"', out)
 
 
 if __name__ == "__main__":

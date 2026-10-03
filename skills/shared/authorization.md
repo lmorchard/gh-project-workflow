@@ -4,7 +4,7 @@ These rules apply to every skill in this repository. They cover what the user ha
 
 ## Roles
 
-The **parent** agent owns the conversation with the user. It makes workflow decisions, conducts interviews, and dispatches tasks. A **subagent** does work in the **subject repository**, the project that the task changes. That work includes code changes, commits, pushes, issue and board updates, PRs, review replies, and merges.
+The **parent** agent owns the conversation with the user. It makes workflow decisions, conducts interviews, and dispatches tasks. A **subagent** does work in the **subject repository**, the project that the task changes. That work includes code changes, commits, pushes, issue and board updates, PRs, review replies, and merges. When a separate identity is configured, subagents follow [Agent identity](identity.md).
 
 A subagent returns questions to the parent. It does not interview the user, wait for an answer, or treat a missing answer as approval. Give each question its reason, a recommended answer, and the tradeoff.
 
