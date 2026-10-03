@@ -105,6 +105,10 @@ Conclusions from the trial:
 - The global git credential helper on this machine is the VS Code container helper, and git asks it before the clone's `gh` helper. The push used the machine token, but the configuration did not guarantee that. An agent clone must clear inherited helpers with `-c credential.helper=` before it adds `gh auth git-credential`.
 - The trial board did not move the closed issue to Done automatically. The setup script replaced the Status options, which probably removed the target of the default workflow for closed items.
 
+## Delivery trial
+
+Les chose to try `MokaGnome` on one real decafclaw issue before a decision on adoption. On 2026-10-03, Les added it to decafclaw board 6 with `scripts/add-board-writer.sh`. It already had Write access to decafclaw from agent-sessions. The token expires on 2026-11-02.
+
 ## Open questions
 
 1. The trial showed that agent PRs get no Copilot review without a seat. Can a machine account have a paid Copilot seat, and does Les accept that cost? If not, does Les accept agent PRs without Copilot review, or request reviews himself?
