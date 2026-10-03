@@ -69,7 +69,7 @@ Lessons and resulting changes:
 
 Les reviewed and merged PR #898 himself on 2026-10-03 (merge commit `4165293`, from head `783ea99`). `Closes #894` closed the issue one second later, and board automation set Done. A merge-pr subagent then ran the already-merged path at `6087b45`. `ghflow board set-status --status Done` exited 0 with action `unchanged` and `readback_matches` true, so the planned first real board write did not occur. A cleanup subagent removed the worktree and the local branch after it confirmed that the branch tip equaled the merged head and the worktree was clean.
 
-- decafclaw's AGENTS.md provides `make prune-worktrees` for landed worktrees. The cleanup used git commands instead. A cleanup procedure should prefer the subject project's own target.
+- decafclaw's AGENTS.md provides `make prune-worktrees` for landed worktrees. The cleanup used git commands instead. The #895 cleanup later found that the target removes worktrees with `--force` and does not delete remote branches, so the explicit commands were the safer choice.
 - The merge-pr agent asked whether the already-merged path expects `pr-state` or `verify-commit`. The skill does not say.
 
 ## 2026-10-03: express delivery of issue 895 through merge
