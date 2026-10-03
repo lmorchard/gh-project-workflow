@@ -55,12 +55,14 @@ We propose one trial before Les decides. The trial uses a separate test reposito
 
 ### Setup by Les
 
+`scripts/identity-trial-setup.sh` does steps 2 to 5. `scripts/identity-trial-teardown.sh` removes the repository and the board after the trial.
+
 1. Use the existing machine account `MokaGnome`, which Les owns. Revoke any personal access tokens that remain from agent-sessions. Make sure that two-factor authentication is on. Record its Copilot plan.
 2. Create the public repository `lmorchard/ghflow-identity-trial` with one file and a `main` branch.
 3. Copy the decafclaw ruleset to it, with its required checks, its Copilot code review rule, and `require_extra_approval_for_unattributed_changes`. Add a short CI workflow that the required check names.
 4. Create a user-owned project board with a Status field. Use the options Backlog, Ready, In progress, In review, and Done.
 5. Give `MokaGnome` Write access to the repository and to the board. On 2026-10-03, it still had Write access to decafclaw from agent-sessions.
-6. On the machine account, create a classic token with the `public_repo`, `project`, and `read:org` scopes. Do not add the `workflow` scope. Set a short expiry.
+6. On the machine account, create one classic token with the `public_repo`, `project`, and `read:org` scopes. Do not add the `workflow` scope. Set a short expiry.
 7. Store the token outside every repository, in a file that only Les can read. Tell the parent its path. Do not paste the token into the conversation.
 8. Do not buy a Copilot seat yet. The trial first measures the result without one.
 
@@ -79,10 +81,11 @@ The subagent sets `GH_TOKEN` from the file and sets the git author and committer
 
 After the trial, Les decides on the Copilot seat and on adoption. If Les buys a seat, the subagent repeats checks 4 and 5.
 
+On 2026-10-03, Les judged the agent-sessions read and write separation unnecessary for this workflow. Agents in this workflow do authorized writes themselves, and no driver exists to do writes for them. The trial uses one classic token.
+
 ## Open questions
 
 1. Can a machine account have a paid Copilot seat, and does Les accept that cost? If not, does Les accept agent PRs without Copilot review, or request reviews himself?
 2. Does Les accept a classic token with broad scopes?
 3. Do agents merge as the machine user, or does Les do every merge?
 4. Does `require_extra_approval_for_unattributed_changes` stay on if mixed-identity PRs become common?
-5. Does the workflow also adopt the agent-sessions read and write separation? Attribution does not need it.
