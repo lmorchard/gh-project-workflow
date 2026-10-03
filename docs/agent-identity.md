@@ -55,11 +55,11 @@ We propose one trial before Les decides. The trial uses a separate test reposito
 
 ### Setup by Les
 
-1. Create the machine account with a verified email address, such as `me+<name>@lmorchard.com`. Turn on two-factor authentication.
+1. Use the existing machine account `MokaGnome`, which Les owns. Revoke any personal access tokens that remain from agent-sessions. Make sure that two-factor authentication is on. Record its Copilot plan.
 2. Create the public repository `lmorchard/ghflow-identity-trial` with one file and a `main` branch.
 3. Copy the decafclaw ruleset to it, with its required checks, its Copilot code review rule, and `require_extra_approval_for_unattributed_changes`. Add a short CI workflow that the required check names.
 4. Create a user-owned project board with a Status field. Use the options Backlog, Ready, In progress, In review, and Done.
-5. Give the machine account Write access to the repository and to the board.
+5. Give `MokaGnome` Write access to the repository and to the board. On 2026-10-03, it still had Write access to decafclaw from agent-sessions.
 6. On the machine account, create a classic token with the `public_repo`, `project`, and `read:org` scopes. Do not add the `workflow` scope. Set a short expiry.
 7. Store the token outside every repository, in a file that only Les can read. Tell the parent its path. Do not paste the token into the conversation.
 8. Do not buy a Copilot seat yet. The trial first measures the result without one.
