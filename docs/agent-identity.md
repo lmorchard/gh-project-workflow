@@ -83,9 +83,31 @@ After the trial, Les decides on the Copilot seat and on adoption. If Les buys a 
 
 On 2026-10-03, Les judged the agent-sessions read and write separation unnecessary for this workflow. Agents in this workflow do authorized writes themselves, and no driver exists to do writes for them. The trial uses one classic token.
 
+## Trial results
+
+The trial ran on 2026-10-03 in `lmorchard/ghflow-identity-trial` with board 11. `MokaGnome` had one classic token and no Copilot seat. Subagents did each step as `MokaGnome`, except check 6. Les did check 6 and also edited the PR in the web interface.
+
+| Check | Result |
+|---|---|
+| 1. Identity | With the token, `gh api user` returned `MokaGnome`. Without it, `gh api user` returned `lmorchard`. |
+| 2. Issue, push, PR | GitHub recorded `MokaGnome` as the issue author, PR author, commit author, and committer. The activity API recorded `MokaGnome` as the actor of the push. The commits were unsigned. |
+| 3. Board | `ghflow board set-status` added the issue to the board and set each status. The Status value records `creator: MokaGnome`. |
+| 4. Automatic Copilot review | No request occurred when `MokaGnome` opened the PR. No request occurred when Les pushed a commit to the PR. |
+| 5. Requested Copilot review | `gh pr edit --add-reviewer "@copilot"` exited 0 but made no request, and no review arrived in 10 minutes. |
+| 6. Approval | Les submitted an APPROVED review. |
+| 7. Mixed authors | Les edited `NOTE.md` in the web interface, so the PR had commits from both accounts. The merge state stayed `CLEAN`. |
+| 8. Merge | `gh pr merge --match-head-commit` as `MokaGnome` succeeded. GitHub records `mergedBy: MokaGnome`. |
+
+Conclusions from the trial:
+
+- A machine user with one classic token gives attribution for every write in this workflow, and lets Les approve agent PRs.
+- Without a Copilot seat, agent PRs get no Copilot review. `--add-reviewer "@copilot"` fails without an error, so only a read-back shows the failure. submit-pr already requires that read-back.
+- The global git credential helper on this machine is the VS Code container helper, and git asks it before the clone's `gh` helper. The push used the machine token, but the configuration did not guarantee that. An agent clone must clear inherited helpers with `-c credential.helper=` before it adds `gh auth git-credential`.
+- The trial board did not move the closed issue to Done automatically. The setup script replaced the Status options, which probably removed the target of the default workflow for closed items.
+
 ## Open questions
 
-1. Can a machine account have a paid Copilot seat, and does Les accept that cost? If not, does Les accept agent PRs without Copilot review, or request reviews himself?
+1. The trial showed that agent PRs get no Copilot review without a seat. Can a machine account have a paid Copilot seat, and does Les accept that cost? If not, does Les accept agent PRs without Copilot review, or request reviews himself?
 2. Does Les accept a classic token with broad scopes?
 3. Do agents merge as the machine user, or does Les do every merge?
 4. Does `require_extra_approval_for_unattributed_changes` stay on if mixed-identity PRs become common?
