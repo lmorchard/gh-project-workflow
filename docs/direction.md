@@ -113,7 +113,7 @@ Green CI alone does not permit an autonomous merge. The agent also needs affirma
 
 A favorable review can come from a person, Copilot, or an independent local reviewer. A COMMENTED review can qualify if its text recommends approval or clearly reports a completed review with no findings. Silence, an empty comment list, and a review timeout do not qualify.
 
-On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. The current affirmative review rule already produces this decision ([scenario results](../evals/results/2026-10-02-copilot-headline.md)).
+On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. On 2026-10-03, Les also decided that a different-model local review does not answer that request; the merge decision goes to him. review.md states both ([scenario results](../evals/results/2026-10-03-cleanup-and-review-substitute.md)).
 
 Permission to implement or submit does not imply permission to merge. Existing explicit merge permission remains valid within its scope, so the agent does not need to ask again. Unresolved defects, human objections, and repository protection rules still require attention.
 

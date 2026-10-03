@@ -56,4 +56,6 @@ Close only issues that this PR completes. Leave a broader parent and its board s
 
 Return the PR URL, merge commit, CI evidence, the review or permission that supported the merge, and the confirmed issue and board states. Report required post-merge checks that remain incomplete. Do not claim a live application test that you did not perform.
 
-Keep local worktrees and branches unless cleanup was requested or project rules require it. Before cleanup, check for uncommitted work. Merge authorization does not permit discarding unrelated files.
+Keep local worktrees and branches unless cleanup was requested or project rules require it. Merge authorization does not permit discarding unrelated files.
+
+Before cleanup, fetch, and compare the local and remote branch tips with the merged PR head. Check the worktree for uncommitted and untracked files. If either tip has commits beyond the merged head, or the worktree has changes, report them and return the choice to the user. Otherwise remove the worktree without `--force`, then delete the branches. After a squash or rebase merge, `git branch -d` refuses because the branch is not an ancestor of the base; when the tips equal the merged head, use `git branch -D`. Report each check and command.

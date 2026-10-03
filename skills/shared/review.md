@@ -32,7 +32,7 @@ A review is complete when the requested reviewer has submitted a review for the 
 
 **Affirmative review** is a favorable review that covers the changes being merged. It can come from a person, Copilot, or an independent local review.
 
-A COMMENTED review qualifies when its text recommends approval or clearly reports a completed review with no findings. These do not qualify: silence, an empty comment list, a timeout, or the COMMENTED state alone. This workflow does not require the GitHub APPROVED state. Authors cannot approve their own PRs, and the agent often submits PRs as the user.
+A COMMENTED review qualifies when its text recommends approval or clearly reports a completed review with no findings. These do not qualify: silence, an empty comment list, a timeout, or the COMMENTED state alone. A review whose text asks for human review, such as Copilot's "Needs a closer look", does not qualify even with no findings. It returns the merge decision to the user. Another review source, including a different-model local review, does not answer that request. This workflow does not require the GitHub APPROVED state. Authors cannot approve their own PRs, and the agent often submits PRs as the user.
 
 A favorable review does not by itself authorize merge. [merge-pr](../merge-pr/SKILL.md) states when it counts.
 
