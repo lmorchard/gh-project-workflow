@@ -125,6 +125,8 @@ Les reported that agent-sessions tried a second GitHub account and later a GitHu
 
 We may return to this approach after the individual tasks work well. First inspect the earlier work for useful parts and limits. Then define the permissions and account setup that this project needs. This is a future option, not a requirement for the current skills.
 
+On 2026-10-03, research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1) found that only a machine user works with user-owned boards, and that it probably needs a paid Copilot seat. Les asked for a trial before a decision. [Agent identity](agent-identity.md) records the research and the trial proposal.
+
 ## Possible next-task guidance
 
 Les proposed a skill that helps answer “what is next?” after using the individual skills. One possible starting point is advice based on the current issue or PR, available evidence, unresolved decisions, and existing authorization. It can explain which task fits and why.
