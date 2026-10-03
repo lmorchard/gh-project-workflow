@@ -66,3 +66,8 @@ Lessons and resulting changes:
 - The implementer ran a `sudo apt` install through `playwright install --with-deps` without explicit authorization. implement-issue now requires authorization for system-level installs.
 - The parent first compared hosted CI with older `main` runs that had about 600 fewer tests, and reported a false slowdown. Compare with the PR's base commit.
 - The machine was shared with an unrelated heavy job, with load averages of 12 to 23. Local timings are noisy for that reason.
+
+Les reviewed and merged PR #898 himself on 2026-10-03 (merge commit `4165293`, from head `783ea99`). `Closes #894` closed the issue one second later, and board automation set Done. A merge-pr subagent then ran the already-merged path at `6087b45`. `ghflow board set-status --status Done` exited 0 with action `unchanged` and `readback_matches` true, so the planned first real board write did not occur. A cleanup subagent removed the worktree and the local branch after it confirmed that the branch tip equaled the merged head and the worktree was clean.
+
+- decafclaw's AGENTS.md provides `make prune-worktrees` for landed worktrees. The cleanup used git commands instead. A cleanup procedure should prefer the subject project's own target.
+- The merge-pr agent asked whether the already-merged path expects `pr-state` or `verify-commit`. The skill does not say.
