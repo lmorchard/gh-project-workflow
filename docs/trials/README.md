@@ -71,3 +71,19 @@ Les reviewed and merged PR #898 himself on 2026-10-03 (merge commit `4165293`, f
 
 - decafclaw's AGENTS.md provides `make prune-worktrees` for landed worktrees. The cleanup used git commands instead. A cleanup procedure should prefer the subject project's own target.
 - The merge-pr agent asked whether the already-merged path expects `pr-state` or `verify-commit`. The skill does not say.
+
+## 2026-10-03: express delivery of issue 895 through merge
+
+The parent coordinated express-issue for [issue 895](https://github.com/lmorchard/decafclaw/issues/895) through merge, which Les authorized. Each phase ran in its own subagent. Implementation and review follow-up used Claude Opus 5.5; local review, submission, and merge used Claude Sonnet 5.5, selected by the dispatch. Skills at `2603989`. [PR #900](https://github.com/lmorchard/decafclaw/pull/900) merged as `6604c0b` from head `ff360b1`, with green hosted CI and Copilot "🟢 Approval recommended" with no findings for that head. This was the first full delivery that used all three CLI operations.
+
+The fix let Starlette's `FileResponse` build the attachment header. Both new regressions failed on the base `4165293` with the reported `UnicodeEncodeError` and passed with the fix. The full suite went from 4257 to 4260 passed. No system install was needed, although Les had authorized Playwright dependencies.
+
+The implementer reported, and the independent local review found without a prompt, one difference from the issue text. ASCII names that need URL quoting, such as `my report.txt`, now get only `filename*=utf-8''my%20report.txt`. Les accepted that form. The implementer pinned it with a test in a second commit, and the reviewer assessed only that change.
+
+Lessons:
+
+- `board set-status` made its first real writes: Backlog to In progress, and In progress to In review, each with a matching readback. Board automation set Done at both merges before the agent ran, so the Done step reported `unchanged`.
+- `verify-commit` reads only published commits. The implementer-to-reviewer handoff happens before a push, so the parent verified those identifiers with git. After the push, submission, follow-up, and merge used the tool. Watch whether this gap causes an error before adding a local mode.
+- Leaving the implementer's risk note out of the reviewer's handoff let the review confirm it independently.
+- The submission agent stated that the automatic Copilot request "came from automation" because its actor was `lmorchard`. That actor does not show the cause; see [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1).
+- decafclaw's AGENTS.md asks for a live test in Mattermost and the web UI after merge. That remains for Les.
