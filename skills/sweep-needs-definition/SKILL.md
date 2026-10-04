@@ -24,7 +24,7 @@ Optionally filter by a specific parent issue or component area. If no issues car
 Process issues one at a time or in bounded slices of 2 to 5 issues. For each issue, dispatch a subagent to apply [define-issue](../define-issue/SKILL.md):
 
 1. Read the issue body and comments to understand the original intent and confirmed decisions.
-2. Inspect current code and test seams at the target revision (such as `main`).
+2. Inspect current code and test seams at the target revision (such as `main`). For client or UI features (Web UI or TUI), inspect whether backend REST or WebSocket endpoints already exist before scoping the client implementation; if backend APIs are missing, separate the task or explicitly note the prerequisite API contract.
 3. Structure the specification following ASD-STE100 guidelines into three distinct sections:
    - **Problem & Bounded Slice**: The exact failure mode or desired outcome, scoped to an implementable first slice. Decouple overlapping concerns into separate, independent issues rather than expanding scope to fix everything in that subsystem.
    - **Concrete Changes & File Targets**: Specific files, classes, methods, and configurations to modify. Prefer systemic autouse guards in shared test configuration (such as `conftest.py`) over per-test boilerplate when defining test hygiene rules.
