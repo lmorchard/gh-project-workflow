@@ -26,9 +26,9 @@ Process issues one at a time or in bounded slices of 2 to 5 issues. For each iss
 1. Read the issue body and comments to understand the original intent and confirmed decisions.
 2. Inspect current code and test seams at the target revision (such as `main`).
 3. Structure the specification following ASD-STE100 guidelines into three distinct sections:
-   - **Problem & Bounded Slice**: The exact failure mode or desired outcome, scoped to an implementable first slice.
-   - **Concrete Changes & File Targets**: Specific files, classes, methods, and configurations to modify.
-   - **Explicit Exclusions & Verification Criteria**: What remains out of scope, exact unit tests to add or run, and passing gate checks.
+   - **Problem & Bounded Slice**: The exact failure mode or desired outcome, scoped to an implementable first slice. Decouple overlapping concerns into separate, independent issues rather than expanding scope to fix everything in that subsystem.
+   - **Concrete Changes & File Targets**: Specific files, classes, methods, and configurations to modify. Prefer systemic autouse guards in shared test configuration (such as `conftest.py`) over per-test boilerplate when defining test hygiene rules.
+   - **Explicit Exclusions & Verification Criteria**: What remains out of scope, exact unit tests to add or run, and passing gate checks. For prompt or eval disambiguation tasks subject to model variance, specify repeat-pass bounds (such as 5 consecutive passes) to prove resolution.
 4. If the scope is too broad for a single implementation task, scope a bounded first slice and recommend child issues or follow-up tasks.
 5. If technical investigation reveals a blocking product or design uncertainty that needs user judgment, stop specification, label the issue `triage:needs-input`, post the specific question, and return it to the parent.
 
