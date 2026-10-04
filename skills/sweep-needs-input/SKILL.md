@@ -19,9 +19,11 @@ gh issue list --repo OWNER/REPO --label "triage:needs-input" --limit 50
 
 If no issues carry the label, report that the input backlog is clear and stop.
 
-## Present each issue
+## Present issues for review
 
-Process issues one at a time:
+Group related issues into decision clusters when multiple issues share a common architectural pattern (such as replacing bespoke skills with standard MCP servers, deferring complex speculative infrastructure, or setting platform scope). Clustering allows the user to resolve related questions in a single decision rather than stepping through serial turns. For isolated issues, present them one at a time.
+
+For each issue or cluster:
 
 1. Read the issue title, body, and recent comments, focusing on the triage findings comment.
 2. Present a short summary in conversation:
@@ -43,7 +45,8 @@ Once the user provides a direction:
    - **User decided not to proceed**: Close the issue with reason `not planned` (and add `wontfix` if used).
    - **Decision makes the task actionable as-is**: Add `triage:ready`.
    - **Decision settles direction, but technical details or criteria remain open**: Add `triage:needs-definition`.
-3. Report the updated status to the user and proceed to the next issue.
+3. If the issue belongs to a parent theme, update the parent issue's rollup comment to reflect the new state.
+4. Report the updated status to the user and proceed to the next issue or cluster.
 
 ## Conclude or pause
 

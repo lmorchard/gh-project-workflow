@@ -16,7 +16,7 @@ Identify the issues to evaluate:
 - An explicit list of issue numbers, or
 - A query of open issues without `triage:*` labels, optionally filtered by area label (such as `core` or `tui`).
 
-Keep batch sizes bounded to 5 to 10 issues per run to ensure thorough inspection of target code and git history.
+Keep batch sizes bounded to 5 to 10 issues per run to ensure thorough inspection of target code and git history. When a parent issue contains more than 10 sub-issues, split the work into parallel slices of 5 to 8 issues to maintain high inspection depth.
 
 ## Inspect code and history
 
@@ -33,11 +33,13 @@ Treat issue claims and older comments as unverified until you check current code
 
 Assign each issue to one classification based on evidence:
 
-- **Already completed**: Current code, merged PRs, or existing tests already satisfy the requested result. Note the exact commit SHA, PR number, or test path.
-- **Obsolete or not planned**: Architectural direction changed, the referenced component was removed or superseded, or the issue is no longer relevant. Note the reason and current state.
-- **Needs human input**: The core purpose or scope requires product or design decisions from the user. Identify the exact 1 to 2 questions with specific choices or tradeoffs.
+- **Already completed**: Current code, merged PRs, or existing tests already satisfy the requested result. Cite the exact commit SHA, PR number, or test path.
+- **Obsolete or not planned**: Architectural direction changed, the referenced component was removed or superseded, or the issue is an exact duplicate of another issue. Cite the specific change or primary issue.
+- **Needs human input**: The core purpose or scope requires product, architectural, or tradeoff decisions from the user. Identify the exact 1 to 2 questions with specific choices or tradeoffs.
 - **Needs technical definition**: The goal is valid and desirable, but the issue lacks concrete technical scope, file boundaries, or acceptance criteria.
 - **Ready as-is**: Problem, scope, and verification criteria are clear, accurate, and actionable against current code.
+
+Autonomous closure requires verifiable evidence: a commit SHA, merged PR, passing test path, or concrete duplicate reference. Do not close active bugs or desired features autonomously merely because they are difficult or open questions exist; label them `triage:needs-input` instead.
 
 ## Update GitHub records
 
@@ -56,8 +58,9 @@ For each evaluated issue:
    - `gh issue close ISSUE_URL --reason completed`
 4. If the issue is obsolete or not planned, close it:
    - `gh issue close ISSUE_URL --reason "not planned"`
-   - Add the `wontfix` label if the repository uses it.
+   - Add the `wontfix` or `duplicate` label if the repository uses it.
 5. If updating labels fails because a label does not exist in the repository, create the label with a brief description and retry.
+6. When evaluating a parent issue's sub-issues, post a rollup summary comment to the parent issue listing the status of its children.
 
 ## Return the batch summary
 
