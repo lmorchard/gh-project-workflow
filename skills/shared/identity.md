@@ -54,6 +54,8 @@ python3 cli/ghflow.py exec -- git push origin BRANCH
 - `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME`, and `GIT_COMMITTER_EMAIL`.
 - `GIT_CONFIG_PARAMETERS` so Git HTTPS operations use `gh auth git-credential` without interference from other system credential helpers.
 
+The `ghflow` commands `pr-state`, `verify-commit`, and `board set-status` apply the configured identity to their own `gh` calls. They do not need `ghflow exec`.
+
 Alternatively, export the environment into the current shell:
 
 ```sh

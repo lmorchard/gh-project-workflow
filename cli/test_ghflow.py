@@ -1,11 +1,12 @@
 import io
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from ghflow import GhError, board_set_status, identity_env, main, pr_state, resolve_identity, verify_commit
+from ghflow import GhError, board_set_status, identity_env, main, pr_state, resolve_identity, run_gh, verify_commit
 
 HEAD = "a" * 40
 OLD = "b" * 40
@@ -414,6 +415,21 @@ class IdentityTests(unittest.TestCase):
             out = stdout.getvalue()
             self.assertIn('export GIT_AUTHOR_NAME="Bot User"', out)
             self.assertIn('export GIT_AUTHOR_EMAIL="bot@example.com"', out)
+
+    def test_run_gh_uses_configured_identity(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+            f.write("bot-token\n")
+            token_path = f.name
+        try:
+            ident = {"login": "BotUser", "name": "BotUser", "email": None, "token_file": token_path}
+            completed = subprocess.CompletedProcess([], 0, stdout='{"ok": true}', stderr="")
+            with patch("ghflow.resolve_identity", return_value=ident), \
+                    patch.dict(os.environ, {}, clear=True), \
+                    patch("ghflow.subprocess.run", return_value=completed) as run:
+                self.assertEqual(run_gh(["api", "user"]), {"ok": True})
+            self.assertEqual(run.call_args.kwargs["env"]["GH_TOKEN"], "bot-token")
+        finally:
+            os.unlink(token_path)
 
 
 if __name__ == "__main__":

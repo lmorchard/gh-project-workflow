@@ -44,8 +44,9 @@ class GhError(Exception):
 
 
 def run_gh(args):
-    """Run gh and return parsed JSON output."""
-    result = subprocess.run(["gh", *args], capture_output=True, text=True)
+    """Run gh under the configured agent identity and return parsed JSON output."""
+    env = identity_env(resolve_identity())
+    result = subprocess.run(["gh", *args], capture_output=True, text=True, env=env)
     if result.returncode != 0:
         raise GhError((result.stderr or result.stdout).strip() or f"gh exited {result.returncode}")
     return json.loads(result.stdout) if result.stdout.strip() else None
