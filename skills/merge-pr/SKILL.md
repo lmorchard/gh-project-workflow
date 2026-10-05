@@ -23,7 +23,7 @@ If CI is pending, wait with a tool that lets you report progress. If CI fails, r
 
 If the repository has no CI, report that the green-CI condition cannot be met. Do not waive it. Changing this policy is a user decision.
 
-Green CI counts only when the head contains the current tip of the base branch: `base_behind_by` in `pr-state` must be 0. Each PR can pass alone and still fail after another PR merges. If the head is behind, update the branch with `gh pr update-branch`, wait for CI on the new head, and assess again. If the update has conflicts, return the PR for repair. Do not merge a head that is behind its base, even with green CI.
+Green CI counts only when the head contains the current tip of the base branch: `base_behind_by` in `pr-state` must be 0. Each PR can pass alone and still fail after another PR merges. If the head is behind, update the branch with `gh api -X PUT repos/OWNER/NAME/pulls/NUMBER/update-branch -f expected_head_sha=HEAD`, wait for CI on the new head, and assess again. `gh pr update-branch` needs the `repo` token scope, which the agent identity does not have. If the update has conflicts, return the PR for repair. Do not merge a head that is behind its base, even with green CI.
 
 A clean update from the base adds no change of its own, so it does not need another independent review. It does need green CI on the new head.
 
