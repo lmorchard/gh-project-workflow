@@ -35,12 +35,16 @@ def rules(*contexts):
     return [{"type": "required_status_checks", "parameters": {"required_status_checks": [{"context": c} for c in contexts]}}]
 
 
-def fake(pr_data, rules_data=None, reviews=(), comments=(), timeline=(), fail=()):
+def fake(pr_data, rules_data=None, reviews=(), comments=(), timeline=(), fail=(), behind_by=0):
     def gh(args):
         if args[0] == "pr":
             if "pr" in fail:
                 raise GhError("not found")
             return pr_data
+        if "/compare/" in args[1]:
+            if "compare" in fail:
+                raise GhError("HTTP 404")
+            return {"behind_by": behind_by, "ahead_by": 1}
         if "rules" in fail:
             raise GhError("HTTP 403")
         return rules_data if rules_data is not None else rules("test")
@@ -102,6 +106,21 @@ class CiTests(unittest.TestCase):
     def test_no_checks_is_none_not_green(self):
         result, _ = pr_state("o/r", 7, **fake(pr(statusCheckRollup=[]), rules_data=[]))
         self.assertEqual(result["ci"], "none")
+
+    def test_head_current_with_base(self):
+        result, _ = pr_state("o/r", 7, **fake(pr()))
+        self.assertEqual(result["base_behind_by"], 0)
+
+    def test_head_behind_base_is_reported(self):
+        result, status = pr_state("o/r", 7, **fake(pr(), behind_by=2))
+        self.assertEqual(result["base_behind_by"], 2)
+        self.assertEqual(result["ci"], "green")
+        self.assertEqual(status, 0)
+
+    def test_unreadable_compare_leaves_behind_unknown(self):
+        result, status = pr_state("o/r", 7, **fake(pr(), fail={"compare"}))
+        self.assertIsNone(result["base_behind_by"])
+        self.assertEqual(status, 2)
 
     def test_unreadable_rules_leave_required_unknown(self):
         result, status = pr_state("o/r", 7, **fake(pr(), fail={"rules"}))

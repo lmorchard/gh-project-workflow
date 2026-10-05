@@ -142,6 +142,11 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
 
     required = part("required_checks", read_required)
 
+    def read_behind():
+        return gh(["api", f"repos/{repo}/compare/{base}...{head}"])["behind_by"]
+
+    behind = part("base_behind_by", read_behind)
+
     checks = []
     for item in pr.get("statusCheckRollup") or []:
         name, state = check_state(item)
@@ -218,6 +223,7 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
         "head": head,
         "head_branch": pr["headRefName"],
         "base": base,
+        "base_behind_by": behind,
         "ci": summarize_ci(checks, required),
         "checks": checks,
         "required_checks": required,

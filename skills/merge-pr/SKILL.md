@@ -23,6 +23,10 @@ If CI is pending, wait with a tool that lets you report progress. If CI fails, r
 
 If the repository has no CI, report that the green-CI condition cannot be met. Do not waive it. Changing this policy is a user decision.
 
+Green CI counts only when the head contains the current tip of the base branch: `base_behind_by` in `pr-state` must be 0. Each PR can pass alone and still fail after another PR merges. If the head is behind, update the branch with `gh pr update-branch`, wait for CI on the new head, and assess again. If the update has conflicts, return the PR for repair. Do not merge a head that is behind its base, even with green CI.
+
+A clean update from the base adds no change of its own, so it does not need another independent review. It does need green CI on the new head.
+
 ## Require review evidence or permission
 
 Prefer a completed Copilot review of the current head. Read the review body, inline discussions, and relevant top-level comments, including all result pages.
@@ -40,7 +44,7 @@ Do not dismiss unresolved defects or human objections because formal approval is
 
 Confirm that the PR is open, not a draft, and mergeable. Use the project's merge method when it specifies one. Otherwise choose a permitted method and state it.
 
-Immediately before merging, read the head and check state again. Merge with `gh pr merge --match-head-commit SHA` when supported. If the head changed, repeat the assessment instead of merging unseen changes.
+Immediately before merging, read the head, check state, and `base_behind_by` again. Merge with `gh pr merge --match-head-commit SHA` when supported. If the head changed, repeat the assessment instead of merging unseen changes.
 
 Follow repository rules and required merge queues. Do not use administrator bypass or weaken protection rules. If GitHub requires an approval that this workflow does not, report the repository restriction.
 

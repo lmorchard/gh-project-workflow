@@ -39,7 +39,8 @@ Process one issue at a time:
      - Do not advance to the next issue in the queue.
      - Preserve the worktree and branch.
      - Return the blocker, error logs, and proposed remediation to the user.
-5. If the issue successfully completes to the authorized endpoint, proceed to the next item in `Ready`.
+5. For a merge endpoint, wait for CI on the base branch's merge commit before you start the next issue. If it fails, treat it as a disruption and halt.
+6. If the issue successfully completes to the authorized endpoint, proceed to the next item in `Ready`.
 
 ## Conclude and hand off
 
