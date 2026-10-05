@@ -6,8 +6,18 @@ The tasks include issues, project boards, code changes, pull requests (PRs), and
 
 Start with one useful operation. Then use operations to do a task, such as a PR review. Combine tasks only after real use shows a benefit.
 
-The repository contains these draft skills, in workflow order:
+The repository contains these skills, organized by lifecycle stage:
 
+### Backlog Triage & Project Board Management
+- [bundle-issues](skills/bundle-issues/SKILL.md) groups related issues into thematic initiatives under native GitHub parent issues labeled `theme`.
+- [triage-issues](skills/triage-issues/SKILL.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
+- [sweep-needs-input](skills/sweep-needs-input/SKILL.md) interactively resolves blocking product and architectural decisions with the user.
+- [sweep-needs-definition](skills/sweep-needs-definition/SKILL.md) develops accepted issues into bounded, actionable specifications with concrete file targets and test criteria.
+- [sweep-audit-closed](skills/sweep-audit-closed/SKILL.md) reviews and confirms autonomously closed issues with cited evidence.
+- [sweep-prioritize](skills/sweep-prioritize/SKILL.md) assigns Priority (`P0`–`P3`) and Size (`XS`–`XL`) fields on the project board and re-sweeps deferred items.
+- [curate-ready-queue](skills/curate-ready-queue/SKILL.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
+
+### Single Issue Specification & Implementation
 - [reconsider-issue](skills/reconsider-issue/SKILL.md) reassesses an existing issue against current project evidence.
 - [decompose-parent-issue](skills/decompose-parent-issue/SKILL.md) maps a broad issue into bounded children and a parent completion condition.
 - [define-issue](skills/define-issue/SKILL.md) prepares and reviews an issue draft.
@@ -19,10 +29,10 @@ The repository contains these draft skills, in workflow order:
 - [address-pr-review](skills/address-pr-review/SKILL.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
 - [merge-pr](skills/merge-pr/SKILL.md) confirms CI and review findings, merges authorized changes, and confirms the result.
 
-These coordinators combine the skills above:
-
+### Workflow Coordinators
 - [express-issue](skills/express-issue/SKILL.md) coordinates one selected issue through delivery to an agreed endpoint.
 - [deliver-parent-issue](skills/deliver-parent-issue/SKILL.md) coordinates a bounded parent through child delivery and completion checks.
+- [burndown-ready-queue](skills/burndown-ready-queue/SKILL.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
 
 Each task skill can be used by itself on an ordinary issue or PR. Skills link to shared references in [skills/shared](skills/shared/) for authorization, evidence, review, and board-status rules, so use them from a full checkout of this repository. The first CLI operation is `pr-state` in [cli/ghflow.py](cli/ghflow.py), a standard-library Python script that uses `gh`. The [CLI decision](docs/direction.md#cli-decision) lists the planned operations. Command names are provisional.
 

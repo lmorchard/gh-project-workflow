@@ -49,7 +49,7 @@ Follow the project's test-first rules. For a bug fix, demonstrate the failure be
 
 Make the smallest change that satisfies the issue. Add tests for the intended behavior and relevant error cases. Leave unrelated cleanup out.
 
-Run the specific checks for each changed behavior and read their output. Then run the broader checks the project requires, using the project's commands.
+Run targeted tests first during implementation iterations to maintain fast feedback. Run the broader test suite and project checks once the implementation is in place, before self-review and commit. Do not repeatedly run the entire test suite on intermediate edits when targeted tests are sufficient.
 
 Change a test when the intended behavior requires it, and explain why. Do not remove useful assertions to make the suite pass. If an issue requirement itself is wrong, return that decision to the parent or user.
 

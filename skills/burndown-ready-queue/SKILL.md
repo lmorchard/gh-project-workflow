@@ -28,7 +28,7 @@ gh project item-list NUMBER --owner OWNER --format json
 
 Process one issue at a time:
 
-1. Select the top unblocked issue in `Ready`.
+1. Select the top unblocked issue in `Ready`. When delivering to a review follow-up endpoint (without merge), ensure the selected task is independent of other in-flight PRs so it can branch cleanly from `origin/main`. If a task depends on code in an unmerged PR, either authorize merging the prerequisite PR first or defer the dependent task.
 2. Dispatch a subagent to execute [express-issue](../express-issue/SKILL.md) on that issue, passing the confirmed repository, issue number, authorization, and endpoint.
 3. Once the subagent completes, verify the result:
    - Did the task reach the expected endpoint?
