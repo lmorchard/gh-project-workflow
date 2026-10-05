@@ -49,6 +49,8 @@ Respect that skill's one-cycle review limit. A review requested after correction
 
 For a review endpoint, report current-head CI, review coverage, resolved findings, and outstanding work. Distinguish a completed review from pending or unavailable evidence. Do not merge.
 
+Wait for the address-pr-review subagent to report before you hand back. Its result is part of this endpoint. If you must hand back first, say that follow-up is still running. Name each pending required check, the head SHA, and the follow-up the parent must still read. Do not report pending CI as an outcome.
+
 For an authorized merge endpoint, dispatch [merge-pr](../merge-pr/SKILL.md) after follow-up, without asking for the same permission again. Authorization for the full flow does not waive its checks.
 
 Read back the final state through the responsible subagent. Report the issue and PR URLs, the current or merged commit, test and review evidence, and remaining limits, including required post-merge checks not yet done.
