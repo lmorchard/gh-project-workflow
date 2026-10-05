@@ -260,12 +260,15 @@ BOARD_OPTIONS = ["Backlog", "Ready", "In progress", "In review", "Done"]
 class FakeBoard:
     """A board with one Status field. `status` is None when the issue is not on the board."""
 
-    def __init__(self, status=None, on_board=True, fail=(), sticky=True):
+    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0):
         self.status = status
         self.on_board = on_board
         self.fail = set(fail)
         self.sticky = sticky
+        self.lag = lag
+        self.pending = None
         self.writes = []
+        self.sleeps = []
 
     def __call__(self, args):
         if args[:2] == ["project", "view"]:
@@ -283,10 +286,15 @@ class FakeBoard:
             option = args[args.index("--single-select-option-id") + 1]
             self.writes.append(option)
             if self.sticky:
-                self.status = BOARD_OPTIONS[int(option.split("-")[1])]
+                self.pending = BOARD_OPTIONS[int(option.split("-")[1])]
             return {}
         if self.writes and "readback" in self.fail:
             raise GhError("HTTP 502")
+        if self.pending is not None:
+            if self.lag:
+                self.lag -= 1
+            else:
+                self.status, self.pending = self.pending, None
         nodes = [{"id": "OTHER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Done"}}]
         if self.on_board:
             value = {"name": self.status} if self.status else {}
@@ -295,7 +303,7 @@ class FakeBoard:
 
 
 def set_status(board, status, **kwargs):
-    return board_set_status("o/r", 5, "o", 6, status, gh=board, **kwargs)
+    return board_set_status("o/r", 5, "o", 6, status, gh=board, sleep=board.sleeps.append, **kwargs)
 
 
 class BoardSetStatusTests(unittest.TestCase):
@@ -353,10 +361,25 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertEqual(status, 1)
 
     def test_write_that_does_not_stick_exits_2(self):
-        result, status = set_status(FakeBoard("Backlog", sticky=False), "In progress")
+        board = FakeBoard("Backlog", sticky=False)
+        result, status = set_status(board, "In progress")
         self.assertEqual(result["after"], "Backlog")
         self.assertFalse(result["readback_matches"])
+        self.assertEqual(result["readback_attempts"], 4)
+        self.assertEqual(len(board.sleeps), 3)
         self.assertEqual(status, 2)
+
+    def test_lagging_readback_is_retried(self):
+        board = FakeBoard("Backlog", lag=2)
+        result, status = set_status(board, "Ready")
+        self.assertEqual((result["after"], result["readback_attempts"], status), ("Ready", 3, 0))
+        self.assertTrue(result["readback_matches"])
+        self.assertEqual(board.writes, ["opt-1"])
+
+    def test_immediate_readback_does_not_sleep(self):
+        board = FakeBoard("Backlog")
+        result, _ = set_status(board, "Ready")
+        self.assertEqual((result["readback_attempts"], board.sleeps), (1, []))
 
     def test_failed_readback_exits_2(self):
         result, status = set_status(FakeBoard("Backlog", fail={"readback"}), "In progress")

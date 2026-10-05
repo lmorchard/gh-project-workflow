@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 CHECK_RUN_STATES = {
@@ -306,7 +307,11 @@ query($owner: String!, $name: String!, $number: Int!) {
 """
 
 
-def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh):
+READBACK_ATTEMPTS = 4
+READBACK_DELAY_SECONDS = 2
+
+
+def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh, sleep=time.sleep):
     """Move one issue to a status on one board, refusing backward moves, and read the result back."""
     result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status, "errors": []}
 
@@ -369,12 +374,20 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         return fail("write", error)
     result["action"] = "set"
 
-    try:
-        _, item = read_item()
-        result["after"] = item[1] if item else None
-    except (GhError, TypeError, KeyError) as error:
-        result["errors"].append({"part": "readback", "error": str(error)})
-        result["after"] = None
+    # Project reads can lag a successful write, so read again before reporting a mismatch.
+    for attempt in range(1, READBACK_ATTEMPTS + 1):
+        if attempt > 1:
+            sleep(READBACK_DELAY_SECONDS)
+        result["readback_attempts"] = attempt
+        try:
+            _, item = read_item()
+            result["after"] = item[1] if item else None
+        except (GhError, TypeError, KeyError) as error:
+            result["errors"].append({"part": "readback", "error": str(error)})
+            result["after"] = None
+            break
+        if result["after"] == target:
+            break
     result["readback_matches"] = result["after"] == target
     return result, 0 if result["readback_matches"] else 2
 
