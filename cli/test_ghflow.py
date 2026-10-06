@@ -2,6 +2,7 @@ import io
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -823,6 +824,264 @@ class StructuredResponseTests(unittest.TestCase):
          result, status = board_set_status("o/r", 5, "o", 6, "Ready", gh=board, sleep=lambda *a: None)
          self.assertEqual(status, 1)
          self.assertEqual(result["errors"][0]["part"], "board")
+
+
+class FakeGhHarness:
+    """Run ghflow.py as a subprocess with a fake `gh` on PATH.
+
+    The fake `gh` (fake_gh.py) records the arguments it receives and returns
+    controlled responses from fixture files, with no network access.
+    """
+
+    GHFLOW = os.path.join(os.path.dirname(__file__), "ghflow.py")
+    FAKE = os.path.join(os.path.dirname(__file__), "fake_gh.py")
+
+    def __init__(self, replies=None, board=None):
+        self.dir = tempfile.mkdtemp(prefix="fakegh-")
+        self.replies = replies or {}
+        self.board = board
+        self.log_path = os.path.join(self.dir, "calls.log")
+        open(self.log_path, "w").close()
+
+    def _write(self, name, obj):
+        path = os.path.join(self.dir, name)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f)
+        return path
+
+    def run(self, argv):
+        env = dict(os.environ)
+        env["GHHOW_LOG"] = self.log_path
+        if self.replies:
+            env["GHHOW_REPLIES"] = self._write("replies.json", self.replies)
+        if self.board is not None:
+            env["GHHOW_BOARD"] = self._write("board.json", self.board)
+        bin_dir = os.path.join(self.dir, "bin")
+        os.makedirs(bin_dir, exist_ok=True)
+        gh = os.path.join(bin_dir, "gh")
+        with open(gh, "w", encoding="utf-8") as f:
+            f.write('#!/bin/sh\nexec "%s" "%s" "$@"\n' % (sys.executable, self.FAKE))
+        os.chmod(gh, 0o755)
+        env["PATH"] = bin_dir + os.pathsep + env.get("PATH", "")
+        result = subprocess.run(
+             [sys.executable, self.GHFLOW, *argv],
+             env=env, capture_output=True, text=True,
+         )
+        with open(self.log_path, encoding="utf-8") as f:
+            raw = f.read()
+        calls = [json.loads(line)["argv"] for line in raw.splitlines() if line.strip()]
+        out = json.loads(result.stdout) if result.stdout.strip() else None
+        return result, out, calls
+
+    @staticmethod
+    def calls_by_cmd(calls, *cmds):
+        return [c for c in calls if c and c[0] in cmds]
+
+    @staticmethod
+    def calls_with(calls, *needles):
+        return [c for c in calls if all(any(needle in t for t in c) for needle in needles)]
+
+
+def pr_view_out(**overrides):
+    data = {
+        "number": 7,
+        "url": "https://github.com/o/r/pull/7",
+        "state": "OPEN",
+        "isDraft": False,
+        "mergeable": "MERGEABLE",
+        "headRefOid": HEAD,
+        "headRefName": "task",
+        "baseRefName": "main",
+        "reviewRequests": [],
+        "statusCheckRollup": [
+            {"__typename": "CheckRun", "name": "test",
+             "status": "COMPLETED", "conclusion": "SUCCESS"},
+        ],
+    }
+    data.update(overrides)
+    return data
+
+
+class PrStateSubprocessTests(unittest.TestCase):
+    def _harness(self, head=HEAD, reviews=None, comments=None,
+                 timeline=None, rules_data=None, behind_by=0, missing=()):
+        replies = {
+            "pr.view:o/r:7": {"out": pr_view_out(headRefOid=head)},
+            "api:repos/o/r/rules/branches/main": {"out": rules_data if rules_data is not None else rules("test")},
+            "api:repos/o/r/compare/main...%s" % head: {"out": {"behind_by": behind_by}},
+            "api.paginate:repos/o/r/pulls/7/reviews": {"out": [list(reviews or [])]},
+            "api.paginate:repos/o/r/pulls/7/comments": {"out": [list(comments or [])]},
+            "api.paginate:repos/o/r/issues/7/timeline": {"out": [list(timeline or [])]},
+        }
+        for part in missing:
+            if part == "rules":
+                replies["api:repos/o/r/rules/branches/main"] = {"code": 1, "err": "HTTP 403"}
+            elif part == "compare":
+                replies["api:repos/o/r/compare/main...%s" % head] = {"code": 1, "err": "HTTP 404"}
+            elif part == "reviews":
+                replies["api.paginate:repos/o/r/pulls/7/reviews"] = {"code": 5, "err": "HTTP 502"}
+        return FakeGhHarness(replies)
+
+    def test_pr_state_reports_head_ci_and_exit_zero(self):
+        h = self._harness()
+        result, out, calls = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(out["head"], HEAD)
+        self.assertEqual(out["base"], "main")
+        self.assertEqual(out["ci"], "green")
+        self.assertIsNotNone(out["reviews"])
+
+    def test_pr_state_sends_repo_identifiers_to_gh(self):
+        h = self._harness()
+        _, _, calls = h.run(["pr-state", "7", "--repo", "o/r"])
+        pr_call = FakeGhHarness.calls_by_cmd(calls, "pr")[0]
+        self.assertEqual(pr_call[:3], ["pr", "view", "7"])
+        self.assertIn("--repo", pr_call)
+        self.assertIn("o/r", pr_call)
+        api_calls = FakeGhHarness.calls_by_cmd(calls, "api")
+        self.assertTrue(any("repos/o/r/rules/branches/main" in t for t in api_calls[0]))
+        self.assertTrue(any("repos/o/r/compare/main..." in t for t in api_calls[1]))
+
+    def test_pr_state_exercises_rest_pagination(self):
+        h = self._harness(reviews=[review(1, "bot", HEAD, "t1")],
+                          timeline=[requested("Copilot", "t0")])
+        _, out, calls = h.run(["pr-state", "7", "--repo", "o/r"])
+        paginated = FakeGhHarness.calls_with(calls, "--paginate", "--slurp")
+        endpoints = [c[1] for c in paginated]
+        self.assertIn("repos/o/r/pulls/7/reviews", endpoints)
+        self.assertIn("repos/o/r/pulls/7/comments", endpoints)
+        self.assertIn("repos/o/r/issues/7/timeline", endpoints)
+        self.assertIsNotNone(out["reviews"])
+        self.assertEqual(out["ci"], "green")
+
+    def test_pr_state_unreadable_pr_exits_1(self):
+        h = FakeGhHarness({"pr.view:o/r:7": {"code": 4, "err": "No matches found"}})
+        result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(out["errors"][0]["part"], "pr")
+        self.assertIsNone(out.get("reviews"))
+
+    def test_pr_state_failed_part_preserves_others_and_exits_2(self):
+        h = self._harness(missing={"reviews"})
+        result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 2)
+        self.assertIsNone(out["reviews"])
+        self.assertEqual(out["ci"], "green")
+        self.assertEqual(out["errors"][0]["part"], "reviews")
+
+    def test_pr_state_malformed_part_is_structured(self):
+        h = self._harness()
+        h.replies["api.paginate:repos/o/r/pulls/7/reviews"] = {"raw": "not json", "code": 0}
+        result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 2)
+        self.assertIsNone(out["reviews"])
+        self.assertEqual(out["errors"][0]["part"], "reviews")
+        self.assertTrue(out["errors"][0]["error"])
+        self.assertEqual(out["ci"], "green")
+
+
+class VerifyCommitSubprocessTests(unittest.TestCase):
+    def _harness(self, message="The fix\n\nwhy", compare="behind",
+                 head=HEAD, fail_commit=False, rev="aaaaaaa"):
+        replies = {
+            "api:repos/o/r/commits/%s" % rev: {
+                  "out": {"sha": HEAD, "commit": {"message": message,
+                           "author": {"date": "2026-10-02T12:00:00Z"}},
+                           "parents": [{"sha": OLD}]},
+              },
+              "pr.view:o/r:7": {"out": {"headRefOid": head}},
+          }
+        if compare is not None:
+            replies["api.jq:repos/o/r/compare/main...%s:{status}" % head] = {"out": {"status": compare}}
+        if fail_commit:
+            replies["api:repos/o/r/commits/%s" % rev] = {
+                  "code": 422,
+                  "err": "No commit found for SHA: %s (HTTP 422)" % rev,
+              }
+        return FakeGhHarness(replies)
+
+    def test_verify_commit_holds_expectations_exit_zero(self):
+        h = self._harness(message="The fix\n\nwhy", compare="behind")
+        result, out, _ = h.run([
+             "verify-commit", "aaaaaaa", "--repo", "o/r",
+             "--subject", "The fix", "--on", "main", "--pr-head", "7",
+         ])
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(out["expectations"],
+             {"subject_matches": True, "on_branch": True, "is_pr_head": True})
+
+    def test_verify_commit_sends_repo_and_rev_to_gh(self):
+        h = self._harness(message="The fix\n\nwhy", compare="behind")
+        _, _, calls = h.run([
+             "verify-commit", "aaaaaaa", "--repo", "o/r",
+             "--subject", "The fix", "--on", "main", "--pr-head", "7",
+         ])
+        commit_call = FakeGhHarness.calls_with(calls, "repos/o/r/commits/aaaaaaa")
+        self.assertTrue(commit_call)
+        self.assertEqual(commit_call[0][:2], ["api", "repos/o/r/commits/aaaaaaa"])
+
+    def test_verify_commit_false_subject_exit_3(self):
+        h = self._harness(message="The fix\n\nwhy", compare="behind")
+        result, out, _ = h.run([
+             "verify-commit", "aaaaaaa", "--repo", "o/r",
+             "--subject", "Other subject", "--on", "main", "--pr-head", "7",
+         ])
+        self.assertEqual(result.returncode, 3)
+        self.assertFalse(out["expectations"]["subject_matches"])
+
+    def test_verify_commit_missing_commit_exit_1(self):
+        h = self._harness(fail_commit=True, rev="abc")
+        result, out, _ = h.run(["verify-commit", "abc", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 1)
+        self.assertNotIn("sha", out)
+        self.assertIn("full SHA", out["note"])
+
+
+class BoardSetStatusSubprocessTests(unittest.TestCase):
+    def _harness(self, status, target, allow_backward=False):
+        board = {
+            "project_id": "P1",
+            "options": BOARD_OPTIONS,
+            "status": status,
+            "on_board": True,
+        }
+        argv = [
+            "board", "set-status", "5", "--repo", "o/r",
+            "--owner", "o", "--project", "6", "--status", target,
+        ]
+        if allow_backward:
+            argv.append("--allow-backward")
+        return FakeGhHarness(board=board), argv
+
+    def test_board_forward_move_sets_and_reads_back_exit_zero(self):
+        h, argv = self._harness("In progress", "In review")
+        result, out, _ = h.run(argv)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(out["action"], "set")
+        self.assertEqual(out["after"], "In review")
+        self.assertTrue(out["readback_matches"])
+
+    def test_board_sends_board_identifiers_to_gh(self):
+        h, argv = self._harness("In progress", "In review")
+        _, _, calls = h.run(argv)
+        self.assertTrue(FakeGhHarness.calls_with(calls, "project"))
+        edit_call = FakeGhHarness.calls_with(calls, "item-edit")
+        self.assertTrue(edit_call)
+        self.assertIn("--project-id", edit_call[0])
+        self.assertIn("P1", edit_call[0])
+
+    def test_board_backward_move_refused_exit_3(self):
+        h, argv = self._harness("Done", "In review")
+        result, out, _ = h.run(argv)
+        self.assertEqual(result.returncode, 3)
+        self.assertEqual(out["action"], "refused")
+        self.assertEqual(out["after"], "Done")
+
+    def test_board_unknown_option_exit_1(self):
+        h, argv = self._harness("Done", "Doing")
+        result, out, _ = h.run(argv)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(out.get("options"), BOARD_OPTIONS)
 
 
 if __name__ == "__main__":
