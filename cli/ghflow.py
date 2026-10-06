@@ -124,9 +124,15 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
             return None
 
     fields = "number,url,state,isDraft,mergeable,headRefOid,headRefName,baseRefName,reviewRequests,statusCheckRollup"
+    required_pr_fields = ("number", "url", "state", "isDraft", "mergeable", "headRefOid", "headRefName", "baseRefName")
     try:
         pr = gh(["pr", "view", str(number), "--repo", repo, "--json", fields])
-    except GhError as error:
+        if not isinstance(pr, dict):
+            raise TypeError("The PR response is not an object.")
+        missing = [field for field in required_pr_fields if field not in pr]
+        if missing:
+            raise ValueError(f"The PR response is missing {', '.join(missing)}.")
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return {"repo": repo, "number": number, "errors": [{"part": "pr", "error": str(error)}]}, 1
 
     head = pr["headRefOid"]
@@ -239,28 +245,44 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
 
 def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
     """Resolve a published commit and compare it with what the caller expects it to be."""
+    errors = []
+    expectations = {}
     try:
         commit = gh(["api", f"repos/{repo}/commits/{rev}"])
-    except GhError as error:
+        if not isinstance(commit, dict):
+            raise ValueError("The commit response is not an object.")
+        if "sha" not in commit:
+            raise ValueError("The commit response is missing its sha.")
+        body = commit["commit"]
+        if not isinstance(body, dict):
+            raise ValueError("The commit body is not an object.")
+        if "message" not in body:
+            raise ValueError("The commit response is missing its message.")
+        if "author" not in body:
+            raise ValueError("The commit response is missing its author.")
+        author = body["author"]
+        if not isinstance(author, dict):
+            raise ValueError("The commit author is not an object.")
+        if "date" not in author:
+            raise ValueError("The commit author is missing its date.")
+        sha = commit["sha"]
+        message = body["message"]
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         result = {"repo": repo, "rev": rev, "errors": [{"part": "commit", "error": str(error)}]}
         if "No commit found" in str(error):
             result["note"] = "GitHub gives this error for an unpushed or missing commit and for an ambiguous or too-short prefix. Check that the commit is pushed, then retry with the full SHA."
         return result, 1
 
-    sha = commit["sha"]
-    message = commit["commit"]["message"]
-    errors = []
-    expectations = {}
     result = {
-        "repo": repo,
-        "rev": rev,
-        "sha": sha,
-        "subject": message.splitlines()[0] if message else "",
-        "author_date": commit["commit"]["author"]["date"],
-        "parents": [parent["sha"] for parent in commit.get("parents") or []],
-        "expectations": expectations,
-        "errors": errors,
-    }
+         "repo": repo,
+         "rev": rev,
+         "sha": sha,
+         "subject": message.splitlines()[0] if message else "",
+         "author_date": author["date"],
+         "parents": [parent["sha"] for parent in commit.get("parents") or []],
+         "expectations": expectations,
+         "errors": errors,
+     }
 
     if subject is not None:
         expectations["subject_matches"] = result["subject"] == subject.strip()
@@ -333,12 +355,12 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
         fields = gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"])["fields"]
         field = next(f for f in fields if f["name"] == "Status")
+        options = [option["name"] for option in field["options"]]
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
-    except (GhError, TypeError, KeyError) as error:
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("board", error)
 
-    options = [option["name"] for option in field["options"]]
     result["options"] = options
     matches = [name for name in options if name == status] or [name for name in options if name.lower() == status.lower()]
     if len(matches) != 1:
@@ -348,7 +370,7 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
 
     try:
         url, item = read_item()
-    except (GhError, TypeError, KeyError) as error:
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("issue", error)
     result["before"] = item[1] if item else None
     result["added"] = False
@@ -369,8 +391,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             item_id = item[0]
         option_id = next(option["id"] for option in field["options"] if option["name"] == target)
         gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
-            "--single-select-option-id", option_id, "--format", "json"])
-    except (GhError, TypeError, KeyError) as error:
+             "--single-select-option-id", option_id, "--format", "json"])
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("write", error)
     result["action"] = "set"
 
@@ -382,7 +404,7 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         try:
             _, item = read_item()
             result["after"] = item[1] if item else None
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             result["errors"].append({"part": "readback", "error": str(error)})
             result["after"] = None
             break

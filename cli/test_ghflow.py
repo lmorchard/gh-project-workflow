@@ -474,5 +474,87 @@ class IdentityTests(unittest.TestCase):
             os.unlink(token_path)
 
 
+class StructuredResponseTests(unittest.TestCase):
+    """Malformed or incomplete external responses become structured errors, not tracebacks."""
+
+    def test_null_pr_response_is_structured_error(self):
+        result, status = pr_state("o/r", 7, gh=lambda args: None, gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+        self.assertNotIn("head", result)
+
+    def test_list_pr_response_is_structured_error(self):
+        result, status = pr_state("o/r", 7, gh=lambda args: [1, 2, 3], gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_malformed_pr_json_is_structured_error(self):
+        def gh(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = pr_state("o/r", 7, gh=gh, gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_missing_pr_field_is_structured_error(self):
+        data = pr()
+        del data["headRefOid"]
+        result, status = pr_state("o/r", 7, **fake(data))
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_null_commit_response_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda args: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+        self.assertNotIn("sha", result)
+
+    def test_missing_commit_field_is_structured_error(self):
+        gh = lambda args: {"commit": {"message": "x", "author": {"date": "d"}}}
+        result, status = verify_commit("o/r", "abc", gh=gh)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+        self.assertNotIn("sha", result)
+
+    def test_malformed_commit_json_is_structured_error(self):
+        def gh(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = verify_commit("o/r", "abc", gh=gh)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_malformed_board_json_is_structured_error(self):
+        def board(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "board")
+
+    def test_malformed_issue_query_json_is_structured_error(self):
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                options = [{"id": f"opt-{i}", "name": name} for i, name in enumerate(BOARD_OPTIONS)]
+                return {"fields": [{"id": "F1", "name": "Status", "options": options}]}
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "issue")
+
+    def test_missing_issue_query_field_is_structured_error(self):
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                options = [{"id": f"opt-{i}", "name": name} for i, name in enumerate(BOARD_OPTIONS)]
+                return {"fields": [{"id": "F1", "name": "Status", "options": options}]}
+            if "graphql" in args:
+                return {}
+            return {}
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "issue")
+
+
 if __name__ == "__main__":
     unittest.main()
