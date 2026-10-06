@@ -119,3 +119,13 @@ Lessons and resulting changes:
 - On a new machine, the auto-mode classifier blocked `ghflow identity` and `ghflow exec` as credential use until Les added allow rules in `.claude/settings.local.json`. It allowed a CI rerun when the subagent prompt named the rerun as authorized CI repair. It blocked the same rerun from a subagent whose prompt did not.
 - GitHub runners did not pick up `lint-and-test` for about 15 minutes, which cancelled jobs on #939 and #940. One `--failed` rerun is the right repair, because no tests ran. The parent's first briefs said "no reruns" for all failures and had to be corrected.
 - The issue body of #662 was partly done already on `main` (#808). The coordinator found this and implemented only the remaining part.
+- After the burndown, the parent delivered #857 and #918 as [PR #946](https://github.com/lmorchard/decafclaw/pull/946), merged as `9d39e9c` with a merge commit. Les chose a commit-by-commit structure:
+  1. The formatting-only commit `639eec1`.
+  2. `.git-blame-ignore-revs`, which lists `639eec1`.
+  3. A fix to the message-type generator.
+  4. New text anchors for `test_api_codegen.py`.
+  5. The `make check` gate.
+
+  The coordinator stopped before submission and asked for a decision. Formatting broke two checks that depend on exact source layout, so the PR needed commits outside the agreed structure. An AST comparison of 342 files found no differences. The reviewer reproduced commit 1 by running `make fmt` on the base. Commits 1 to 3 do not pass the checks alone.
+- Two coordinators said that the hand-back tool refused their report with "already delivered", so they sent it again by message. The parent received both copies each time. Another coordinator said that the harness made it hand back before its follow-up subagent reported. The wait rule in `express-issue` therefore cannot always hold. The fallback, which names the pending checks and head, is the part that worked.
+- The classifier denied `git push origin --delete` for merged branches as "Git Destructive". The local worktree cleanup succeeded without `--force`. The seven remote branches remain.
