@@ -41,7 +41,7 @@ When the PR is ready for review, move the issue it implements to In review, foll
 
 ## Request a review
 
-For an agent pull request, the primary review source is a different-model local review, as [Review](../shared/review.md) states. A completed independent local review lets the PR proceed. Do not request Copilot by default.
+For an agent pull request, the primary review source is a different-model local review, as [Review](../shared/review.md) states. A completed independent local review of the published head lets the PR proceed. A review that covers an earlier commit does not qualify. Do not request Copilot by default.
 
 Request Copilot review only when the user asked for it. Read the current requests and reviews with `pr-state`, described in [Evidence](../shared/evidence.md). Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
 
