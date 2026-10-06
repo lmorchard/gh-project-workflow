@@ -25,7 +25,7 @@ The repository contains these skills, organized by lifecycle stage:
 - [file-issue](skills/file-issue/SKILL.md) publishes a reviewed draft and confirms the requested GitHub changes.
 - [implement-issue](skills/implement-issue/SKILL.md) produces tested, committed changes for PR preparation.
 - [review-changes](skills/review-changes/SKILL.md) assesses changes in a fresh reviewer context without editing them.
-- [submit-pr](skills/submit-pr/SKILL.md) publishes committed work and requests Copilot review.
+- [submit-pr](skills/submit-pr/SKILL.md) publishes committed work and requests a review; for an agent pull request, independent local review is the primary source and the user may request Copilot review.
 - [address-pr-review](skills/address-pr-review/SKILL.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
 - [merge-pr](skills/merge-pr/SKILL.md) confirms CI and review findings, merges authorized changes, and confirms the result.
 
