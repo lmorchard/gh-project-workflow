@@ -258,17 +258,23 @@ BOARD_OPTIONS = ["Backlog", "Ready", "In progress", "In review", "Done"]
 
 
 class FakeBoard:
-    """A board with one Status field. `status` is None when the issue is not on the board."""
+    """A board with one Status field, read through GraphQL projectItems pages; membership spans pages and reads report pagination."""
 
-    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0):
+    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0,
+                 advance=0, advance_to=None, member_page=1, incomplete_read=False):
         self.status = status
+        self.advance = advance
+        self.advance_to = advance_to
         self.on_board = on_board
         self.fail = set(fail)
         self.sticky = sticky
         self.lag = lag
+        self.page_count = member_page
+        self.incomplete_read = incomplete_read
         self.pending = None
         self.writes = []
         self.sleeps = []
+        self.member_reads = 0
 
     def __call__(self, args):
         if args[:2] == ["project", "view"]:
@@ -290,16 +296,29 @@ class FakeBoard:
             return {}
         if self.writes and "readback" in self.fail:
             raise GhError("HTTP 502")
+        if "read" in self.fail:
+            raise GhError("HTTP 502")
         if self.pending is not None:
             if self.lag:
                 self.lag -= 1
             else:
                 self.status, self.pending = self.pending, None
-        nodes = [{"id": "OTHER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Done"}}]
-        if self.on_board:
-            value = {"name": self.status} if self.status else {}
-            nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
-        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5", "projectItems": {"nodes": nodes}}}}}
+        self.member_reads += 1
+        page_index = min(self.member_reads, self.page_count)
+        live = self.status
+        if self.advance and self.member_reads > self.advance:
+            live = self.advance_to
+        if page_index < self.page_count:
+            nodes = [{"id": "FILLER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Backlog"}}]
+            info = {"hasNextPage": True, "endCursor": f"CURSOR-{page_index}"}
+        else:
+            nodes = []
+            if self.on_board:
+                value = {"name": live} if live else {}
+                nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
+            info = {"hasNextPage": self.incomplete_read, "endCursor": None}
+        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+                    "projectItems": {"nodes": nodes, "pageInfo": info}}}}}
 
 
 def set_status(board, status, **kwargs):
@@ -386,6 +405,45 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertIsNone(result["after"])
         self.assertEqual(result["errors"][0]["part"], "readback")
         self.assertEqual(status, 2)
+
+    def test_stale_advance_between_reads_is_refused_without_write(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(result["before"], "In progress")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+        self.assertIn("another actor", result["reason"].lower())
+
+    def test_stale_advance_refused_even_when_backward_allowed(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "Backlog", allow_backward=True)
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+
+    def test_member_on_later_page_is_found_by_paginating(self):
+        board = FakeBoard("In review", member_page=3)
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("unchanged", "In review"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 0)
+        self.assertGreaterEqual(board.member_reads, 3)
+
+    def test_incomplete_read_refuses_add_on_assumed_absence(self):
+        board = FakeBoard(on_board=False, incomplete_read=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result["membership_complete"])
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
+
+    def test_failed_membership_read_blocks_add(self):
+        board = FakeBoard(on_board=False, fail={"read"})
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["errors"][0]["part"], "issue")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
 
 
 class IdentityTests(unittest.TestCase):
