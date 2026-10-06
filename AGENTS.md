@@ -10,6 +10,8 @@ Do not add automatic task selection without evidence of a need and an explicit p
 
 Keep decisions separate from proposals. Give a source for each lesson or code section that you copy. Select a language and command names when a specific task supplies enough information.
 
+Create each worktree for this repository at `.claude/worktrees/<branch>` inside the checkout, not in a sibling directory. Git ignores that folder. Do not remove a worktree that has uncommitted changes or an open PR.
+
 ## Parent and trial agent roles
 
 The parent agent develops skills with Les and evaluates their trials. It can edit this workflow repository and inspect subject repositories for research. A subject repository is a project used to try the skills.
