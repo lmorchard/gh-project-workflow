@@ -93,6 +93,8 @@ Draft files support the conversation but are not required reading for approval. 
 
 ## Review approach
 
+Superseded by the 2026-10-03 machine-account policy (see [Future agent identity](#future-agent-identity) and [Review](../skills/shared/review.md)). Under that policy, independent local review is the primary review source for an agent pull request, and the user requests Copilot review manually. The text below keeps the earlier discussion.
+
 PR submission will request Copilot review when available. If access is unavailable, the parent can dispatch a local reviewer in a fresh context. The local reviewer must use a different model from the implementer for this fallback.
 
 The parent records model identities from available session or dispatch information. If identity or model selection is unavailable, it reports the limit. A same-model second opinion does not silently replace the requested different-model review.

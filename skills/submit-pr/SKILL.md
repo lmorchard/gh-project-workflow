@@ -47,14 +47,14 @@ Request Copilot review only when the user asked for it. Read the current request
 
 Record the request time, the requested head, and existing review identifiers. Read back the request or the resulting review.
 
-If the user requested Copilot and it is unavailable, return the reason and a handoff for local review with [review-changes](../review-changes/SKILL.md). Supply the issue, repository, base and head commits, and the implementation model if known. Do not recreate the PR because a review request failed.
+If the user requested Copilot and it is unavailable, use a completed different-model local review that covers the head as the review source. Only when no such review covers the head, return the reason and a handoff for local review with [review-changes](../review-changes/SKILL.md), supplying the issue, repository, base and head commits, and the implementation model if known. Do not recreate the PR because a review request failed.
 
 ## Report and hand off
 
 Read the CI and review state for the published head. Return:
 
 - The PR URL, head commit, worktree, and branch.
-- The review source used, and, for any Copilot request, its time, requested reviewer, and existing review identifiers.
+- The review source used. For a local review, include its head, findings, and the recorded model identities that show it is different from the implementer. For a Copilot request, include its time, requested reviewer, and existing review identifiers.
 - The observed CI and review state.
 - The board transition result, or why it was skipped or failed.
 - Any other incomplete operations.
