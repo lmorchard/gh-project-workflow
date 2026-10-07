@@ -135,3 +135,6 @@ Lessons and resulting changes:
 ## ghflow installation
 
 [Setup trial, 2026-10-07](2026-10-07-ghflow-setup.md) assesses one registered skill, symbolic-link discovery, routing, and dependency access in Claude Code, Codex, and OpenCode.
+
+[Root-package setup trial, 2026-10-07](2026-10-07-ghflow-root-setup.md) repeats discovery and routing after the repository-root layout change.
+It records the subject-resolution correction and the unresolved OpenCode discovery of ignored nested worktrees.

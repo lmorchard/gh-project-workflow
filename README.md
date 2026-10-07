@@ -13,7 +13,7 @@ python3 scripts/install-skill.py claude codex
 A symbolic link points to the source checkout root. Source edits appear through the links without another installation.
 The installer preserves correct links and refuses existing conflicting entries before it creates links.
 It creates `~/.claude/skills/ghflow` and `~/.agents/skills/ghflow`.
-OpenCode also discovers these compatible directories. See the [setup trial](docs/trials/2026-10-07-ghflow-setup.md) for tested discovery and limits.
+OpenCode also discovers these compatible directories. See the [root-package setup trial](docs/trials/2026-10-07-ghflow-root-setup.md) for tested discovery and limits.
 If you use only OpenCode, run `python3 scripts/install-skill.py opencode` for its native personal directory.
 Do not add a native OpenCode link when compatible links already expose `ghflow`.
 
@@ -22,6 +22,12 @@ For an isolated personal installation trial, use `--home TEMP_HOME`.
 These options change the link destinations, not agent authentication or configuration.
 The installer does not remove older generic skill installations. Remove those links separately after you inspect their sources.
 If you move the source checkout, replace its stale links manually. The installer refuses to overwrite them.
+
+OpenCode can discover nested `SKILL.md` files inside the linked checkout, including Git-ignored worktrees.
+Repository checks ignore worktrees, but native discovery does not.
+We propose a clean dedicated source checkout for installation until the installer policy is settled.
+The installer currently does not reject nested skill packages.
+The [root-package trial](docs/trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records this unresolved limitation.
 
 Start a new agent session in the target project. Request an operation explicitly:
 

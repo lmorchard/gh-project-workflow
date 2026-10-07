@@ -1,5 +1,8 @@
 # ghflow setup trial
 
+This is the historical nested-package trial before Les selected a repository-root skill package.
+The [root-package trial](2026-10-07-ghflow-root-setup.md) records the later layout.
+
 This trial assesses symbolic-link installation, discovery, routing, and source access for [issue #16](https://github.com/lmorchard/gh-project-workflow/issues/16).
 A symbolic link points to the source directory. A fresh session has no earlier conversation.
 
