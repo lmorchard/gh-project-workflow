@@ -115,10 +115,13 @@ def handle_graphql(argv, board, board_path):
             "repository": {
                 "issue": {
                     "url": f"https://github.com/{owner}/{name}/issues/{number}",
-                    "projectItems": {"nodes": nodes},
+                    "projectItems": {
+                        "nodes": nodes,
+                        "pageInfo": {"hasNextPage": False},
+                    },
                 },
-           },
-      },
+            },
+       },
     }
     sys.stdout.write(json.dumps(result))
 
