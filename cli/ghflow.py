@@ -8,7 +8,8 @@ A part that could not be read is null and has an entry in "errors". An empty
 list means GitHub returned nothing. Exit status: 0 when every part was read,
 2 when some parts failed, 1 when the PR or commit itself could not be read.
 verify-commit exits 3 when the commit was read and an expectation is false.
-board set-status exits 3 when it refuses a backward move.
+board set-status exits 3 when it refuses a backward move or a detected stale
+transition, and exits 1 when a membership read could not be read in full.
 """
 
 import argparse
@@ -329,11 +330,12 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
 
 
 ISSUE_ITEMS_QUERY = """
-query($owner: String!, $name: String!, $number: Int!) {
+query($owner: String!, $name: String!, $number: Int!, $page: String) {
   repository(owner: $owner, name: $name) {
     issue(number: $number) {
       url
-      projectItems(first: 50) {
+      projectItems(first: 50, after: $page) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           id
           project { id }
@@ -351,22 +353,56 @@ READBACK_DELAY_SECONDS = 2
 
 
 def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh, sleep=time.sleep):
-    """Move one issue to a status on one board, refusing backward moves, and read the result back."""
-    result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status, "errors": []}
+    """Move one issue to a status on one board, refusing backward moves and stale transitions, and read the result back."""
+    result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status,
+              "facts": [], "added": False, "errors": []}
 
     def fail(part, error):
         result["errors"].append({"part": part, "error": str(error)})
         return result, 1
 
+    def fact(step, state):
+        result["facts"].append({"step": step, "state": state})
+
     def read_item():
-        """Return the issue URL and its item on this board as (item_id, status), or None."""
+        """Return (issue_url, item, incomplete).
+
+        item is None only when its absence is proven. Read every membership page: a
+        read that stops because a page claims a next page but gives no cursor returns
+        incomplete=True, so a partial read is never treated as an absent item and
+        used to add one on an assumed absence.
+        """
         repo_owner, name = repo.split("/")
-        data = gh(["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"])
-        issue = data["data"]["repository"]["issue"]
-        for node in issue["projectItems"]["nodes"]:
-            if node["project"]["id"] == project_id:
-                return issue["url"], (node["id"], (node.get("fieldValueByName") or {}).get("name"))
-        return issue["url"], None
+        url = None
+        node = None
+        cursor = None
+        incomplete = False
+        while True:
+            args = ["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"]
+            if cursor:
+                args += ["--raw-field", f"page={cursor}"]
+            issue = gh(args)["data"]["repository"]["issue"]
+            if url is None:
+                url = issue["url"]
+            items = issue["projectItems"]
+            info = items.get("pageInfo")
+            for node_item in items["nodes"]:
+                if node_item["project"]["id"] == project_id:
+                    node = (node_item["id"], (node_item.get("fieldValueByName") or {}).get("name"))
+            if not isinstance(info, dict):
+                incomplete = True
+                break
+            has_next = info.get("hasNextPage")
+            if not isinstance(has_next, bool):
+                incomplete = True
+                break
+            if not has_next:
+                break
+            cursor = info.get("endCursor")
+            if not isinstance(cursor, str):
+                incomplete = True
+                break
+        return url, node, incomplete
 
     try:
         project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
@@ -378,6 +414,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         for option in field["options"]:
             if not isinstance(option, dict) or not isinstance(option.get("name"), str):
                 raise ValueError("A Status option is not a named string.")
+            if "id" not in option:
+                raise ValueError("A Status option is missing its id.")
             options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
@@ -392,49 +430,109 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     result["target"] = target
 
     try:
-        url, item = read_item()
+        url, item, incomplete = read_item()
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("issue", error)
     result["before"] = item[1] if item else None
-    result["added"] = False
+    result["membership_complete"] = not incomplete
+
+    if item is None and incomplete:
+        result.update(action="refused", after=result["before"], membership_complete=False)
+        result["reason"] = "Membership could not be read in full, so absence is not proven. No item was added."
+        return result, 1
 
     if item and item[1] == target:
         result.update(action="unchanged", after=target, readback_matches=True)
+        fact("membership", "reused")
+        fact("status", "already_at_target")
         return result, 0
     if item and item[1] in options and options.index(item[1]) > options.index(target) and not allow_backward:
         result.update(action="refused", after=item[1])
         result["reason"] = f"{item[1]} to {target} is a backward move. Pass --allow-backward only with a reason and authorization."
+        fact("status", "refused")
         return result, 3
 
+    # Re-read the live status just before the write. Another actor may have moved the
+    # item between the first read and now; a stale request must not overwrite that
+    # move. This narrows the race but cannot close it: a later remote write still
+    # wins, and no local lock or repeated read makes the update atomic.
     try:
-        if item is None:
+        _, live, live_incomplete = read_item()
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
+        return fail("recheck", error)
+    if live_incomplete:
+        result.update(action="refused", after=result["before"], membership_complete=False)
+        result["reason"] = "The pre-write membership read was incomplete, so the live status is unconfirmed. No write was made."
+        return result, 1
+    live_status = live[1] if live else None
+    if live != item:
+        result.update(action="stale-refused", after=live_status)
+        result["reason"] = f"Another actor moved the item from {result['before']} to {live_status} since it was first read. The write was refused to preserve that change."
+        return result, 3
+    result["recheck"] = live_status
+
+    try:
+        if live is None:
             item_id = gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"])["id"]
             result["added"] = True
+            fact("membership", "completed")
         else:
-            item_id = item[0]
-        option_id = next(option["id"] for option in field["options"] if option["name"] == target)
-        gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
-             "--single-select-option-id", option_id, "--format", "json"])
+            item_id = live[0]
+            fact("membership", "reused")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
-        return fail("write", error)
-    result["action"] = "set"
+        result["errors"].append({"part": "add", "error": str(error)})
+        fact("membership", "uncertain")
+        return result, 1
 
-    # Project reads can lag a successful write, so read again before reporting a mismatch.
+    edit_failed = False
+    option_id = next(option["id"] for option in field["options"] if option["name"] == target)
+    try:
+        gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
+              "--single-select-option-id", option_id, "--format", "json"])
+        fact("status", "completed")
+        result["action"] = "set"
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
+         # The edit reported a failure but the remote change may have taken hold,
+         # so reconcile through a fresh read rather than the failed response.
+        edit_failed = True
+        result["errors"].append({"part": "write", "error": str(error)})
+        fact("status", "uncertain")
+
     for attempt in range(1, READBACK_ATTEMPTS + 1):
         if attempt > 1:
             sleep(READBACK_DELAY_SECONDS)
         result["readback_attempts"] = attempt
         try:
-            _, item = read_item()
+            _, item, incomplete = read_item()
             result["after"] = item[1] if item else None
         except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             result["errors"].append({"part": "readback", "error": str(error)})
             result["after"] = None
             break
+        if incomplete:
+            result["readback_incomplete"] = True
+            break
         if result["after"] == target:
             break
+    if result.get("readback_incomplete"):
+        result["readback_matches"] = False
+        return result, 2
     result["readback_matches"] = result["after"] == target
-    return result, 0 if result["readback_matches"] else 2
+
+    if result["readback_matches"]:
+        fact("readback", "confirmed")
+        if edit_failed:
+            result["action"] = "reconciled"
+        return result, 0
+    if edit_failed:
+        fact("readback", "unknown" if result["after"] is None else "mismatch")
+        return result, 1
+    if result["after"] is None:
+        fact("readback", "unknown")
+        return result, 2
+    fact("readback", "mismatch")
+    result["action"] = "mismatch"
+    return result, 2
 
 
 def resolve_identity(env=None, config_paths=None):

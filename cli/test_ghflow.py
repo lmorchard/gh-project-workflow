@@ -258,17 +258,34 @@ BOARD_OPTIONS = ["Backlog", "Ready", "In progress", "In review", "Done"]
 
 
 class FakeBoard:
-    """A board with one Status field. `status` is None when the issue is not on the board."""
+    """A board with one Status field, read through GraphQL projectItems pages; membership spans pages and reads report pagination."""
 
-    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0):
+    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0,
+                 advance=0, advance_to=None, member_page=1, incomplete_read=False,
+                 missing_page_info=False, has_next_page_null=False,
+                 missing_end_cursor=False, recheck_json_error=False,
+                 readback_incomplete=False,
+                 uncertain=False, fail_edits=0):
         self.status = status
+        self.advance = advance
+        self.advance_to = advance_to
         self.on_board = on_board
         self.fail = set(fail)
         self.sticky = sticky
         self.lag = lag
+        self.page_count = member_page
+        self.incomplete_read = incomplete_read
+        self.missing_page_info = missing_page_info
+        self.has_next_page_null = has_next_page_null
+        self.missing_end_cursor = missing_end_cursor
+        self.recheck_json_error = recheck_json_error
+        self.readback_incomplete = readback_incomplete
+        self.uncertain = uncertain
+        self.fail_edits_remaining = fail_edits
         self.pending = None
         self.writes = []
         self.sleeps = []
+        self.member_reads = 0
 
     def __call__(self, args):
         if args[:2] == ["project", "view"]:
@@ -284,22 +301,60 @@ class FakeBoard:
             if "write" in self.fail:
                 raise GhError("HTTP 403")
             option = args[args.index("--single-select-option-id") + 1]
+            if self.uncertain:
+                self.writes.append(option)
+                if self.sticky:
+                    self.pending = BOARD_OPTIONS[int(option.split("-")[1])]
+                raise GhError("HTTP 502")
+            if self.fail_edits_remaining > 0:
+                self.fail_edits_remaining -= 1
+                self.writes.append("edit-failed")
+                raise GhError("HTTP 403")
             self.writes.append(option)
             if self.sticky:
                 self.pending = BOARD_OPTIONS[int(option.split("-")[1])]
             return {}
         if self.writes and "readback" in self.fail:
             raise GhError("HTTP 502")
+        if "read" in self.fail:
+            raise GhError("HTTP 502")
         if self.pending is not None:
             if self.lag:
                 self.lag -= 1
             else:
                 self.status, self.pending = self.pending, None
-        nodes = [{"id": "OTHER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Done"}}]
-        if self.on_board:
-            value = {"name": self.status} if self.status else {}
-            nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
-        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5", "projectItems": {"nodes": nodes}}}}}
+        self.member_reads += 1
+        # recheck_json_error: on the second membership read (pre-write live re-read)
+        # raise JSONDecodeError to exercise finding-D in read_item.
+        if self.recheck_json_error and self.member_reads >= 2:
+            raise json.JSONDecodeError("bad", "x", 0)
+        page_index = min(self.member_reads, self.page_count)
+        live = self.status
+        if self.advance and self.member_reads > self.advance:
+            live = self.advance_to
+        if page_index < self.page_count:
+            nodes = [{"id": "FILLER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Backlog"}}]
+            info = {"hasNextPage": True, "endCursor": f"CURSOR-{page_index}"}
+        else:
+            nodes = []
+            if self.on_board:
+                value = {"name": live} if live else {}
+                nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
+            if self.missing_page_info:
+                info = None   # entirely absent
+            elif self.has_next_page_null:
+                info = {"hasNextPage": None, "endCursor": None}
+            elif self.missing_end_cursor:
+                info = {"hasNextPage": True}   # hasNextPage=True but no endCursor
+            elif self.readback_incomplete and self.writes:
+                info = {"hasNextPage": True, "endCursor": None}   # post-write page incomplete
+            else:
+                info = {"hasNextPage": self.incomplete_read, "endCursor": None}
+        if self.missing_page_info:
+            return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+                 "projectItems": {"nodes": nodes}}}}}
+        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+             "projectItems": {"nodes": nodes, "pageInfo": info}}}}}
 
 
 def set_status(board, status, **kwargs):
@@ -386,6 +441,159 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertIsNone(result["after"])
         self.assertEqual(result["errors"][0]["part"], "readback")
         self.assertEqual(status, 2)
+
+    def test_stale_advance_between_reads_is_refused_without_write(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(result["before"], "In progress")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+        self.assertIn("another actor", result["reason"].lower())
+
+    def test_stale_advance_refused_even_when_backward_allowed(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "Backlog", allow_backward=True)
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+
+    def test_member_on_later_page_is_found_by_paginating(self):
+        board = FakeBoard("In review", member_page=3)
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("unchanged", "In review"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 0)
+        self.assertGreaterEqual(board.member_reads, 3)
+
+    def test_incomplete_read_refuses_add_on_assumed_absence(self):
+        board = FakeBoard(on_board=False, incomplete_read=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result["membership_complete"])
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
+
+    def test_failed_membership_read_blocks_add(self):
+        board = FakeBoard(on_board=False, fail={"read"})
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["errors"][0]["part"], "issue")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
+
+    def test_stale_transition_with_item_removed_fires_refused(self):
+        # An item is removed between reads; the guard compares full (id, status), so
+        # None != (id, status) triggers stale-refused, not item-add.
+        board = FakeBoard("In progress", on_board=True, advance=1, advance_to=None)
+        result, status = set_status(board, "In review")
+        self.assertEqual(result["action"], "stale-refused")
+        self.assertFalse(result.get("added", True))
+        self.assertEqual(status, 3)
+
+    def test_incomplete_readback_does_not_report_success(self):
+         # The post-write read page reports incomplete=True with the target present;
+         # the result must not be status 0.
+        board = FakeBoard("Backlog", readback_incomplete=True)
+        result, status = set_status(board, "Ready")
+        self.assertEqual(status, 2)
+        self.assertFalse(result.get("readback_matches", False))
+
+    def test_missing_page_info_marks_read_incomplete(self):
+        # A response with absent pageInfo causes incomplete=True, which for an absent
+        # item leads to "refused", not an item-add.
+        board = FakeBoard(on_board=False, missing_page_info=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result.get("membership_complete", True))
+        self.assertEqual(status, 1)
+
+    def test_non_boolean_has_next_page_is_incomplete(self):
+        board = FakeBoard(on_board=False, has_next_page_null=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_missing_end_cursor_is_incomplete(self):
+        board = FakeBoard(on_board=False, missing_end_cursor=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_recheck_catches_json_decode_error(self):
+        board = FakeBoard("In progress", recheck_json_error=True)
+        result, status = set_status(board, "In review")
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "recheck")
+
+    def test_edit_succeeds_readback_fails_records_unknown_fact(self):
+        board = FakeBoard("Backlog", fail={"readback"})
+        result, status = set_status(board, "In progress")
+        self.assertEqual(status, 2)
+        self.assertIsNone(result["after"])
+        self.assertFalse(result["readback_matches"])
+        self.assertEqual(result["action"], "set")
+        self.assertEqual(result["facts"][-1], {"step": "readback", "state": "unknown"})
+        self.assertEqual(board.writes, ["opt-2"])
+
+    def test_reuse_after_successful_add_no_duplicate(self):
+        board = FakeBoard(on_board=False, fail_edits=1)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "write")
+        self.assertTrue(result["added"])
+        self.assertEqual(board.writes, ["add", "edit-failed"])
+        result2, status2 = set_status(board, "In progress")
+        self.assertEqual(status2, 0)
+        self.assertFalse(result2["added"])
+        self.assertEqual(result2["action"], "set")
+        self.assertEqual(board.writes.count("add"), 1)
+        self.assertEqual(board.status, "In progress")
+
+    def test_missing_option_id_is_structured_error(self):
+        # An option missing its id must surface as a structured board error, not a
+        # traceback at the option_id lookup in the write block.
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                return {"fields": [{"id": "F1", "name": "Status",
+                                     "options": [{"name": "Backlog"}]}]}
+            raise Exception("unreachable")
+        result, status = board_set_status("o/r", 5, "o", 6, "Backlog", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "board")
+
+
+    def test_reuse_after_successful_edit_no_duplicate(self):
+        board = FakeBoard("In progress")
+        result, status = set_status(board, "In review")
+        self.assertEqual(status, 0)
+        self.assertEqual(result["action"], "set")
+        self.assertEqual(board.writes, ["opt-3"])
+        result2, status2 = set_status(board, "In review")
+        self.assertEqual(status2, 0)
+        self.assertEqual(result2["action"], "unchanged")
+        self.assertEqual(board.writes, ["opt-3"])
+        self.assertEqual(board.status, "In review")
+
+    def test_uncertain_write_reconciled_by_fresh_read(self):
+        board = FakeBoard("Backlog", uncertain=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(status, 0)
+        self.assertEqual(result["action"], "reconciled")
+        self.assertEqual(result["after"], "In progress")
+        self.assertTrue(result["readback_matches"])
+        self.assertTrue(any(f["step"] == "status" and f["state"] == "uncertain"
+                             for f in result["facts"]))
+
+    def test_repeated_calls_converge_without_duplicate_or_loss(self):
+        board = FakeBoard(on_board=False, fail_edits=1)
+        result1, status1 = set_status(board, "In progress")
+        self.assertEqual(status1, 1)
+        result2, status2 = set_status(board, "In progress")
+        self.assertEqual(status2, 0)
+        self.assertEqual(board.writes.count("add"), 1)
+        self.assertEqual(board.status, "In progress")
 
 
 class IdentityTests(unittest.TestCase):
