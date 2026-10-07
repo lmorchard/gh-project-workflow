@@ -4,21 +4,21 @@ These rules apply to every skill that requests, performs, waits for, or relies o
 
 ## Review sources
 
-This workflow uses three review sources:
+For an agent pull request, the primary review source is **independent local review**, done with [review-changes](../review-changes/SKILL.md) in a fresh context. [Agent identity](identity.md) states this policy.
 
-- **Copilot**, requested on the PR. It is the preferred source. Its underlying model is unknown unless something identifies it.
-- **Independent local review**, done with [review-changes](../review-changes/SKILL.md) in a fresh context.
-- **Human review**, from the user or another person.
+The user may request **Copilot** review manually, in the GitHub web interface or with `gh pr edit PR_URL --add-reviewer "@copilot"`. Copilot is not the default for agent pull requests. Its underlying model is unknown unless something identifies it.
+
+**Human review** comes from the user or another person.
 
 The local review must use a different model from the implementer. Record each model identity from runtime or dispatch metadata. Do not infer it from an agent's name, writing style, or claims. A different agent name, a fresh context, or a changed reasoning setting does not make a different model.
 
-If Copilot is unavailable, a different-model local review is the review source. Do not return that choice to the user. If either identity is unknown or a different model is unavailable, report that and return the review choice to the parent. A same-model second opinion can still help. Label it as same-model, and leave the different-model requirement unmet. A user-approved alternative stays explicit in later handoffs.
+When the user requested Copilot and it is unavailable, a different-model local review is the review source. Do not return that choice to the user. If a model identity is unknown or a different model is unavailable, report that and return the review choice to the parent. A same-model second opinion can still help. Label it as same-model, and leave the different-model requirement unmet. A user-approved alternative stays explicit in later handoffs.
 
 No review source guarantees correct findings. Review does not replace tests or human judgment.
 
 ## Copilot request state
 
-Request a review with `gh pr edit PR_URL --add-reviewer "@copilot"` when the installed help supports it. Request a reviewer, not a coding-agent assignment or a comment that asks Copilot to change code.
+Request a Copilot review with `gh pr edit PR_URL --add-reviewer "@copilot"` only when the user asked for it. For an agent pull request, the default source is independent local review, not Copilot. Request a reviewer, not a coding-agent assignment or a comment that asks Copilot to change code.
 
 Before you request, inspect current review requests, completed reviews, and review-request timeline events. Repository automation can request Copilot as soon as the PR opens. An empty requested-reviewer list does not prove that no request exists. If a request for the current head exists, keep its timestamp and do not request again.
 
