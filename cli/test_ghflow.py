@@ -549,6 +549,21 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertEqual(board.writes.count("add"), 1)
         self.assertEqual(board.status, "In progress")
 
+    def test_missing_option_id_is_structured_error(self):
+        # An option missing its id must surface as a structured board error, not a
+        # traceback at the option_id lookup in the write block.
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                return {"fields": [{"id": "F1", "name": "Status",
+                                     "options": [{"name": "Backlog"}]}]}
+            raise Exception("unreachable")
+        result, status = board_set_status("o/r", 5, "o", 6, "Backlog", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "board")
+
+
     def test_reuse_after_successful_edit_no_duplicate(self):
         board = FakeBoard("In progress")
         result, status = set_status(board, "In review")

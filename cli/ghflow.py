@@ -414,6 +414,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         for option in field["options"]:
             if not isinstance(option, dict) or not isinstance(option.get("name"), str):
                 raise ValueError("A Status option is not a named string.")
+            if "id" not in option:
+                raise ValueError("A Status option is missing its id.")
             options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
