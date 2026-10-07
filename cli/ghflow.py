@@ -8,7 +8,8 @@ A part that could not be read is null and has an entry in "errors". An empty
 list means GitHub returned nothing. Exit status: 0 when every part was read,
 2 when some parts failed, 1 when the PR or commit itself could not be read.
 verify-commit exits 3 when the commit was read and an expectation is false.
-board set-status exits 3 when it refuses a backward move.
+board set-status exits 3 when it refuses a backward move or a detected stale
+transition, and exits 1 when a membership read could not be read in full.
 """
 
 import argparse
@@ -124,9 +125,22 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
             return None
 
     fields = "number,url,state,isDraft,mergeable,headRefOid,headRefName,baseRefName,reviewRequests,statusCheckRollup"
+    required_pr_fields = ("number", "url", "state", "isDraft", "mergeable", "headRefOid", "headRefName", "baseRefName")
     try:
         pr = gh(["pr", "view", str(number), "--repo", repo, "--json", fields])
-    except GhError as error:
+        if not isinstance(pr, dict):
+            raise TypeError("The PR response is not an object.")
+        missing = [field for field in required_pr_fields if field not in pr]
+        if missing:
+            raise ValueError(f"The PR response is missing {', '.join(missing)}.")
+        for coll_name, coll_value in pr.items():
+            if coll_name in ("reviewRequests", "statusCheckRollup"):
+                if not isinstance(coll_value, list):
+                    raise ValueError("The PR response has a malformed " + str(coll_name) + ".")
+                for coll_item in coll_value:
+                    if coll_item is not None and not isinstance(coll_item, dict):
+                        raise ValueError("The PR response has a malformed " + str(coll_name) + " entry.")
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return {"repo": repo, "number": number, "errors": [{"part": "pr", "error": str(error)}]}, 1
 
     head = pr["headRefOid"]
@@ -239,28 +253,54 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
 
 def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
     """Resolve a published commit and compare it with what the caller expects it to be."""
+    errors = []
+    expectations = {}
     try:
         commit = gh(["api", f"repos/{repo}/commits/{rev}"])
-    except GhError as error:
+        if not isinstance(commit, dict):
+            raise ValueError("The commit response is not an object.")
+        if "sha" not in commit:
+            raise ValueError("The commit response is missing its sha.")
+        body = commit["commit"]
+        if not isinstance(body, dict):
+            raise ValueError("The commit body is not an object.")
+        if "message" not in body:
+            raise ValueError("The commit response is missing its message.")
+        if "author" not in body:
+            raise ValueError("The commit response is missing its author.")
+        author = body["author"]
+        if not isinstance(author, dict):
+            raise ValueError("The commit author is not an object.")
+        if "date" not in author:
+            raise ValueError("The commit author is missing its date.")
+        sha = commit["sha"]
+        message = body["message"]
+        if not isinstance(message, str):
+            raise ValueError("The commit message is not a string.")
+        parents = commit.get("parents")
+        if parents is None:
+            parents = []
+        elif not isinstance(parents, list):
+            raise ValueError("The commit parents are not a list.")
+        for parent in parents:
+            if not isinstance(parent, dict) or "sha" not in parent:
+                raise ValueError("A commit parent is missing its sha.")
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         result = {"repo": repo, "rev": rev, "errors": [{"part": "commit", "error": str(error)}]}
         if "No commit found" in str(error):
             result["note"] = "GitHub gives this error for an unpushed or missing commit and for an ambiguous or too-short prefix. Check that the commit is pushed, then retry with the full SHA."
         return result, 1
 
-    sha = commit["sha"]
-    message = commit["commit"]["message"]
-    errors = []
-    expectations = {}
     result = {
-        "repo": repo,
-        "rev": rev,
-        "sha": sha,
-        "subject": message.splitlines()[0] if message else "",
-        "author_date": commit["commit"]["author"]["date"],
-        "parents": [parent["sha"] for parent in commit.get("parents") or []],
-        "expectations": expectations,
-        "errors": errors,
-    }
+         "repo": repo,
+         "rev": rev,
+         "sha": sha,
+         "subject": message.splitlines()[0] if message else "",
+         "author_date": author["date"],
+         "parents": [parent["sha"] for parent in parents],
+         "expectations": expectations,
+         "errors": errors,
+     }
 
     if subject is not None:
         expectations["subject_matches"] = result["subject"] == subject.strip()
@@ -270,7 +310,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
             # "behind" or "identical" means the commit is in the branch's history.
             status = gh(["api", f"repos/{repo}/compare/{on}...{sha}", "--jq", "{status}"])["status"]
             expectations["on_branch"] = status in ("behind", "identical")
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": "on_branch", "error": str(error)})
             expectations["on_branch"] = None
 
@@ -280,7 +320,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
             head = gh(["pr", "view", str(number), "--repo", pr_repo, "--json", "headRefOid"])["headRefOid"]
             result["pr_head"] = head
             expectations["is_pr_head"] = head == sha
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": "is_pr_head", "error": str(error)})
             expectations["is_pr_head"] = None
 
@@ -290,11 +330,12 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
 
 
 ISSUE_ITEMS_QUERY = """
-query($owner: String!, $name: String!, $number: Int!) {
+query($owner: String!, $name: String!, $number: Int!, $page: String) {
   repository(owner: $owner, name: $name) {
     issue(number: $number) {
       url
-      projectItems(first: 50) {
+      projectItems(first: 50, after: $page) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           id
           project { id }
@@ -312,7 +353,7 @@ READBACK_DELAY_SECONDS = 2
 
 
 def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh, sleep=time.sleep):
-    """Move one issue to a status on one board, refusing backward moves, and read the result back."""
+    """Move one issue to a status on one board, refusing backward moves and stale transitions, and read the result back."""
     result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status, "errors": []}
 
     def fail(part, error):
@@ -320,25 +361,61 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         return result, 1
 
     def read_item():
-        """Return the issue URL and its item on this board as (item_id, status), or None."""
+        """Return (issue_url, item, incomplete).
+
+        item is None only when its absence is proven. Read every membership page: a
+        read that stops because a page claims a next page but gives no cursor returns
+        incomplete=True, so a partial read is never treated as an absent item and
+        used to add one on an assumed absence.
+        """
         repo_owner, name = repo.split("/")
-        data = gh(["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"])
-        issue = data["data"]["repository"]["issue"]
-        for node in issue["projectItems"]["nodes"]:
-            if node["project"]["id"] == project_id:
-                return issue["url"], (node["id"], (node.get("fieldValueByName") or {}).get("name"))
-        return issue["url"], None
+        url = None
+        node = None
+        cursor = None
+        incomplete = False
+        while True:
+            args = ["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"]
+            if cursor:
+                args += ["--raw-field", f"page={cursor}"]
+            issue = gh(args)["data"]["repository"]["issue"]
+            if url is None:
+                url = issue["url"]
+            items = issue["projectItems"]
+            info = items.get("pageInfo")
+            for node_item in items["nodes"]:
+                if node_item["project"]["id"] == project_id:
+                    node = (node_item["id"], (node_item.get("fieldValueByName") or {}).get("name"))
+            if not isinstance(info, dict):
+                incomplete = True
+                break
+            has_next = info.get("hasNextPage")
+            if not isinstance(has_next, bool):
+                incomplete = True
+                break
+            if not has_next:
+                break
+            cursor = info.get("endCursor")
+            if not isinstance(cursor, str):
+                incomplete = True
+                break
+        return url, node, incomplete
 
     try:
         project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
         fields = gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"])["fields"]
         field = next(f for f in fields if f["name"] == "Status")
+        if not isinstance(field.get("options"), list):
+            raise ValueError("The Status field has no option list.")
+        options = []
+        for option in field["options"]:
+            if not isinstance(option, dict) or not isinstance(option.get("name"), str):
+                raise ValueError("A Status option is not a named string.")
+            options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
-    except (GhError, TypeError, KeyError) as error:
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("board", error)
 
-    options = [option["name"] for option in field["options"]]
     result["options"] = options
     matches = [name for name in options if name == status] or [name for name in options if name.lower() == status.lower()]
     if len(matches) != 1:
@@ -347,11 +424,17 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     result["target"] = target
 
     try:
-        url, item = read_item()
-    except (GhError, TypeError, KeyError) as error:
+        url, item, incomplete = read_item()
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("issue", error)
     result["before"] = item[1] if item else None
     result["added"] = False
+    result["membership_complete"] = not incomplete
+
+    if item is None and incomplete:
+        result.update(action="refused", after=result["before"], membership_complete=False)
+        result["reason"] = "Membership could not be read in full, so absence is not proven. No item was added."
+        return result, 1
 
     if item and item[1] == target:
         result.update(action="unchanged", after=target, readback_matches=True)
@@ -361,16 +444,36 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         result["reason"] = f"{item[1]} to {target} is a backward move. Pass --allow-backward only with a reason and authorization."
         return result, 3
 
+    # Re-read the live status just before the write. Another actor may have moved the
+    # item between the first read and now; a stale request must not overwrite that
+    # move. This narrows the race but cannot close it: a later remote write still
+    # wins, and no local lock or repeated read makes the update atomic.
     try:
-        if item is None:
+        _, live, live_incomplete = read_item()
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
+        return fail("recheck", error)
+    if live_incomplete:
+        result.update(action="refused", after=result["before"], membership_complete=False)
+        result["reason"] = "The pre-write membership read was incomplete, so the live status is unconfirmed. No write was made."
+        return result, 1
+    live_status = live[1] if live else None
+    if live != item:
+        result.update(action="stale-refused", after=live_status)
+        result["reason"] = f"Another actor moved the item from {result['before']} to {live_status} since it was first read. The write was refused to preserve that change."
+        return result, 3
+    result["recheck"] = live_status
+
+    try:
+        if live is None:
             item_id = gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"])["id"]
             result["added"] = True
         else:
-            item_id = item[0]
+            item_id = live[0]
         option_id = next(option["id"] for option in field["options"] if option["name"] == target)
         gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
-            "--single-select-option-id", option_id, "--format", "json"])
-    except (GhError, TypeError, KeyError) as error:
+              "--single-select-option-id", option_id, "--format", "json"])
+
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("write", error)
     result["action"] = "set"
 
@@ -380,14 +483,20 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             sleep(READBACK_DELAY_SECONDS)
         result["readback_attempts"] = attempt
         try:
-            _, item = read_item()
+            _, item, incomplete = read_item()
             result["after"] = item[1] if item else None
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             result["errors"].append({"part": "readback", "error": str(error)})
             result["after"] = None
             break
+        if incomplete:
+            result["readback_incomplete"] = True
+            break
         if result["after"] == target:
             break
+    if result.get("readback_incomplete"):
+        result["readback_matches"] = False
+        return result, 2
     result["readback_matches"] = result["after"] == target
     return result, 0 if result["readback_matches"] else 2
 

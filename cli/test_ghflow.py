@@ -258,17 +258,31 @@ BOARD_OPTIONS = ["Backlog", "Ready", "In progress", "In review", "Done"]
 
 
 class FakeBoard:
-    """A board with one Status field. `status` is None when the issue is not on the board."""
+    """A board with one Status field, read through GraphQL projectItems pages; membership spans pages and reads report pagination."""
 
-    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0):
+    def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0,
+                 advance=0, advance_to=None, member_page=1, incomplete_read=False,
+                 missing_page_info=False, has_next_page_null=False,
+                 missing_end_cursor=False, recheck_json_error=False,
+                 readback_incomplete=False):
         self.status = status
+        self.advance = advance
+        self.advance_to = advance_to
         self.on_board = on_board
         self.fail = set(fail)
         self.sticky = sticky
         self.lag = lag
+        self.page_count = member_page
+        self.incomplete_read = incomplete_read
+        self.missing_page_info = missing_page_info
+        self.has_next_page_null = has_next_page_null
+        self.missing_end_cursor = missing_end_cursor
+        self.recheck_json_error = recheck_json_error
+        self.readback_incomplete = readback_incomplete
         self.pending = None
         self.writes = []
         self.sleeps = []
+        self.member_reads = 0
 
     def __call__(self, args):
         if args[:2] == ["project", "view"]:
@@ -290,16 +304,45 @@ class FakeBoard:
             return {}
         if self.writes and "readback" in self.fail:
             raise GhError("HTTP 502")
+        if "read" in self.fail:
+            raise GhError("HTTP 502")
         if self.pending is not None:
             if self.lag:
                 self.lag -= 1
             else:
                 self.status, self.pending = self.pending, None
-        nodes = [{"id": "OTHER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Done"}}]
-        if self.on_board:
-            value = {"name": self.status} if self.status else {}
-            nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
-        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5", "projectItems": {"nodes": nodes}}}}}
+        self.member_reads += 1
+        # recheck_json_error: on the second membership read (pre-write live re-read)
+        # raise JSONDecodeError to exercise finding-D in read_item.
+        if self.recheck_json_error and self.member_reads >= 2:
+            raise json.JSONDecodeError("bad", "x", 0)
+        page_index = min(self.member_reads, self.page_count)
+        live = self.status
+        if self.advance and self.member_reads > self.advance:
+            live = self.advance_to
+        if page_index < self.page_count:
+            nodes = [{"id": "FILLER", "project": {"id": "P9"}, "fieldValueByName": {"name": "Backlog"}}]
+            info = {"hasNextPage": True, "endCursor": f"CURSOR-{page_index}"}
+        else:
+            nodes = []
+            if self.on_board:
+                value = {"name": live} if live else {}
+                nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
+            if self.missing_page_info:
+                info = None   # entirely absent
+            elif self.has_next_page_null:
+                info = {"hasNextPage": None, "endCursor": None}
+            elif self.missing_end_cursor:
+                info = {"hasNextPage": True}   # hasNextPage=True but no endCursor
+            elif self.readback_incomplete and self.writes:
+                info = {"hasNextPage": True, "endCursor": None}   # post-write page incomplete
+            else:
+                info = {"hasNextPage": self.incomplete_read, "endCursor": None}
+        if self.missing_page_info:
+            return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+                 "projectItems": {"nodes": nodes}}}}}
+        return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+             "projectItems": {"nodes": nodes, "pageInfo": info}}}}}
 
 
 def set_status(board, status, **kwargs):
@@ -387,6 +430,90 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertEqual(result["errors"][0]["part"], "readback")
         self.assertEqual(status, 2)
 
+    def test_stale_advance_between_reads_is_refused_without_write(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(result["before"], "In progress")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+        self.assertIn("another actor", result["reason"].lower())
+
+    def test_stale_advance_refused_even_when_backward_allowed(self):
+        board = FakeBoard("In progress", advance=1, advance_to="Done")
+        result, status = set_status(board, "Backlog", allow_backward=True)
+        self.assertEqual((result["action"], result["after"]), ("stale-refused", "Done"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 3)
+
+    def test_member_on_later_page_is_found_by_paginating(self):
+        board = FakeBoard("In review", member_page=3)
+        result, status = set_status(board, "In review")
+        self.assertEqual((result["action"], result["after"]), ("unchanged", "In review"))
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 0)
+        self.assertGreaterEqual(board.member_reads, 3)
+
+    def test_incomplete_read_refuses_add_on_assumed_absence(self):
+        board = FakeBoard(on_board=False, incomplete_read=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result["membership_complete"])
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
+
+    def test_failed_membership_read_blocks_add(self):
+        board = FakeBoard(on_board=False, fail={"read"})
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["errors"][0]["part"], "issue")
+        self.assertEqual(board.writes, [])
+        self.assertEqual(status, 1)
+
+    def test_stale_transition_with_item_removed_fires_refused(self):
+        # An item is removed between reads; the guard compares full (id, status), so
+        # None != (id, status) triggers stale-refused, not item-add.
+        board = FakeBoard("In progress", on_board=True, advance=1, advance_to=None)
+        result, status = set_status(board, "In review")
+        self.assertEqual(result["action"], "stale-refused")
+        self.assertFalse(result.get("added", True))
+        self.assertEqual(status, 3)
+
+    def test_incomplete_readback_does_not_report_success(self):
+         # The post-write read page reports incomplete=True with the target present;
+         # the result must not be status 0.
+        board = FakeBoard("Backlog", readback_incomplete=True)
+        result, status = set_status(board, "Ready")
+        self.assertEqual(status, 2)
+        self.assertFalse(result.get("readback_matches", False))
+
+    def test_missing_page_info_marks_read_incomplete(self):
+        # A response with absent pageInfo causes incomplete=True, which for an absent
+        # item leads to "refused", not an item-add.
+        board = FakeBoard(on_board=False, missing_page_info=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result.get("membership_complete", True))
+        self.assertEqual(status, 1)
+
+    def test_non_boolean_has_next_page_is_incomplete(self):
+        board = FakeBoard(on_board=False, has_next_page_null=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_missing_end_cursor_is_incomplete(self):
+        board = FakeBoard(on_board=False, missing_end_cursor=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_recheck_catches_json_decode_error(self):
+        board = FakeBoard("In progress", recheck_json_error=True)
+        result, status = set_status(board, "In review")
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "recheck")
+
+
 
 class IdentityTests(unittest.TestCase):
     def test_identity_unconfigured_when_no_env_and_no_config(self):
@@ -472,6 +599,149 @@ class IdentityTests(unittest.TestCase):
             self.assertEqual(run.call_args.kwargs["env"]["GH_TOKEN"], "bot-token")
         finally:
             os.unlink(token_path)
+
+
+class StructuredResponseTests(unittest.TestCase):
+    """Malformed or incomplete external responses become structured errors, not tracebacks."""
+
+    def test_null_pr_response_is_structured_error(self):
+        result, status = pr_state("o/r", 7, gh=lambda args: None, gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+        self.assertNotIn("head", result)
+
+    def test_list_pr_response_is_structured_error(self):
+        result, status = pr_state("o/r", 7, gh=lambda args: [1, 2, 3], gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_malformed_pr_json_is_structured_error(self):
+        def gh(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = pr_state("o/r", 7, gh=gh, gh_paginated=lambda path: [])
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_missing_pr_field_is_structured_error(self):
+        data = pr()
+        del data["headRefOid"]
+        result, status = pr_state("o/r", 7, **fake(data))
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_null_commit_response_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda args: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+        self.assertNotIn("sha", result)
+
+    def test_missing_commit_field_is_structured_error(self):
+        gh = lambda args: {"commit": {"message": "x", "author": {"date": "d"}}}
+        result, status = verify_commit("o/r", "abc", gh=gh)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+        self.assertNotIn("sha", result)
+
+    def test_malformed_commit_json_is_structured_error(self):
+        def gh(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = verify_commit("o/r", "abc", gh=gh)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_malformed_board_json_is_structured_error(self):
+        def board(args):
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "board")
+
+    def test_malformed_issue_query_json_is_structured_error(self):
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                options = [{"id": f"opt-{i}", "name": name} for i, name in enumerate(BOARD_OPTIONS)]
+                return {"fields": [{"id": "F1", "name": "Status", "options": options}]}
+            raise json.JSONDecodeError("bad", "x", 0)
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "issue")
+
+    def test_missing_issue_query_field_is_structured_error(self):
+        def board(args):
+            if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+            if args[:2] == ["project", "field-list"]:
+                options = [{"id": f"opt-{i}", "name": name} for i, name in enumerate(BOARD_OPTIONS)]
+                return {"fields": [{"id": "F1", "name": "Status", "options": options}]}
+            if "graphql" in args:
+                return {}
+            return {}
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=board, sleep=lambda *a: None)
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "issue")
+
+    def test_on_branch_catches_json_decode_error(self):
+         def gh(args):
+             joined = " ".join(args)
+             if "commits/" in joined:
+                return {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": [{"sha": "O"}]}
+             if "compare" in joined:
+                raise json.JSONDecodeError("bad", "x", 0)
+             return {"status": "behind"}
+         result, status = verify_commit("o/r", "abc", on="main", gh=gh)
+         self.assertEqual(status, 2)
+         self.assertEqual(result["errors"][0]["part"], "on_branch")
+
+    def test_is_pr_head_catches_json_decode_error(self):
+         def gh(args):
+             joined = " ".join(args)
+             if "commits/" in joined:
+                return {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": []}
+             if "pr" in joined and "view" in joined:
+                raise json.JSONDecodeError("bad", "x", 0)
+             return {"headRefOid": "abc"}
+         result, status = verify_commit("o/r", "abc", pr_head=("o/r", 7), gh=gh)
+         self.assertEqual(status, 2)
+         self.assertEqual(result["errors"][0]["part"], "is_pr_head")
+
+    def test_non_string_commit_message_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": 123, "author": {"date": "d"}}})
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_null_parent_entry_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": [None]})
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_absent_parent_list_is_empty(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}})
+        self.assertEqual(status, 0)
+        self.assertEqual(result["parents"], [])
+
+    def test_null_in_review_requests_is_structured_error(self):
+         def gh(args):
+             if "pr" in args:
+                return {"number": 7, "url": "u", "state": "open", "isDraft": False, "mergeable": "MERGEABLE",
+                        "headRefOid": "abc", "headRefName": "b", "baseRefName": "main",
+                        "reviewRequests": [None], "statusCheckRollup": None}
+             return []
+         result, status = pr_state("o/r", 7, gh=gh, gh_paginated=lambda p: [])
+         self.assertEqual(status, 1)
+         self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_null_board_option_name_is_structured_error(self):
+         def board(args):
+             if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+             if args[:2] == ["project", "field-list"]:
+                return {"fields": [{"id": "F", "name": "Status", "options": [{"id": "o1", "name": None}]}]}
+             raise Exception("unreachable")
+         result, status = board_set_status("o/r", 5, "o", 6, "Ready", gh=board, sleep=lambda *a: None)
+         self.assertEqual(status, 1)
+         self.assertEqual(result["errors"][0]["part"], "board")
 
 
 if __name__ == "__main__":
