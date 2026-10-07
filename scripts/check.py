@@ -25,17 +25,41 @@ def frontmatter(text):
     return fields
 
 
-def check_skills():
+def check_skills(root=ROOT):
     errors = []
-    for path in sorted(ROOT.glob("skills/*/SKILL.md")):
-        rel = path.relative_to(ROOT)
+    inventory = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z", "*SKILL.md"],
+        cwd=root, capture_output=True, text=True,
+    )
+    if inventory.returncode == 0:
+        paths = sorted(root / name for name in inventory.stdout.split("\0")
+                       if name and (root / name).is_file())
+    else:
+        paths = sorted(root.glob("**/SKILL.md"))
+    expected = root / "SKILL.md"
+    if paths != [expected]:
+        errors.append("skills: expected only root SKILL.md")
+    task_dir = root / "references/tasks"
+    tasks = set(task_dir.glob("*.md")) - {task_dir / "research.md"}
+    if not tasks:
+        errors.append("skills: no task references")
+    if expected.exists():
+        routed = {(expected.parent / target.split("#")[0]).resolve()
+                  for target in LINK.findall(expected.read_text())}
+        for task in sorted(tasks):
+            if task.resolve() not in routed:
+                errors.append(f"{task.relative_to(root)}: not reachable from entry skill")
+            if frontmatter(task.read_text()) is not None:
+                errors.append(f"{task.relative_to(root)}: task reference has skill frontmatter")
+    for path in paths:
+        rel = path.relative_to(root)
         fields = frontmatter(path.read_text())
         if fields is None:
             errors.append(f"{rel}: missing frontmatter")
             continue
         name = fields.get("name", "")
-        if name != path.parent.name:
-            errors.append(f"{rel}: name {name!r} does not match directory")
+        if name != "ghflow":
+            errors.append(f"{rel}: name {name!r} must be ghflow")
         if not NAME.match(name):
             errors.append(f"{rel}: name {name!r} is not lowercase-hyphenated")
         description = fields.get("description", "")
@@ -46,17 +70,24 @@ def check_skills():
     return errors
 
 
-def check_links():
+def check_links(root=ROOT):
     errors = []
     files = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.md"],
-        cwd=ROOT, capture_output=True, text=True, check=True,
+        cwd=root, capture_output=True, text=True, check=True,
     ).stdout.split()
     for name in files:
-        path = ROOT / name
+        path = root / name
         if not path.exists():
             continue
-        for target in LINK.findall(path.read_text()):
+        text = path.read_text()
+        if path.is_relative_to(root / "evals/scenarios"):
+            for line in text.splitlines():
+                if line.startswith("source:"):
+                    for source in re.findall(r"\b(?:skills|references)/[a-zA-Z0-9_/.-]+", line):
+                        if not (root / source).exists():
+                            errors.append(f"{name}: broken scenario source {source}")
+        for target in LINK.findall(text):
             if re.match(r"^[a-z]+:", target) or target.startswith("#"):
                 continue
             if not (path.parent / target.split("#")[0]).exists():

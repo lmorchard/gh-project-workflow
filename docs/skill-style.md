@@ -1,18 +1,18 @@
 # Skill style
 
-This is the house style for `SKILL.md` files and the shared references in `skills/shared/`. Agents read skills to act, so write for an agent that is doing the task now. The strict [Writing rules](writing.md) apply to documents, specifications, and issue text, not to skills.
+This is the house style for `SKILL.md` files and the shared references in `references/shared/`. Agents read skills to act, so write for an agent that is doing the task now. The strict [Writing rules](writing.md) apply to documents, specifications, and issue text, not to skills.
 
 ## What a skill contains
 
-A skill owns one task: the judgment and procedure that are specific to it. It links to shared references for policy that several skills apply. If a rule appears in two skills, it belongs in a shared reference.
+A task reference owns one operation: the judgment and procedure that are specific to it. It links to shared references for policy that several skills apply. If a rule appears in two skills, it belongs in a shared reference.
 
 Use these shared references instead of restating their rules:
 
-- [Authorization](../skills/shared/authorization.md): what the user has permitted, how it carries between tasks, and what the parent and subagents each do.
-- [Evidence](../skills/shared/evidence.md): source revisions, check states, hosted CI, safe GitHub writes, and honest reports.
-- [Review](../skills/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
-- [Board status](../skills/shared/board-status.md): moving an issue between project-board states.
-- [Agent identity](../skills/shared/identity.md): configuring machine account credentials and running commands under that identity.
+- [Authorization](../references/shared/authorization.md): what the user has permitted, how it carries between tasks, and what the parent and subagents each do.
+- [Evidence](../references/shared/evidence.md): source revisions, check states, hosted CI, safe GitHub writes, and honest reports.
+- [Review](../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
+- [Board status](../references/shared/board-status.md): moving an issue between project-board states.
+- [Agent identity](../references/shared/identity.md): configuring machine account credentials and running commands under that identity.
 
 Link a reference where its rules apply. Add a one-line summary only when the reader needs it at that point to act correctly. Agents do not reliably open a reference unless the skill says that it applies, so keep the trigger for a decision-critical rule in the skill: name the situation and link the rule. The [pilot run](../evals/results/2026-10-02-pilot.md) showed this. Read the references when you write or review a skill.
 
@@ -20,7 +20,7 @@ Keep history out of skills. Old reasons and incidents mislead agents when the be
 
 ## Structure
 
-Frontmatter has `name`, which matches the directory, and `description`. The description says what the skill produces, when to use it, and its main boundary, such as "Do not merge."
+Only the root `SKILL.md` has frontmatter with `name: ghflow` and `description`. The source checkout directory can have any name. Task references have no skill frontmatter. The description says what the skill produces, when to use it, and its main boundary, such as "Do not merge."
 
 Open with one short paragraph: the result and where the skill stops. Then order the sections in the sequence of the task. End with a section on what to return and hand off.
 

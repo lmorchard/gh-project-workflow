@@ -1,6 +1,6 @@
 ---
 skills: [file-issue]
-source: skills/file-issue resume rules
+source: references/tasks/file-issue.md resume rules
 ---
 
 ## Situation

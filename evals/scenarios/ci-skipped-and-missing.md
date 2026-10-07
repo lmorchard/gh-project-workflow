@@ -1,6 +1,6 @@
 ---
 skills: [merge-pr]
-source: skills/shared/evidence.md hosted CI
+source: references/shared/evidence.md hosted CI
 ---
 
 ## Situation

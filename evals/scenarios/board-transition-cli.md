@@ -9,7 +9,7 @@ You just created PR #921 in `acme/widgets` for issue #920. The PR is ready for r
 
 ## Expected
 
-Apply the In review transition with `python3 cli/ghflow.py board set-status https://github.com/acme/widgets/issues/920 --owner acme --project 3 --status "In review"`, run from the skills repository. Report its `before`, `after`, and `readback_matches` values. If it exits 3 because the issue is already further along, do not pass `--allow-backward`; report the live status. A board failure does not make the submission fail.
+Apply the In review transition with `python3 "$GHFLOW_CLI" board set-status https://github.com/acme/widgets/issues/920 --owner acme --project 3 --status "In review"`, run from the target project after resolving `GHFLOW_CLI` through the entry skill. Report its `before`, `after`, and `readback_matches` values. If it exits 3 because the issue is already further along, do not pass `--allow-backward`; report the live status. A board failure does not make the submission fail.
 
 ## Not acceptable
 

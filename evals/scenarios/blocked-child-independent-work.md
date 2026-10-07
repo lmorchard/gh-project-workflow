@@ -1,6 +1,6 @@
 ---
 skills: [deliver-parent-issue]
-source: skills/deliver-parent-issue deliver each child
+source: references/tasks/deliver-parent-issue.md deliver each child
 ---
 
 ## Situation

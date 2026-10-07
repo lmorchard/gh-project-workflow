@@ -1,6 +1,6 @@
 ---
 skills: [submit-pr]
-source: skills/submit-pr publish rules
+source: references/tasks/submit-pr.md publish rules
 ---
 
 ## Situation

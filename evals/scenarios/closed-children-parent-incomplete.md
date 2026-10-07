@@ -1,6 +1,6 @@
 ---
 skills: [reconsider-issue]
-source: skills/shared/evidence.md sources and revisions
+source: references/shared/evidence.md sources and revisions
 ---
 
 ## Situation

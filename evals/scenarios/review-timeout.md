@@ -1,6 +1,6 @@
 ---
 skills: [address-pr-review]
-source: skills/address-pr-review wait rules
+source: references/tasks/address-pr-review.md wait rules
 ---
 
 ## Situation
