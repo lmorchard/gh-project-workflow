@@ -354,11 +354,15 @@ READBACK_DELAY_SECONDS = 2
 
 def board_set_status(repo, number, owner, project, status, allow_backward=False, gh=run_gh, sleep=time.sleep):
     """Move one issue to a status on one board, refusing backward moves and stale transitions, and read the result back."""
-    result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status, "errors": []}
+    result = {"issue": f"{repo}#{number}", "project": f"{owner}/{project}", "requested": status,
+              "facts": [], "added": False, "errors": []}
 
     def fail(part, error):
         result["errors"].append({"part": part, "error": str(error)})
         return result, 1
+
+    def fact(step, state):
+        result["facts"].append({"step": step, "state": state})
 
     def read_item():
         """Return (issue_url, item, incomplete).
@@ -410,6 +414,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         for option in field["options"]:
             if not isinstance(option, dict) or not isinstance(option.get("name"), str):
                 raise ValueError("A Status option is not a named string.")
+            if "id" not in option:
+                raise ValueError("A Status option is missing its id.")
             options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
@@ -428,7 +434,6 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("issue", error)
     result["before"] = item[1] if item else None
-    result["added"] = False
     result["membership_complete"] = not incomplete
 
     if item is None and incomplete:
@@ -438,10 +443,13 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
 
     if item and item[1] == target:
         result.update(action="unchanged", after=target, readback_matches=True)
+        fact("membership", "reused")
+        fact("status", "already_at_target")
         return result, 0
     if item and item[1] in options and options.index(item[1]) > options.index(target) and not allow_backward:
         result.update(action="refused", after=item[1])
         result["reason"] = f"{item[1]} to {target} is a backward move. Pass --allow-backward only with a reason and authorization."
+        fact("status", "refused")
         return result, 3
 
     # Re-read the live status just before the write. Another actor may have moved the
@@ -467,17 +475,29 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         if live is None:
             item_id = gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"])["id"]
             result["added"] = True
+            fact("membership", "completed")
         else:
             item_id = live[0]
-        option_id = next(option["id"] for option in field["options"] if option["name"] == target)
+            fact("membership", "reused")
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
+        result["errors"].append({"part": "add", "error": str(error)})
+        fact("membership", "uncertain")
+        return result, 1
+
+    edit_failed = False
+    option_id = next(option["id"] for option in field["options"] if option["name"] == target)
+    try:
         gh(["project", "item-edit", "--id", item_id, "--project-id", project_id, "--field-id", field["id"],
               "--single-select-option-id", option_id, "--format", "json"])
-
+        fact("status", "completed")
+        result["action"] = "set"
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
-        return fail("write", error)
-    result["action"] = "set"
+         # The edit reported a failure but the remote change may have taken hold,
+         # so reconcile through a fresh read rather than the failed response.
+        edit_failed = True
+        result["errors"].append({"part": "write", "error": str(error)})
+        fact("status", "uncertain")
 
-    # Project reads can lag a successful write, so read again before reporting a mismatch.
     for attempt in range(1, READBACK_ATTEMPTS + 1):
         if attempt > 1:
             sleep(READBACK_DELAY_SECONDS)
@@ -498,7 +518,21 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         result["readback_matches"] = False
         return result, 2
     result["readback_matches"] = result["after"] == target
-    return result, 0 if result["readback_matches"] else 2
+
+    if result["readback_matches"]:
+        fact("readback", "confirmed")
+        if edit_failed:
+            result["action"] = "reconciled"
+        return result, 0
+    if edit_failed:
+        fact("readback", "unknown" if result["after"] is None else "mismatch")
+        return result, 1
+    if result["after"] is None:
+        fact("readback", "unknown")
+        return result, 2
+    fact("readback", "mismatch")
+    result["action"] = "mismatch"
+    return result, 2
 
 
 def resolve_identity(env=None, config_paths=None):
