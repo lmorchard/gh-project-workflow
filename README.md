@@ -10,7 +10,7 @@ Keep a full checkout of this repository. Install personal symbolic links with:
 python3 scripts/install-skill.py claude codex
 ```
 
-A symbolic link points to the source directory. Source edits appear through the links without another installation.
+A symbolic link points to the source checkout root. Source edits appear through the links without another installation.
 The installer preserves correct links and refuses existing conflicting entries before it creates links.
 It creates `~/.claude/skills/ghflow` and `~/.agents/skills/ghflow`.
 OpenCode also discovers these compatible directories. See the [setup trial](docs/trials/2026-10-07-ghflow-setup.md) for tested discovery and limits.
@@ -31,13 +31,14 @@ Start a new agent session in the target project. Request an operation explicitly
 
 > Use ghflow to review PR #456.
 
-Read [ghflow](skills/ghflow/SKILL.md) for routing and dependency access.
-The skill launcher uses an absolute resolved path and preserves the target project's current directory.
+Read [ghflow](SKILL.md) for routing and dependency access.
+The entry skill resolves the source checkout root and uses its absolute `cli/ghflow.py` path.
+Commands preserve the target project's current directory.
 It does not require the workflow checkout to be the current directory.
 
 ## Source access permissions
 
-The agent needs access to the resolved source checkout, including `docs/writing.md` outside the linked skill directory.
+The agent needs access to the resolved source checkout, including `references/`, `docs/writing.md`, and `cli/ghflow.py`.
 If the agent requests external directory access, permit that source checkout for this task.
 A link does not grant tool permissions.
 For Claude Code, `--add-dir SOURCE_CHECKOUT` includes that checkout in the session's allowed directories.
@@ -70,34 +71,34 @@ The entry skill selects these independently usable operations:
 
 ### Backlog Triage & Project Board Management
 
-- [bundle-issues](skills/ghflow/references/tasks/bundle-issues.md) groups related issues into thematic initiatives under native GitHub parent issues labeled `theme`.
-- [triage-issues](skills/ghflow/references/tasks/triage-issues.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
-- [sweep-needs-input](skills/ghflow/references/tasks/sweep-needs-input.md) interactively resolves blocking product and architectural decisions with the user.
-- [sweep-needs-definition](skills/ghflow/references/tasks/sweep-needs-definition.md) develops accepted issues into bounded, actionable specifications with concrete file targets and test criteria.
-- [sweep-audit-closed](skills/ghflow/references/tasks/sweep-audit-closed.md) reviews and confirms autonomously closed issues with cited evidence.
-- [sweep-prioritize](skills/ghflow/references/tasks/sweep-prioritize.md) assigns Priority (`P0`–`P3`) and Size (`XS`–`XL`) fields on the project board and re-sweeps deferred items.
-- [curate-ready-queue](skills/ghflow/references/tasks/curate-ready-queue.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
+- [bundle-issues](references/tasks/bundle-issues.md) groups related issues into thematic initiatives under native GitHub parent issues labeled `theme`.
+- [triage-issues](references/tasks/triage-issues.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
+- [sweep-needs-input](references/tasks/sweep-needs-input.md) interactively resolves blocking product and architectural decisions with the user.
+- [sweep-needs-definition](references/tasks/sweep-needs-definition.md) develops accepted issues into bounded, actionable specifications with concrete file targets and test criteria.
+- [sweep-audit-closed](references/tasks/sweep-audit-closed.md) reviews and confirms autonomously closed issues with cited evidence.
+- [sweep-prioritize](references/tasks/sweep-prioritize.md) assigns Priority (`P0`–`P3`) and Size (`XS`–`XL`) fields on the project board and re-sweeps deferred items.
+- [curate-ready-queue](references/tasks/curate-ready-queue.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
 
 ### Single Issue Specification & Implementation
 
-- [reconsider-issue](skills/ghflow/references/tasks/reconsider-issue.md) reassesses an existing issue against current project evidence.
-- [decompose-parent-issue](skills/ghflow/references/tasks/decompose-parent-issue.md) maps a broad issue into bounded children and a parent completion condition.
-- [define-issue](skills/ghflow/references/tasks/define-issue.md) prepares and reviews an issue draft.
-- [interview-issue](skills/ghflow/references/tasks/interview-issue.md) resolves decisions with the user.
-- [file-issue](skills/ghflow/references/tasks/file-issue.md) publishes a reviewed draft and confirms the requested GitHub changes.
-- [implement-issue](skills/ghflow/references/tasks/implement-issue.md) produces tested, committed changes for PR preparation.
-- [review-changes](skills/ghflow/references/tasks/review-changes.md) assesses changes in a fresh reviewer context without editing them.
-- [submit-pr](skills/ghflow/references/tasks/submit-pr.md) publishes committed work and requests a review; for an agent pull request, independent local review is the primary source and the user may request Copilot review.
-- [address-pr-review](skills/ghflow/references/tasks/address-pr-review.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
-- [merge-pr](skills/ghflow/references/tasks/merge-pr.md) confirms CI and review findings, merges authorized changes, and confirms the result.
+- [reconsider-issue](references/tasks/reconsider-issue.md) reassesses an existing issue against current project evidence.
+- [decompose-parent-issue](references/tasks/decompose-parent-issue.md) maps a broad issue into bounded children and a parent completion condition.
+- [define-issue](references/tasks/define-issue.md) prepares and reviews an issue draft.
+- [interview-issue](references/tasks/interview-issue.md) resolves decisions with the user.
+- [file-issue](references/tasks/file-issue.md) publishes a reviewed draft and confirms the requested GitHub changes.
+- [implement-issue](references/tasks/implement-issue.md) produces tested, committed changes for PR preparation.
+- [review-changes](references/tasks/review-changes.md) assesses changes in a fresh reviewer context without editing them.
+- [submit-pr](references/tasks/submit-pr.md) publishes committed work and requests a review; for an agent pull request, independent local review is the primary source and the user may request Copilot review.
+- [address-pr-review](references/tasks/address-pr-review.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
+- [merge-pr](references/tasks/merge-pr.md) confirms CI and review findings, merges authorized changes, and confirms the result.
 
 ### Workflow Coordinators
 
-- [express-issue](skills/ghflow/references/tasks/express-issue.md) coordinates one selected issue through delivery to an agreed endpoint.
-- [deliver-parent-issue](skills/ghflow/references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
-- [burndown-ready-queue](skills/ghflow/references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
+- [express-issue](references/tasks/express-issue.md) coordinates one selected issue through delivery to an agreed endpoint.
+- [deliver-parent-issue](references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
+- [burndown-ready-queue](references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
 
-Each operation accepts an ordinary issue or PR. References share [authorization and evidence rules](skills/ghflow/references/shared/).
+Each operation accepts an ordinary issue or PR. References share [authorization and evidence rules](references/shared).
 Delivery through review follow-up leaves the PR open. Merge requires explicit authorization and the existing review policy.
 
 ## Requirements
@@ -107,7 +108,7 @@ Keep a local checkout of the target project for code investigation.
 The standard-library CLI in [cli/ghflow.py](cli/ghflow.py) handles repeatable operations.
 It uses existing Git and `gh` commands for other work.
 
-Configure the machine account through [Agent identity](skills/ghflow/references/shared/identity.md) before subagents run Git or GitHub commands.
+Configure the machine account through [Agent identity](references/shared/identity.md) before subagents run Git or GitHub commands.
 The account needs access to the target repository. Board operations also need writer access to the selected project.
 Do not change accounts to work around access failures.
 

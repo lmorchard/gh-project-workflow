@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-SOURCE = Path(__file__).resolve().parent.parent / "skills/ghflow"
+SOURCE = Path(__file__).resolve().parent.parent
 PERSONAL = {"claude": ".claude/skills", "codex": ".agents/skills", "opencode": ".config/opencode/skills"}
 PROJECT = {"claude": ".claude/skills", "codex": ".agents/skills", "opencode": ".opencode/skills"}
 

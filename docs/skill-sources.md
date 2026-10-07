@@ -6,7 +6,7 @@ The draft adapts selected ideas from agent-sessions at commit `4379832`. It does
 
 The [documentarian prompt](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/documentarian-prompt.md) separates descriptions of current code from proposed changes. It requests file and line references, neutral questions, existing tests, and other callers of shared code.
 
-The new [research guide](../skills/ghflow/references/tasks/research.md) retains those ideas. It removes the fixed question count and mandatory research file. It also distinguishes a limited search from proof that a feature does not exist.
+The new [research guide](../references/tasks/research.md) retains those ideas. It removes the fixed question count and mandatory research file. It also distinguishes a limited search from proof that a feature does not exist.
 
 ## Issue content and readiness
 
@@ -26,7 +26,7 @@ The old findings contain evidence about some instructions in their original cont
 
 ## Filing procedure
 
-The [file-issue skill](../skills/ghflow/references/tasks/file-issue.md) comes from the [issue 861 filing trial](trials/2026-09-30-issue-843/filing.md). That trial created the issue, established its parent, added project membership, and changed its status. Read-back commands established the saved results.
+The [file-issue skill](../references/tasks/file-issue.md) comes from the [issue 861 filing trial](trials/2026-09-30-issue-843/filing.md). That trial created the issue, established its parent, added project membership, and changed its status. Read-back commands established the saved results.
 
 The skill adds recovery guidance for failed or uncertain writes. The trial did not exercise those failures. This guidance is a design precaution, not a measured guarantee of safe retries.
 
@@ -34,7 +34,7 @@ The skill uses installed command help instead of a fixed command template. The t
 
 ## Implementation procedure
 
-The [implement-issue skill](../skills/ghflow/references/tasks/implement-issue.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
+The [implement-issue skill](../references/tasks/implement-issue.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
 
 The draft retains planning against current code, isolated worktrees, baseline results, requirement-specific checks, and small changes. It also retains explicit reports of blocked work and enough information for another session to resume. Project rules determine the required tests and record format.
 
@@ -94,4 +94,11 @@ These adaptations omit fixed question counts, mandatory discovery reports, tier 
 
 ## ghflow entry and installation
 
-[Issue #16](https://github.com/lmorchard/gh-project-workflow/issues/16) records Les's 2026-10-07 decision to register one `ghflow` skill. Existing task procedures and shared policy moved into references with their boundaries preserved. The symbolic-link installer implements the installation approach agreed in that conversation. The portable launcher preserves the caller's directory and resolves the CLI from the source checkout.
+[Issue #16](https://github.com/lmorchard/gh-project-workflow/issues/16) records Les's 2026-10-07 decision to register one `ghflow` skill.
+Existing task procedures and shared policy moved into references with their boundaries preserved.
+The symbolic-link installer follows the installation approach agreed in that conversation.
+
+The first layout used a portable launcher to resolve the CLI from the source checkout.
+Les then selected a repository-root skill package for PR #17.
+The root entry now uses the existing CLI directly.
+It supplies the absolute source path and preserves the caller's directory.

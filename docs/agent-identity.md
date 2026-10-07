@@ -123,6 +123,6 @@ The parent coordinated `express-issue` for [issue 897](https://github.com/lmorch
 
 On 2026-10-03, Les adopted the machine account identity for agents in this workflow.
 
-- **Configurable identity:** The identity configuration supports environment variables and config files. The shared reference [Agent identity](../skills/ghflow/references/shared/identity.md) defines the rules.
+- **Configurable identity:** The identity configuration supports environment variables and config files. The shared reference [Agent identity](../references/shared/identity.md) defines the rules.
 - **Review source:** Independent local review is the primary review source for agent pull requests. Les can request a Copilot review manually when desired.
 - **Merge authority:** Agents can merge authorized pull requests as the machine account when green CI and affirmative review exist.

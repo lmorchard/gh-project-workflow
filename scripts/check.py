@@ -27,11 +27,19 @@ def frontmatter(text):
 
 def check_skills(root=ROOT):
     errors = []
-    paths = sorted(root.glob("skills/**/SKILL.md"))
-    expected = root / "skills/ghflow/SKILL.md"
+    inventory = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z", "*SKILL.md"],
+        cwd=root, capture_output=True, text=True,
+    )
+    if inventory.returncode == 0:
+        paths = sorted(root / name for name in inventory.stdout.split("\0")
+                       if name and (root / name).is_file())
+    else:
+        paths = sorted(root.glob("**/SKILL.md"))
+    expected = root / "SKILL.md"
     if paths != [expected]:
-        errors.append("skills: expected only skills/ghflow/SKILL.md")
-    task_dir = root / "skills/ghflow/references/tasks"
+        errors.append("skills: expected only root SKILL.md")
+    task_dir = root / "references/tasks"
     tasks = set(task_dir.glob("*.md")) - {task_dir / "research.md"}
     if not tasks:
         errors.append("skills: no task references")
@@ -50,8 +58,8 @@ def check_skills(root=ROOT):
             errors.append(f"{rel}: missing frontmatter")
             continue
         name = fields.get("name", "")
-        if name != path.parent.name:
-            errors.append(f"{rel}: name {name!r} does not match directory")
+        if name != "ghflow":
+            errors.append(f"{rel}: name {name!r} must be ghflow")
         if not NAME.match(name):
             errors.append(f"{rel}: name {name!r} is not lowercase-hyphenated")
         description = fields.get("description", "")
@@ -76,7 +84,7 @@ def check_links(root=ROOT):
         if path.is_relative_to(root / "evals/scenarios"):
             for line in text.splitlines():
                 if line.startswith("source:"):
-                    for source in re.findall(r"\bskills/[a-zA-Z0-9_/.-]+", line):
+                    for source in re.findall(r"\b(?:skills|references)/[a-zA-Z0-9_/.-]+", line):
                         if not (root / source).exists():
                             errors.append(f"{name}: broken scenario source {source}")
         for target in LINK.findall(text):

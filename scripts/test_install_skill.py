@@ -83,8 +83,13 @@ class InstallationTests(unittest.TestCase):
                                 cwd=self.root, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(sorted(p.name for p in (self.root / ".agents/skills").iterdir()), ["ghflow"])
-        launcher = self.root / ".agents/skills/ghflow/scripts/ghflow.py"
-        result = subprocess.run(["python3", str(launcher), "--help"], cwd=self.root,
+        installed = self.root / ".agents/skills/ghflow"
+        self.assertEqual(installed.resolve(), ROOT)
+        task = installed / "references/tasks/define-issue.md"
+        self.assertTrue(task.is_file())
+        self.assertTrue((installed / "docs/writing.md").is_file())
+        cli = installed / "cli/ghflow.py"
+        result = subprocess.run(["python3", str(cli), "--help"], cwd=self.root,
                                 text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("verify-commit", result.stdout)
@@ -92,7 +97,7 @@ class InstallationTests(unittest.TestCase):
         config = self.root / ".ghflow/identity.json"
         config.parent.mkdir()
         config.write_text('{"login":"target-user","name":"Target","email":"target@example.invalid"}')
-        result = subprocess.run(["python3", str(launcher), "identity"], cwd=self.root,
+        result = subprocess.run(["python3", str(cli), "identity"], cwd=self.root,
                                 text=True, capture_output=True)
         self.assertIn('"login": "target-user"', result.stdout)
 
@@ -107,7 +112,23 @@ class StructureTests(unittest.TestCase):
             skill = root / "skills/define-issue/SKILL.md"
             skill.parent.mkdir(parents=True)
             skill.write_text("---\nname: define-issue\ndescription: draft\n---\n")
-            self.assertIn("skills: expected only skills/ghflow/SKILL.md", checker.check_skills(root))
+            self.assertIn("skills: expected only root SKILL.md", checker.check_skills(root))
+
+    def test_root_skill_ignores_worktrees(self):
+        with tempfile.TemporaryDirectory() as path:
+            root = Path(path)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            (root / ".gitignore").write_text(".claude/worktrees/\n")
+            (root / "SKILL.md").write_text(
+                "---\nname: ghflow\ndescription: workflow\n---\n"
+                "[task](references/tasks/define-issue.md)\n")
+            task = root / "references/tasks/define-issue.md"
+            task.parent.mkdir(parents=True)
+            task.write_text("draft")
+            ignored = root / ".claude/worktrees/trial/SKILL.md"
+            ignored.parent.mkdir(parents=True)
+            ignored.write_text("unrelated")
+            self.assertEqual(checker.check_skills(root), [])
 
     def test_broken_task_link_fails(self):
         with tempfile.TemporaryDirectory() as path:
@@ -130,7 +151,7 @@ class StructureTests(unittest.TestCase):
     def test_unrouted_reference_fails(self):
         with tempfile.TemporaryDirectory() as path:
             root = Path(path)
-            skill = root / "skills/ghflow/SKILL.md"
+            skill = root / "SKILL.md"
             task = skill.parent / "references/tasks/hidden.md"
             task.parent.mkdir(parents=True)
             skill.write_text("---\nname: ghflow\ndescription: draft\n---\n")

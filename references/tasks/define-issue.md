@@ -24,7 +24,7 @@ When delegated, return the draft, confirmed decisions, relevant evidence, and de
 
 ## Draft the issue
 
-Issue text follows the project [Writing rules](../../../../docs/writing.md): familiar words, active voice, instruction sentences within 20 words and description sentences within 25. Define unfamiliar terms at first use. Keep identifiers and commands exact.
+Issue text follows the project [Writing rules](../../docs/writing.md): familiar words, active voice, instruction sentences within 20 words and description sentences within 25. Define unfamiliar terms at first use. Keep identifiers and commands exact.
 
 Keep the draft proportional to the task. Include these facts in whatever structure fits:
 

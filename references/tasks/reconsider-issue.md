@@ -26,7 +26,7 @@ If several useful changes remain, suggest boundaries and the next useful task. P
 
 For a substantial correction, return a revised title and body. For a small one, return the exact edit. Keep completed progress visible, and distinguish proposed scope from agreed scope.
 
-Include the remaining problem, known completed work, success conditions, and material open questions, in proportion to the issue. Issue text follows the project [Writing rules](../../../../docs/writing.md).
+Include the remaining problem, known completed work, success conditions, and material open questions, in proportion to the issue. Issue text follows the project [Writing rules](../../docs/writing.md).
 
 Review the proposal against the evidence before you return it. Make sure it keeps the original goal, does not repeat completed work, and that status and closure recommendations agree with the remaining scope. Fix unsupported claims and unclear wording yourself.
 

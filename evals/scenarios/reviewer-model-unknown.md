@@ -1,6 +1,6 @@
 ---
 skills: [express-issue, review-changes]
-source: skills/ghflow/references/shared/review.md review sources
+source: references/shared/review.md review sources
 ---
 
 ## Situation

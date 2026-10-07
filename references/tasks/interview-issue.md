@@ -30,6 +30,6 @@ Stop when the remaining choices no longer block issue definition. There is no fi
 
 Return the updated draft, the confirmed decisions, and any remaining questions, with what changed and why. Put essential answers in the draft so another agent does not need this conversation. For consequential decisions, include the reason and why a plausible alternative was rejected, in proportion to the decision. A separate decision log is not needed.
 
-Review the draft before returning it. Make sure scope, success conditions, and decisions agree, and that existing evidence stays separate from proposed tests. Issue text follows the project [Writing rules](../../../../docs/writing.md).
+Review the draft before returning it. Make sure scope, success conditions, and decisions agree, and that existing evidence stays separate from proposed tests. Issue text follows the project [Writing rules](../../docs/writing.md).
 
 To continue with [define-issue](define-issue.md), pass back the updated draft and decisions. Research restarts only if an answer invalidates existing evidence. If the agreed flow includes publication, continue to it once the decisions are settled.

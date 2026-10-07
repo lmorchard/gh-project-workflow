@@ -1,6 +1,6 @@
 ---
 skills: [express-issue]
-source: skills/ghflow/references/tasks/express-issue.md endpoint
+source: references/tasks/express-issue.md endpoint
 ---
 
 ## Situation

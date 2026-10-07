@@ -1,6 +1,6 @@
 ---
 skills: [express-issue]
-source: skills/ghflow/references/shared/authorization.md limits
+source: references/shared/authorization.md limits
 ---
 
 ## Situation
