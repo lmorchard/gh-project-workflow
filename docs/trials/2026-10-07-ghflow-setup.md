@@ -1,57 +1,79 @@
 # ghflow setup trial
 
-This trial checks [issue #16](https://github.com/lmorchard/gh-project-workflow/issues/16): discovery through symbolic links, operation selection, dependencies, and authorization limits.
-The implementation starts from `dda34b3` in an isolated worktree.
+This trial assesses symbolic-link installation, discovery, routing, and source access for [issue #16](https://github.com/lmorchard/gh-project-workflow/issues/16).
+A symbolic link points to the source directory. A fresh session has no earlier conversation.
 
-## Local behavior checks
+## Local checks
 
-The baseline `make check` passed all 93 CLI tests.
-The revised suite adds nine installation and structure tests.
-They establish these results:
+Implementation starts from `dda34b3` in `.claude/worktrees/issue-16-ghflow`.
+The baseline `make check` passed 93 CLI tests.
+The revised suite adds nine installer and structure tests.
+`make check` passes all 102 tests, local links, skill structure, scenario source paths, and whitespace.
 
-- Repeated installation preserves correct links.
-- Source edits appear through each link without another copy.
-- Files, directories, unrelated links, and dangling links cause refusal before any requested link is created.
-- Conflicting destination ancestors also cause refusal before any directory or link is created.
-- Installation exposes only `ghflow` in an isolated project skill directory.
-- The linked CLI launcher runs from an unrelated directory and reads that directory's identity configuration.
-- The structure check rejects missing entry skills, extra registered skills, and task references absent from the entry skill.
-- The link check detects a broken task reference and a stale scenario source path.
+Repeated installation preserves correct links. Source edits appear through each link without another copy.
+Conflicting entries and ancestors cause refusal before any requested directory or link is created.
+Tests cover files, directories, unrelated links, dangling links, and links to files.
 
-`make check` passes all 102 tests, local Markdown links, and whitespace checks.
-These tests do not establish agent discovery or routing behavior.
+An isolated project installation exposes only `ghflow`.
+Its launcher runs from another directory and reads that directory's identity configuration.
+Structure checks reject missing entry skills, extra registered skills, and tasks absent from the entry skill.
+Link checks detect broken task references and stale scenario source paths.
 
-The skill-creator validator could not start with system Python because PyYAML is unavailable.
-An isolated offline `uv` attempt also failed because its temporary cache contains no PyYAML package.
-The repository's own frontmatter check passes.
+The bundled skill validator could not start because system Python lacks PyYAML.
+An isolated offline `uv` attempt also failed because its temporary cache contains no PyYAML.
+Repository frontmatter checks pass. These local tests do not establish agent behavior.
 
-## Fresh-session trials
+## Fresh-session sources
 
-Fixtures: `/tmp/ghflow-native-trial-_y80vp42`; source: `/Users/lmorchard/devel/mine/gh-project-workflow/.claude/worktrees/issue-16-ghflow/skills/ghflow`.
+A separate trial agent used fixtures in `/tmp/ghflow-native-trial-_y80vp42`.
+Each target was a new Git repository with `README.md` and `request.txt` about optional task due dates.
+Prompts requested an issue draft and a read-only delivery assessment. They supplied no expected answers.
 
-Each target is an unborn Git repo with only README.md and request.txt describing optional task due dates. Fresh prompts are in draft-prompt.txt and delivery-prompt.txt. No expected answers were supplied. No target code, GitHub record, commit or push was changed. Native CLI runtime logs/cache/session records may persist in existing runtime directories; no global installation or configuration change was made.
+The source skill was `/Users/lmorchard/devel/mine/gh-project-workflow/.claude/worktrees/issue-16-ghflow/skills/ghflow`.
+The source changed during the trials. These results describe setup and routing during implementation, rather than certification of the final tree.
+Logs and the original report remain beside the temporary fixtures.
 
-### Versions and model evidence
+## Versions and models
 
-- Claude Code 2.1.293. Startup and assistant event metadata: claude-opus-5-5.
-- Codex CLI 0.161.0. Existing config selects gpt-6-astra/high. JSON events do not expose returned model identity, so config selection is evidence, not a separate provider-confirmed identity. Startup reports unknown enterprise requirement ultrafast_mode; requests still complete.
-- OpenCode 1.18.35. Existing configured ollama/qwen3-coder:30b failed with UnknownError and was absent from `opencode models`. Selected supported `opencode/big-pickle`; sanitized session export records providerID opencode and modelID big-pickle, agent plan.
+Claude Code was `2.1.293`. Startup and assistant metadata recorded `claude-opus-5-5`.
+Codex CLI was `0.161.0`. Its configuration selected `gpt-6-astra/high`.
+Codex JSON events did not report a returned model identity. Configuration proves selection, not a separate provider-confirmed identity.
+Codex reported an unknown enterprise requirement, `ultrafast_mode`. Requests still completed.
 
-### Discovery
+OpenCode was `1.18.35`.
+Its configured `ollama/qwen3-coder:30b` failed with `UnknownError` and was absent from the supported model list.
+The trial used supported `opencode/big-pickle`.
+A sanitized session export recorded `providerID=opencode`, `modelID=big-pickle`, and `agent=plan`.
 
-Claude `.claude/skills/ghflow` appears in startup skills and Skill tool successfully loads it. Codex `.agents/skills/ghflow` is discovered and read. OpenCode `debug skill` with both `.claude/skills/ghflow` and `.agents/skills/ghflow` returns exactly one ghflow, choosing `.agents`. Removing `.agents` returns exactly one at `.claude`. Retaining one `.agents` installation is enough; no duplicate entry was observed. A final repeat of dual discovery again chooses `.agents`; the delivery agent nevertheless uses the also-present `.claude` path for references and help, which resolve to the same source.
+## Discovery and routing
 
-### Draft routing
+Claude discovered `.claude/skills/ghflow`, and its Skill tool loaded the entry instructions.
+Codex discovered and read `.agents/skills/ghflow`.
+OpenCode's `debug skill` reported exactly one `ghflow` with both compatible links present. It selected `.agents`.
+After removal of `.agents`, OpenCode reported exactly one entry at `.claude`.
+A final duplicate-discovery check repeated the same result.
+The delivery agent used the equivalent `.claude` paths. Both links resolve to the same source.
 
-Claude and Codex select define-issue, read shared authorization/evidence and linked source docs/writing.md, produce in-response drafts, distinguish proposals from confirmed facts and identify missing application code/revision. Both run launcher help from target cwd. Codex also executes launcher through the symlink path. OpenCode fresh scoped-permission run selects define-issue, reads task/shared references and linked docs/writing.md, runs launcher help, and produces an in-response draft. It reports missing implementation and revision evidence, retains ordering and due-date display as unresolved decisions, and does not publish or implement. Earlier runs without the allowance ended without final conversational output.
+All three agents selected `define-issue` for the draft request.
+They read task references, shared rules, and source writing guidance.
+They produced drafts in the response without publication or implementation.
+They identified missing application code and revision evidence. Proposed behavior stayed separate from confirmed facts.
 
-### Delivery routing
+All three agents selected `express-issue` for the delivery assessment.
+They retained the review-follow-up endpoint with an open PR and the requirement for fresh, different-model independent review.
+They retained explicit merge authorization and the read-only trial limit.
+They reported the missing selected issue and did not dispatch work.
+Claude reported unavailable delegation in the restricted session. Codex reported exposed delegation that the prompt prohibited.
+These assessments do not establish complete implementation or delivery.
 
-Claude and Codex select express-issue; identify review-follow-up endpoint with PR left open, fresh-context different-model independent review, recorded runtime/dispatch identities, explicit merge authorization and read-only trial limits. Claude correctly reports this tool-limited session lacks delegation/model dispatch; Codex reports exposed delegation but the prompt forbids it. Missing real GitHub issue and unborn fixture are explicit evidence limits. Neither dispatches. OpenCode scoped-permission fresh retry completes the delivery assessment: express-issue, review-follow-up endpoint with open PR, independent different-model review, explicit merge authorization, narrow read-only trial limits, and missing selected issue. It runs launcher --help through the symlink from target cwd (exit 0). The earlier no-allowance delivery run lacked final conversational output.
+## Source access and trial limits
 
-### Paths and permission limits
+All three agents ran launcher `--help` from the target directory.
+Codex and OpenCode also ran it through a symlink path.
+Claude and Codex read source `docs/writing.md` directly.
+OpenCode initially rejected this external read and supplied no final conversational output.
 
-All three execute source `scripts/ghflow.py --help` with target checkout as cwd and observe ghflow usage. All three read task/shared references through native symlink installation. Claude/Codex actually read source docs/writing.md. OpenCode initially auto-rejected that outside-cwd read; fresh run with the scoped project-only config below successfully reads it. No blanket external allowance or global configuration was added.
+A fresh OpenCode retry used this scoped configuration in the temporary target's `opencode.json`:
 
 ```json
 {
@@ -65,9 +87,21 @@ All three execute source `scripts/ghflow.py --help` with target checkout as cwd 
 }
 ```
 
-Claude initial delivery command was denied by restrictive trial Bash permissions for compound pwd/python/echo commands. Fresh retry allows harmless pwd/echo and successfully runs standalone python3 help; this was a harness limitation, not a source portability defect. Source-checkout access is supplied with --add-dir. Codex/OpenCode initially require escalation because runtime directories outside tmp are sandbox-protected. Claude initially retried network requests under the sandbox; narrow escalation permits model access.
+The retry read writing guidance and completed both requested responses.
+The final delivery stream, `opencode-delivery-allowance.jsonl`, included final text and exit status 0.
+The README documents scoped source access. The installer changes no permissions.
 
-### Commands
+Claude's restricted Bash rules initially denied a compound help command.
+A fresh retry permitted harmless `pwd` and `echo` commands. Standalone Python help then succeeded.
+Claude used `--add-dir` for source access.
+Codex and OpenCode needed sandbox escalation for existing runtime directories. Claude needed escalation for model network access.
+
+All trial processes completed.
+The agents changed no target code, GitHub records, commits, or branches.
+The trial setup added only links and the temporary OpenCode configuration.
+No personal installation or global configuration change occurred. Existing runtime directories can retain session records and caches.
+
+## Commands
 
 Run Claude from fixture/claude:
 
@@ -91,6 +125,3 @@ OpenCode:
 
 Discovery: `opencode debug skill` from target cwd. Actual model: `opencode export --sanitize ses_ee7777abaffetl3kb0y0Z977oX`.
 
-Logs are JSONL plus stderr beside this report. Source files were being edited concurrently, so this is an in-progress implementation trial, not final-tree certification.
-
-Final fresh scoped OpenCode delivery stream: `opencode-delivery-allowance.jsonl`, completed with final text and exit 0. All model processes are complete.
