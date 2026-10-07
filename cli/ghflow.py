@@ -381,14 +381,21 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             if url is None:
                 url = issue["url"]
             items = issue["projectItems"]
-            info = items.get("pageInfo") or {}
+            info = items.get("pageInfo")
             for node_item in items["nodes"]:
                 if node_item["project"]["id"] == project_id:
                     node = (node_item["id"], (node_item.get("fieldValueByName") or {}).get("name"))
-            if not info.get("hasNextPage"):
+            if not isinstance(info, dict):
+                incomplete = True
+                break
+            has_next = info.get("hasNextPage")
+            if not isinstance(has_next, bool):
+                incomplete = True
+                break
+            if not has_next:
                 break
             cursor = info.get("endCursor")
-            if not cursor:
+            if not isinstance(cursor, str):
                 incomplete = True
                 break
         return url, node, incomplete
@@ -443,14 +450,14 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     # wins, and no local lock or repeated read makes the update atomic.
     try:
         _, live, live_incomplete = read_item()
-    except (GhError, TypeError, KeyError) as error:
+    except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return fail("recheck", error)
     if live_incomplete:
         result.update(action="refused", after=result["before"], membership_complete=False)
         result["reason"] = "The pre-write membership read was incomplete, so the live status is unconfirmed. No write was made."
         return result, 1
     live_status = live[1] if live else None
-    if live_status != result["before"]:
+    if live != item:
         result.update(action="stale-refused", after=live_status)
         result["reason"] = f"Another actor moved the item from {result['before']} to {live_status} since it was first read. The write was refused to preserve that change."
         return result, 3
@@ -487,6 +494,9 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             break
         if result["after"] == target:
             break
+    if result.get("readback_incomplete"):
+        result["readback_matches"] = False
+        return result, 2
     result["readback_matches"] = result["after"] == target
     return result, 0 if result["readback_matches"] else 2
 

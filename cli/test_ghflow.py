@@ -261,7 +261,10 @@ class FakeBoard:
     """A board with one Status field, read through GraphQL projectItems pages; membership spans pages and reads report pagination."""
 
     def __init__(self, status=None, on_board=True, fail=(), sticky=True, lag=0,
-                 advance=0, advance_to=None, member_page=1, incomplete_read=False):
+                 advance=0, advance_to=None, member_page=1, incomplete_read=False,
+                 missing_page_info=False, has_next_page_null=False,
+                 missing_end_cursor=False, recheck_json_error=False,
+                 readback_incomplete=False):
         self.status = status
         self.advance = advance
         self.advance_to = advance_to
@@ -271,6 +274,11 @@ class FakeBoard:
         self.lag = lag
         self.page_count = member_page
         self.incomplete_read = incomplete_read
+        self.missing_page_info = missing_page_info
+        self.has_next_page_null = has_next_page_null
+        self.missing_end_cursor = missing_end_cursor
+        self.recheck_json_error = recheck_json_error
+        self.readback_incomplete = readback_incomplete
         self.pending = None
         self.writes = []
         self.sleeps = []
@@ -304,6 +312,10 @@ class FakeBoard:
             else:
                 self.status, self.pending = self.pending, None
         self.member_reads += 1
+        # recheck_json_error: on the second membership read (pre-write live re-read)
+        # raise JSONDecodeError to exercise finding-D in read_item.
+        if self.recheck_json_error and self.member_reads >= 2:
+            raise json.JSONDecodeError("bad", "x", 0)
         page_index = min(self.member_reads, self.page_count)
         live = self.status
         if self.advance and self.member_reads > self.advance:
@@ -316,9 +328,21 @@ class FakeBoard:
             if self.on_board:
                 value = {"name": live} if live else {}
                 nodes.append({"id": "ITEM", "project": {"id": "P1"}, "fieldValueByName": value})
-            info = {"hasNextPage": self.incomplete_read, "endCursor": None}
+            if self.missing_page_info:
+                info = None   # entirely absent
+            elif self.has_next_page_null:
+                info = {"hasNextPage": None, "endCursor": None}
+            elif self.missing_end_cursor:
+                info = {"hasNextPage": True}   # hasNextPage=True but no endCursor
+            elif self.readback_incomplete and self.writes:
+                info = {"hasNextPage": True, "endCursor": None}   # post-write page incomplete
+            else:
+                info = {"hasNextPage": self.incomplete_read, "endCursor": None}
+        if self.missing_page_info:
+            return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
+                 "projectItems": {"nodes": nodes}}}}}
         return {"data": {"repository": {"issue": {"url": "https://github.com/o/r/issues/5",
-                    "projectItems": {"nodes": nodes, "pageInfo": info}}}}}
+             "projectItems": {"nodes": nodes, "pageInfo": info}}}}}
 
 
 def set_status(board, status, **kwargs):
@@ -444,6 +468,51 @@ class BoardSetStatusTests(unittest.TestCase):
         self.assertEqual(result["errors"][0]["part"], "issue")
         self.assertEqual(board.writes, [])
         self.assertEqual(status, 1)
+
+    def test_stale_transition_with_item_removed_fires_refused(self):
+        # An item is removed between reads; the guard compares full (id, status), so
+        # None != (id, status) triggers stale-refused, not item-add.
+        board = FakeBoard("In progress", on_board=True, advance=1, advance_to=None)
+        result, status = set_status(board, "In review")
+        self.assertEqual(result["action"], "stale-refused")
+        self.assertFalse(result.get("added", True))
+        self.assertEqual(status, 3)
+
+    def test_incomplete_readback_does_not_report_success(self):
+         # The post-write read page reports incomplete=True with the target present;
+         # the result must not be status 0.
+        board = FakeBoard("Backlog", readback_incomplete=True)
+        result, status = set_status(board, "Ready")
+        self.assertEqual(status, 2)
+        self.assertFalse(result.get("readback_matches", False))
+
+    def test_missing_page_info_marks_read_incomplete(self):
+        # A response with absent pageInfo causes incomplete=True, which for an absent
+        # item leads to "refused", not an item-add.
+        board = FakeBoard(on_board=False, missing_page_info=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertFalse(result.get("membership_complete", True))
+        self.assertEqual(status, 1)
+
+    def test_non_boolean_has_next_page_is_incomplete(self):
+        board = FakeBoard(on_board=False, has_next_page_null=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_missing_end_cursor_is_incomplete(self):
+        board = FakeBoard(on_board=False, missing_end_cursor=True)
+        result, status = set_status(board, "In progress")
+        self.assertEqual(result["action"], "refused")
+        self.assertEqual(status, 1)
+
+    def test_recheck_catches_json_decode_error(self):
+        board = FakeBoard("In progress", recheck_json_error=True)
+        result, status = set_status(board, "In review")
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "recheck")
+
 
 
 class IdentityTests(unittest.TestCase):
