@@ -16,7 +16,7 @@ GHFLOW_CLI="ABSOLUTE_SKILL_DIRECTORY/scripts/ghflow.py"
 python3 "$GHFLOW_CLI" --help
 ```
 
-Replace `ABSOLUTE_SKILL_DIRECTORY` with the resolved directory. Keep the full source checkout available: the launcher resolves `cli/ghflow.py` from its own file path. It preserves the current directory, so run Git and GitHub commands from the target project. Resolve writing guidance through each reference's links, not through the current directory.
+Replace `ABSOLUTE_SKILL_DIRECTORY` with the resolved directory. Keep the full source checkout available: the launcher resolves `cli/ghflow.py` from its own file path. It preserves the current directory, so run Git and GitHub commands from the target project. Resolve writing guidance through each reference's links, not through the current directory. If source reads need external directory permission, report the resolved checkout path and use the setup instructions in [Source access permissions](../../README.md#source-access-permissions). Do not silently change agent permissions.
 
 Apply [Authorization](references/shared/authorization.md) and [Evidence](references/shared/evidence.md). Before a subagent runs Git or GitHub commands, apply [Agent identity](references/shared/identity.md). CLI reads do not grant permission to write.
 

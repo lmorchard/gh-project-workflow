@@ -1,6 +1,6 @@
 ---
 skills: [reconsider-issue]
-source: skills/shared/evidence.md sources and revisions
+source: skills/ghflow/references/shared/evidence.md sources and revisions
 ---
 
 ## Situation

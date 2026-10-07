@@ -1,6 +1,6 @@
 ---
 skills: [merge-pr]
-source: skills/shared/review.md affirmative review
+source: skills/ghflow/references/shared/review.md affirmative review
 ---
 
 ## Situation

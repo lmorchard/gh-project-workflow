@@ -1,6 +1,6 @@
 ---
 skills: [file-issue]
-source: skills/file-issue resume rules
+source: skills/ghflow/references/tasks/file-issue.md resume rules
 ---
 
 ## Situation

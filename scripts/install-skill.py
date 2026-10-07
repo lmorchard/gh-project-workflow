@@ -16,6 +16,9 @@ def install(destinations, source=SOURCE):
         raise ValueError(f"Missing source skill: {source}")
     # Check the full request before creating any links.
     for destination in destinations:
+        for ancestor in destination.parents:
+            if os.path.lexists(ancestor) and not ancestor.is_dir():
+                raise ValueError(f"Destination ancestor is not a directory: {ancestor}")
         if os.path.lexists(destination):
             if destination.is_symlink() and destination.resolve() == source:
                 continue

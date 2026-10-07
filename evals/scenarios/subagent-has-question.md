@@ -1,6 +1,6 @@
 ---
 skills: [implement-issue]
-source: skills/shared/authorization.md roles
+source: skills/ghflow/references/shared/authorization.md roles
 ---
 
 ## Situation

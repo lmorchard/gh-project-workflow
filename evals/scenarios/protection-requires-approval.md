@@ -1,6 +1,6 @@
 ---
 skills: [merge-pr]
-source: skills/merge-pr merge rules
+source: skills/ghflow/references/tasks/merge-pr.md merge rules
 ---
 
 ## Situation

@@ -1,6 +1,6 @@
 ---
 skills: [submit-pr]
-source: skills/shared/identity.md code review policy; issue 3
+source: skills/ghflow/references/shared/identity.md code review policy; issue 3
 ---
 
 ## Situation

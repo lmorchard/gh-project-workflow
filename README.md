@@ -35,11 +35,41 @@ Read [ghflow](skills/ghflow/SKILL.md) for routing and dependency access.
 The skill launcher uses an absolute resolved path and preserves the target project's current directory.
 It does not require the workflow checkout to be the current directory.
 
+## Source access permissions
+
+The agent needs access to the resolved source checkout, including `docs/writing.md` outside the linked skill directory.
+If the agent requests external directory access, permit that source checkout for this task.
+A link does not grant tool permissions.
+For Claude Code, `--add-dir SOURCE_CHECKOUT` includes that checkout in the session's allowed directories.
+Codex's read-only sandbox allowed these dependency reads in the setup trial.
+
+OpenCode prompts for external directory access by default.
+For unattended sessions, merge this narrowly scoped rule into the target project's `opencode.json` after you inspect its existing rules:
+
+```json
+{
+  "permission": {
+    "external_directory": {
+      "/ABSOLUTE/SOURCE_CHECKOUT/*": "allow"
+    },
+    "edit": {
+      "/ABSOLUTE/SOURCE_CHECKOUT/*": "deny"
+    }
+  }
+}
+```
+
+Replace both paths with the resolved source checkout.
+This permits source access and blocks file-tool edits to it. Other tool permissions still apply.
+The installer does not change agent permissions or write this configuration.
+See [OpenCode permissions](https://opencode.ai/docs/permissions/#external-directories) for directory and tool rules.
+
 ## Operations
 
 The entry skill selects these independently usable operations:
 
 ### Backlog Triage & Project Board Management
+
 - [bundle-issues](skills/ghflow/references/tasks/bundle-issues.md) groups related issues into thematic initiatives under native GitHub parent issues labeled `theme`.
 - [triage-issues](skills/ghflow/references/tasks/triage-issues.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
 - [sweep-needs-input](skills/ghflow/references/tasks/sweep-needs-input.md) interactively resolves blocking product and architectural decisions with the user.
@@ -49,6 +79,7 @@ The entry skill selects these independently usable operations:
 - [curate-ready-queue](skills/ghflow/references/tasks/curate-ready-queue.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
 
 ### Single Issue Specification & Implementation
+
 - [reconsider-issue](skills/ghflow/references/tasks/reconsider-issue.md) reassesses an existing issue against current project evidence.
 - [decompose-parent-issue](skills/ghflow/references/tasks/decompose-parent-issue.md) maps a broad issue into bounded children and a parent completion condition.
 - [define-issue](skills/ghflow/references/tasks/define-issue.md) prepares and reviews an issue draft.
@@ -61,6 +92,7 @@ The entry skill selects these independently usable operations:
 - [merge-pr](skills/ghflow/references/tasks/merge-pr.md) confirms CI and review findings, merges authorized changes, and confirms the result.
 
 ### Workflow Coordinators
+
 - [express-issue](skills/ghflow/references/tasks/express-issue.md) coordinates one selected issue through delivery to an agreed endpoint.
 - [deliver-parent-issue](skills/ghflow/references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
 - [burndown-ready-queue](skills/ghflow/references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.

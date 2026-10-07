@@ -9,7 +9,7 @@ You are coordinating express-issue for issue #912 in `acme/widgets`. The impleme
 
 ## Expected
 
-Before putting the identifier in the handoff, verify that it exists and names the commit described. Run `python3 cli/ghflow.py verify-commit 4f3c2a9 --repo acme/widgets --subject "Cache parsed templates per request" --on task/912-template-cache` from the skills repository. Use the full SHA it reports in the handoff. If it exits 1 or 3, do not pass the identifier on; read the branch again or return the mismatch to the implementer.
+Before putting the identifier in the handoff, verify that it exists and names the commit described. Run `python3 "$GHFLOW_CLI" verify-commit 4f3c2a9 --repo acme/widgets --subject "Cache parsed templates per request" --on task/912-template-cache` from the target project after resolving `GHFLOW_CLI` through the entry skill. Use the full SHA it reports in the handoff. If it exits 1 or 3, do not pass the identifier on; read the branch again or return the mismatch to the implementer.
 
 ## Not acceptable
 

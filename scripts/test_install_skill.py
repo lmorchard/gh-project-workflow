@@ -55,6 +55,28 @@ class InstallationTests(unittest.TestCase):
                 if kind == "directory": conflict.rmdir()
                 else: conflict.unlink()
 
+    def test_ancestor_conflicts_preflight_before_any_link(self):
+        for kind in ("file", "dangling-link", "link-to-file"):
+            with self.subTest(kind=kind):
+                trial_home = self.root / kind
+                trial_home.mkdir()
+                conflict = trial_home / ".agents"
+                target = trial_home / "ancestor-target"
+                if kind == "file": conflict.write_text("keep")
+                else:
+                    if kind == "link-to-file": target.write_text("keep")
+                    conflict.symlink_to(target)
+                result = subprocess.run(
+                    ["python3", str(ROOT / "scripts/install-skill.py"),
+                     "--home", str(trial_home), "claude", "codex"],
+                    text=True, capture_output=True)
+                self.assertEqual(result.returncode, 1)
+                self.assertFalse((trial_home / ".claude").exists())
+                if kind == "file": self.assertEqual(conflict.read_text(), "keep")
+                else: self.assertEqual(conflict.readlink(), target)
+                conflict.unlink()
+                if target.exists(): target.unlink()
+
     def test_project_install_and_cli_from_unrelated_cwd(self):
         result = subprocess.run(["python3", str(ROOT / "scripts/install-skill.py"),
                                  "--project", str(self.root), "claude", "codex"],
@@ -94,6 +116,16 @@ class StructureTests(unittest.TestCase):
             (root / "entry.md").write_text("[task](references/missing.md)")
             self.assertEqual(checker.check_links(root),
                              ["entry.md: broken link references/missing.md"])
+
+    def test_stale_scenario_source_fails(self):
+        with tempfile.TemporaryDirectory() as path:
+            root = Path(path)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            scenario = root / "evals/scenarios/stale.md"
+            scenario.parent.mkdir(parents=True)
+            scenario.write_text("---\nsource: skills/shared/evidence.md\n---\n")
+            self.assertEqual(checker.check_links(root), [
+                "evals/scenarios/stale.md: broken scenario source skills/shared/evidence.md"])
 
     def test_unrouted_reference_fails(self):
         with tempfile.TemporaryDirectory() as path:

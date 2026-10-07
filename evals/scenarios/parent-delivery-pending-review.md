@@ -1,6 +1,6 @@
 ---
 skills: [deliver-parent-issue, express-issue, merge-pr]
-source: skills/deliver-parent-issue merge rule
+source: skills/ghflow/references/tasks/deliver-parent-issue.md merge rule
 ---
 
 ## Situation

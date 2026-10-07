@@ -1,6 +1,6 @@
 ---
 skills: [address-pr-review]
-source: skills/address-pr-review CI repair
+source: skills/ghflow/references/tasks/address-pr-review.md CI repair
 ---
 
 ## Situation

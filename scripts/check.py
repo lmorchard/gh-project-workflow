@@ -72,7 +72,14 @@ def check_links(root=ROOT):
         path = root / name
         if not path.exists():
             continue
-        for target in LINK.findall(path.read_text()):
+        text = path.read_text()
+        if path.is_relative_to(root / "evals/scenarios"):
+            for line in text.splitlines():
+                if line.startswith("source:"):
+                    for source in re.findall(r"\bskills/[a-zA-Z0-9_/.-]+", line):
+                        if not (root / source).exists():
+                            errors.append(f"{name}: broken scenario source {source}")
+        for target in LINK.findall(text):
             if re.match(r"^[a-z]+:", target) or target.startswith("#"):
                 continue
             if not (path.parent / target.split("#")[0]).exists():

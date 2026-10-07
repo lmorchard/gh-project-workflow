@@ -1,6 +1,6 @@
 ---
 skills: [submit-pr]
-source: skills/submit-pr publish rules
+source: skills/ghflow/references/tasks/submit-pr.md publish rules
 ---
 
 ## Situation
