@@ -25,9 +25,11 @@ If you move the source checkout, replace its stale links manually. The installer
 
 OpenCode can discover nested `SKILL.md` files inside the linked checkout, including Git-ignored worktrees.
 Repository checks ignore worktrees, but native discovery does not.
-We propose a clean dedicated source checkout for installation until the installer policy is settled.
-The installer currently does not reject nested skill packages.
-The [root-package trial](docs/trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records this unresolved limitation.
+The selected policy documents this limitation and permits root checkout links without an installer guard.
+Inspect the installed source's worktrees for nested skill files.
+Maintain worktrees through authorized cleanup, and preserve worktrees with uncommitted changes or an open PR.
+If additional skills are unwanted, use a separate source checkout without nested skill packages.
+The [root-package trial](docs/trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records the evidence and decision.
 
 Start a new agent session in the target project. Request an operation explicitly:
 

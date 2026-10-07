@@ -104,10 +104,21 @@ The [configuration schema](https://opencode.ai/config.json) provides additional 
 [Watcher configuration](https://opencode.ai/docs/config/#watcher) controls file watching.
 
 Clean-source discovery succeeds, but ignored nested worktrees can expose additional skills in OpenCode `1.18.35`.
-The root-layout installation policy for this case remains a user decision.
-We propose a clean dedicated source checkout for installation.
-This recommendation does not add an installer restriction.
-No installer guard, permission workaround, or worktree removal was applied during this checkpoint.
+Les selected a document-only policy for this limitation on 2026-10-07.
+Root checkout links remain permitted. The installer does not reject nested skill packages.
+Inspect and maintain source worktrees through authorized cleanup.
+Preserve worktrees with uncommitted changes or an open PR.
+If unwanted skills appear, use a separate source checkout without nested skill packages.
+No installer guard, permission workaround, or worktree removal was applied.
+
+## Review decision for PR #17
+
+The original implementation model identity remains unknown.
+Independent reviewer `gpt-6-astra` reviewed head `883786d5bb3fea2514ee41c267460d986d0a6faa` with no new actionable findings.
+This review does not prove that the reviewer used a different model from the implementer.
+Les accepted this review for PR #17 on 2026-10-07.
+The exception applies only to this task and permits progress after checks of the current head.
+It does not change the shared review policy or authorize merge.
 
 ## Source permissions and limits
 
