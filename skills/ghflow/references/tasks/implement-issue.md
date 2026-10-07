@@ -1,0 +1,74 @@
+# Implement an issue
+
+Produce tested, committed changes for the requested issue, with enough evidence for another agent to prepare a PR. This skill ends with a local branch and a report. Do not push, open a PR, merge, or remove the worktree.
+
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
+
+## Read the issue and current code
+
+Read the project instructions, the issue body, and relevant comments. Identify the intended result, scope limits, success conditions, and confirmed decisions. Do not require labels or documents from another skill.
+
+Inspect the relevant code and tests at the current revision, and determine whether the reported problem still exists. If part of the issue is already satisfied, record the evidence and implement only what remains. If nothing remains, report that. Do not create unrelated work to justify a commit.
+
+Resolve routine implementation choices from the current code and project conventions. If a missing decision changes scope or user-visible behavior, explain the question and recommend an answer instead of redefining the issue.
+
+## Prepare an isolated workspace
+
+Inspect the current status, branches, and existing worktrees before you change anything. Preserve unrelated work.
+
+Determine the base branch from the project or the request. Do not assume it is `main` or that the current checkout is the right base. Refresh its remote reference when access permits.
+
+Create a worktree and task branch following project conventions. Do not reset or switch the shared checkout. Do not reuse another session's worktree because its name matches the issue.
+
+If resuming, confirm the supplied worktree and branch before you edit, and read their existing changes. Continue that work instead of starting a competing implementation.
+
+Prepare what the baseline checks need, such as generated code, frontend packages, and browser binaries. A Python test suite can need JavaScript tools too. Install declared dependencies as the project directs, before the baseline. Installs into the project or the user's home are part of the task. A system-level install, such as one that uses `sudo` or the operating system's package manager, needs explicit authorization: report the need and the command instead of running it. Do not run an installation at the same time as tests that use or copy those dependencies; some gate commands reinstall packages, so check before running gates in parallel. Use test configuration and isolated data where required. Do not copy credentials or connect to live services to make tests pass.
+
+Run the relevant baseline before implementation. Record existing failures and environment limits separately from new failures. If a baseline problem prevents meaningful verification, investigate or report it. Independent implementation can continue, but incomplete verification is not success.
+
+## Mark implementation in progress
+
+When implementation starts, move the issue to In progress, following [Board status](../shared/board-status.md). On resumption, keep a later state such as In review or Done. If the update fails, report it and continue implementation.
+
+## Plan the change and its evidence
+
+Make a short plan against the current code. Connect each planned change to an issue requirement. Prefer small steps that show useful behavior across the relevant components.
+
+For each success condition, name a test, command, or human assessment, what it establishes, and its expected result. Mark which checks exist and which you must add. Keep tests of new behavior separate from tests that protect existing behavior. Missing tests or setup errors do not demonstrate the reported bug.
+
+Use the project's record format if it has one. Otherwise keep brief notes with the task. Do not create a fixed set of planning files.
+
+## Implement and test
+
+Follow the project's test-first rules. For a bug fix, demonstrate the failure before changing the implementation when feasible. Make sure the failure comes from the reported behavior, not a broken setup.
+
+Make the smallest change that satisfies the issue. Add tests for the intended behavior and relevant error cases. Leave unrelated cleanup out.
+
+Run targeted tests first during implementation iterations to maintain fast feedback. Run the broader test suite and project checks once the implementation is in place, before self-review and commit. Do not repeatedly run the entire test suite on intermediate edits when targeted tests are sufficient.
+
+Change a test when the intended behavior requires it, and explain why. Do not remove useful assertions to make the suite pass. If an issue requirement itself is wrong, return that decision to the parent or user.
+
+If a requirement needs human judgment, prepare the example or demonstration and state what the person must assess.
+
+## Review and commit
+
+Inspect the complete task diff from the merge base, including uncommitted and new files. Look for incomplete changes, missed callers, error cases, unrelated edits, and missing documentation. Check that changed tests still establish the intended behavior. Fix what you find within scope, and run the affected checks again.
+
+If the base changes or conflicts need resolution, reassess which results still apply.
+
+Stage only the intended files and inspect the staged diff. Commit logical changes following project conventions. If a commit hook changes tested files, run the affected checks again. Make sure the commits contain the changes your report describes.
+
+This self-review is not independent review. Do not claim independent verification when none occurred.
+
+## Return the result
+
+Return:
+
+- The issue URL, worktree path, branch, base revision, final commits, the revision you tested, and any remaining uncommitted changes.
+- The board transition result, or why it was skipped or failed.
+- The implementation model from session metadata, or "unknown". The parent uses it to choose a different model for review.
+- The changes, and the result for each success condition.
+- The commands you ran and their results, including failures and checks you did not run.
+- Status: ready for PR preparation, incomplete, or awaiting a decision. A partial or failing implementation is not ready. Include existing failures, remaining human assessments, and unresolved risks.
+
+If blocked or interrupted, preserve the worktree and report completed work and the next useful action. Do not post comments or make further board changes to report a blocker. Hand separately authorized next actions back to the parent.

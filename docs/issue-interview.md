@@ -4,9 +4,9 @@ The issue-definition agent corrects problems that it can resolve from evidence. 
 
 ## Responsibilities
 
-The [define-issue skill](../skills/define-issue/SKILL.md) researches, drafts, and reviews an issue. A delegated agent returns the draft, confirmed decisions, and unresolved questions. Each question includes its reason, recommendation, and tradeoff.
+The [define-issue skill](../skills/ghflow/references/tasks/define-issue.md) researches, drafts, and reviews an issue. A delegated agent returns the draft, confirmed decisions, and unresolved questions. Each question includes its reason, recommendation, and tradeoff.
 
-The [interview-issue skill](../skills/interview-issue/SKILL.md) helps the parent discuss those questions with the user. It can also start from a rough idea. It updates the draft as the user supplies answers.
+The [interview-issue skill](../skills/ghflow/references/tasks/interview-issue.md) helps the parent discuss those questions with the user. It can also start from a rough idea. It updates the draft as the user supplies answers.
 
 The parent can then return the draft and decisions for another issue review. After authorization, `file-issue` publishes the reviewed draft. No skill requires a scheduler or another skill to be installed.
 

@@ -25,10 +25,26 @@ def frontmatter(text):
     return fields
 
 
-def check_skills():
+def check_skills(root=ROOT):
     errors = []
-    for path in sorted(ROOT.glob("skills/*/SKILL.md")):
-        rel = path.relative_to(ROOT)
+    paths = sorted(root.glob("skills/**/SKILL.md"))
+    expected = root / "skills/ghflow/SKILL.md"
+    if paths != [expected]:
+        errors.append("skills: expected only skills/ghflow/SKILL.md")
+    task_dir = root / "skills/ghflow/references/tasks"
+    tasks = set(task_dir.glob("*.md")) - {task_dir / "research.md"}
+    if not tasks:
+        errors.append("skills: no task references")
+    if expected.exists():
+        routed = {(expected.parent / target.split("#")[0]).resolve()
+                  for target in LINK.findall(expected.read_text())}
+        for task in sorted(tasks):
+            if task.resolve() not in routed:
+                errors.append(f"{task.relative_to(root)}: not reachable from entry skill")
+            if frontmatter(task.read_text()) is not None:
+                errors.append(f"{task.relative_to(root)}: task reference has skill frontmatter")
+    for path in paths:
+        rel = path.relative_to(root)
         fields = frontmatter(path.read_text())
         if fields is None:
             errors.append(f"{rel}: missing frontmatter")
@@ -46,14 +62,14 @@ def check_skills():
     return errors
 
 
-def check_links():
+def check_links(root=ROOT):
     errors = []
     files = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.md"],
-        cwd=ROOT, capture_output=True, text=True, check=True,
+        cwd=root, capture_output=True, text=True, check=True,
     ).stdout.split()
     for name in files:
-        path = ROOT / name
+        path = root / name
         if not path.exists():
             continue
         for target in LINK.findall(path.read_text()):

@@ -18,7 +18,7 @@ Entries before 2026-10-02 did not record the skill commit. For those entries, th
 
 ## 2026-09-30: issue 843 definition, filing, and decomposition
 
-The [issue 843 folder](2026-09-30-issue-843/) contains agent output from these trials:
+The [issue 843 folder](2026-09-30-issue-843) contains agent output from these trials:
 
 - [Issue definition trial results](2026-09-30-issue-843/review.md) for define-issue in a fresh agent context. Skills: `70cff5c`, which added the skill and recorded the trial together.
 - [Filing the reviewed issue](2026-09-30-issue-843/filing.md), which created issue 861. No filing skill existed yet. The file-issue skill was written from this trial in `03d08f1`.
@@ -131,3 +131,7 @@ Lessons and resulting changes:
 - The classifier denied `git push origin --delete` for merged branches as "Git Destructive". The local worktree cleanup succeeded without `--force`. The seven remote branches remain.
 - Cleanup after the run removed all 25 local decafclaw worktrees without `--force`. #861's branch looked unmerged because PR #862 was squash-merged. Its tip equaled the PR head, and the diffs were identical, so `git branch -D` was correct. Les turned on "Automatically delete head branches" and ran `scripts/delete-merged-branches.sh` (`b4bc444`), which deleted the merged branches that agents could not. `merge-pr` cleanup now deletes only local branches (`575274d`). Sibling-directory worktrees from another agent session led to the `.claude/worktrees/` convention in AGENTS.md (`9d72822`).
 - Follow-up issues: decafclaw #947, #948, and #949, and [gh-project-workflow #13](https://github.com/lmorchard/gh-project-workflow/issues/13) on who should own review follow-up.
+
+## ghflow installation
+
+[Setup trial, 2026-10-07](2026-10-07-ghflow-setup.md) assesses one registered skill, symbolic-link discovery, routing, and dependency access in Claude Code, Codex, and OpenCode.
