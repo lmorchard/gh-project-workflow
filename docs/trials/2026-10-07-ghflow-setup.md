@@ -39,7 +39,7 @@ Each target is an unborn Git repo with only README.md and request.txt describing
 
 ### Discovery
 
-Claude `.claude/skills/ghflow` appears in startup skills and Skill tool successfully loads it. Codex `.agents/skills/ghflow` is discovered and read. OpenCode `debug skill` with both `.claude/skills/ghflow` and `.agents/skills/ghflow` returns exactly one ghflow, choosing `.agents`. Removing `.agents` returns exactly one at `.claude`. Retaining one `.agents` installation is enough; no duplicate entry was observed.
+Claude `.claude/skills/ghflow` appears in startup skills and Skill tool successfully loads it. Codex `.agents/skills/ghflow` is discovered and read. OpenCode `debug skill` with both `.claude/skills/ghflow` and `.agents/skills/ghflow` returns exactly one ghflow, choosing `.agents`. Removing `.agents` returns exactly one at `.claude`. Retaining one `.agents` installation is enough; no duplicate entry was observed. A final repeat of dual discovery again chooses `.agents`; the delivery agent nevertheless uses the also-present `.claude` path for references and help, which resolve to the same source.
 
 ### Draft routing
 
@@ -47,7 +47,7 @@ Claude and Codex select define-issue, read shared authorization/evidence and lin
 
 ### Delivery routing
 
-Claude and Codex select express-issue; identify review-follow-up endpoint with PR left open, fresh-context different-model independent review, recorded runtime/dispatch identities, explicit merge authorization and read-only trial limits. Claude correctly reports this tool-limited session lacks delegation/model dispatch; Codex reports exposed delegation but the prompt forbids it. Missing real GitHub issue and unborn fixture are explicit evidence limits. Neither dispatches. OpenCode reads express/review policy and executes CLI help but its completed JSON stream contains only tools and step events; no final assessment was delivered.
+Claude and Codex select express-issue; identify review-follow-up endpoint with PR left open, fresh-context different-model independent review, recorded runtime/dispatch identities, explicit merge authorization and read-only trial limits. Claude correctly reports this tool-limited session lacks delegation/model dispatch; Codex reports exposed delegation but the prompt forbids it. Missing real GitHub issue and unborn fixture are explicit evidence limits. Neither dispatches. OpenCode scoped-permission fresh retry completes the delivery assessment: express-issue, review-follow-up endpoint with open PR, independent different-model review, explicit merge authorization, narrow read-only trial limits, and missing selected issue. It runs launcher --help through the symlink from target cwd (exit 0). The earlier no-allowance delivery run lacked final conversational output.
 
 ### Paths and permission limits
 
@@ -92,3 +92,5 @@ OpenCode:
 Discovery: `opencode debug skill` from target cwd. Actual model: `opencode export --sanitize ses_ee7777abaffetl3kb0y0Z977oX`.
 
 Logs are JSONL plus stderr beside this report. Source files were being edited concurrently, so this is an in-progress implementation trial, not final-tree certification.
+
+Final fresh scoped OpenCode delivery stream: `opencode-delivery-allowance.jsonl`, completed with final text and exit 0. All model processes are complete.
