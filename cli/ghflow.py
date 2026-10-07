@@ -132,6 +132,13 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
         missing = [field for field in required_pr_fields if field not in pr]
         if missing:
             raise ValueError(f"The PR response is missing {', '.join(missing)}.")
+        for coll_name, coll_value in pr.items():
+            if coll_name in ("reviewRequests", "statusCheckRollup"):
+                if not isinstance(coll_value, list):
+                    raise ValueError("The PR response has a malformed " + str(coll_name) + ".")
+                for coll_item in coll_value:
+                    if coll_item is not None and not isinstance(coll_item, dict):
+                        raise ValueError("The PR response has a malformed " + str(coll_name) + " entry.")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return {"repo": repo, "number": number, "errors": [{"part": "pr", "error": str(error)}]}, 1
 
@@ -267,6 +274,16 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
             raise ValueError("The commit author is missing its date.")
         sha = commit["sha"]
         message = body["message"]
+        if not isinstance(message, str):
+            raise ValueError("The commit message is not a string.")
+        parents = commit.get("parents")
+        if parents is None:
+            parents = []
+        elif not isinstance(parents, list):
+            raise ValueError("The commit parents are not a list.")
+        for parent in parents:
+            if not isinstance(parent, dict) or "sha" not in parent:
+                raise ValueError("A commit parent is missing its sha.")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         result = {"repo": repo, "rev": rev, "errors": [{"part": "commit", "error": str(error)}]}
         if "No commit found" in str(error):
@@ -279,7 +296,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
          "sha": sha,
          "subject": message.splitlines()[0] if message else "",
          "author_date": author["date"],
-         "parents": [parent["sha"] for parent in commit.get("parents") or []],
+         "parents": [parent["sha"] for parent in parents],
          "expectations": expectations,
          "errors": errors,
      }
@@ -292,7 +309,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
             # "behind" or "identical" means the commit is in the branch's history.
             status = gh(["api", f"repos/{repo}/compare/{on}...{sha}", "--jq", "{status}"])["status"]
             expectations["on_branch"] = status in ("behind", "identical")
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": "on_branch", "error": str(error)})
             expectations["on_branch"] = None
 
@@ -302,7 +319,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
             head = gh(["pr", "view", str(number), "--repo", pr_repo, "--json", "headRefOid"])["headRefOid"]
             result["pr_head"] = head
             expectations["is_pr_head"] = head == sha
-        except (GhError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": "is_pr_head", "error": str(error)})
             expectations["is_pr_head"] = None
 
@@ -355,7 +372,13 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
         fields = gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"])["fields"]
         field = next(f for f in fields if f["name"] == "Status")
-        options = [option["name"] for option in field["options"]]
+        if not isinstance(field.get("options"), list):
+            raise ValueError("The Status field has no option list.")
+        options = []
+        for option in field["options"]:
+            if not isinstance(option, dict) or not isinstance(option.get("name"), str):
+                raise ValueError("A Status option is not a named string.")
+            options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:

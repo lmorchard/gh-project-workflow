@@ -555,6 +555,67 @@ class StructuredResponseTests(unittest.TestCase):
         self.assertEqual(status, 1)
         self.assertEqual(result["errors"][0]["part"], "issue")
 
+    def test_on_branch_catches_json_decode_error(self):
+         def gh(args):
+             joined = " ".join(args)
+             if "commits/" in joined:
+                return {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": [{"sha": "O"}]}
+             if "compare" in joined:
+                raise json.JSONDecodeError("bad", "x", 0)
+             return {"status": "behind"}
+         result, status = verify_commit("o/r", "abc", on="main", gh=gh)
+         self.assertEqual(status, 2)
+         self.assertEqual(result["errors"][0]["part"], "on_branch")
+
+    def test_is_pr_head_catches_json_decode_error(self):
+         def gh(args):
+             joined = " ".join(args)
+             if "commits/" in joined:
+                return {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": []}
+             if "pr" in joined and "view" in joined:
+                raise json.JSONDecodeError("bad", "x", 0)
+             return {"headRefOid": "abc"}
+         result, status = verify_commit("o/r", "abc", pr_head=("o/r", 7), gh=gh)
+         self.assertEqual(status, 2)
+         self.assertEqual(result["errors"][0]["part"], "is_pr_head")
+
+    def test_non_string_commit_message_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": 123, "author": {"date": "d"}}})
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_null_parent_entry_is_structured_error(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}, "parents": [None]})
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_absent_parent_list_is_empty(self):
+        result, status = verify_commit("o/r", "abc", gh=lambda a: {"sha": "abc", "commit": {"message": "x", "author": {"date": "d"}}})
+        self.assertEqual(status, 0)
+        self.assertEqual(result["parents"], [])
+
+    def test_null_in_review_requests_is_structured_error(self):
+         def gh(args):
+             if "pr" in args:
+                return {"number": 7, "url": "u", "state": "open", "isDraft": False, "mergeable": "MERGEABLE",
+                        "headRefOid": "abc", "headRefName": "b", "baseRefName": "main",
+                        "reviewRequests": [None], "statusCheckRollup": None}
+             return []
+         result, status = pr_state("o/r", 7, gh=gh, gh_paginated=lambda p: [])
+         self.assertEqual(status, 1)
+         self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_null_board_option_name_is_structured_error(self):
+         def board(args):
+             if args[:2] == ["project", "view"]:
+                return {"id": "P1"}
+             if args[:2] == ["project", "field-list"]:
+                return {"fields": [{"id": "F", "name": "Status", "options": [{"id": "o1", "name": None}]}]}
+             raise Exception("unreachable")
+         result, status = board_set_status("o/r", 5, "o", 6, "Ready", gh=board, sleep=lambda *a: None)
+         self.assertEqual(status, 1)
+         self.assertEqual(result["errors"][0]["part"], "board")
+
 
 if __name__ == "__main__":
     unittest.main()
