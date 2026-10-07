@@ -124,4 +124,3 @@ OpenCode:
 ```
 
 Discovery: `opencode debug skill` from target cwd. Actual model: `opencode export --sanitize ses_ee7777abaffetl3kb0y0Z977oX`.
-
