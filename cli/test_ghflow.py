@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -651,21 +652,67 @@ class IdentityTests(unittest.TestCase):
             os.unlink(token_path)
 
     def test_identity_command_export(self):
-        ident = {
-            "login": "BotUser",
-            "name": "Bot User",
-            "email": "bot@example.com",
-            "token_file": None,
-            "configured": True,
-        }
-        with patch("ghflow.resolve_identity", return_value=ident):
-            stdout = io.StringIO()
-            with patch("sys.stdout", stdout):
-                status = main(["identity", "--export"])
-            self.assertEqual(status, 0)
-            out = stdout.getvalue()
-            self.assertIn('export GIT_AUTHOR_NAME="Bot User"', out)
-            self.assertIn('export GIT_AUTHOR_EMAIL="bot@example.com"', out)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker_path = os.path.join(temp_dir, "shell-expanded")
+            token = f"token $value `tick` 'single' \"double\"\n$(touch {marker_path})"
+            name = f"Bot $name `tick` 'single' \"double\"\n$(touch {marker_path})"
+            email = "bot $email `tick` 'single' \"double\"\n@example.com"
+            git_config = "'credential.https://github.com.helper=' $value `tick`\nnext"
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as token_file:
+                token_file.write(token)
+                token_path = token_file.name
+            try:
+                ident = {
+                    "login": "BotUser",
+                    "name": name,
+                    "email": email,
+                    "token_file": token_path,
+                    "configured": True,
+                }
+                with patch("ghflow.resolve_identity", return_value=ident), \
+                        patch.dict(os.environ, {"GIT_CONFIG_PARAMETERS": git_config}, clear=True):
+                    stdout = io.StringIO()
+                    with patch("sys.stdout", stdout):
+                        status = main(["identity", "--export"])
+
+                self.assertEqual(status, 0)
+                exported = stdout.getvalue()
+                names = [
+                    "GH_TOKEN",
+                    "GIT_AUTHOR_NAME",
+                    "GIT_COMMITTER_NAME",
+                    "GIT_AUTHOR_EMAIL",
+                    "GIT_COMMITTER_EMAIL",
+                    "GIT_CONFIG_PARAMETERS",
+                ]
+                helper = (
+                    "import json, os; "
+                    f"print(json.dumps({{key: os.environ.get(key) for key in {tuple(names)!r}}}))"
+                )
+                read_exports = f"\nexec python3 -c {shlex.quote(helper)}"
+                completed = subprocess.run(
+                    ["/bin/sh", "-c", exported + read_exports],
+                    env={"PATH": os.environ.get("PATH", "/usr/bin:/bin")},
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                self.assertEqual(
+                    json.loads(completed.stdout),
+                    {
+                        "GH_TOKEN": token,
+                        "GIT_AUTHOR_NAME": name,
+                        "GIT_COMMITTER_NAME": name,
+                        "GIT_AUTHOR_EMAIL": email,
+                        "GIT_COMMITTER_EMAIL": email,
+                        "GIT_CONFIG_PARAMETERS": git_config,
+                    },
+                )
+                self.assertFalse(os.path.exists(marker_path), "shell metacharacter executed")
+            finally:
+                os.unlink(token_path)
 
     def test_run_gh_uses_configured_identity(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:

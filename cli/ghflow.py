@@ -16,6 +16,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -756,17 +757,17 @@ def main(argv=None):
             env = identity_env(identity)
             statements = []
             if "GH_TOKEN" in env:
-                statements.append(f'export GH_TOKEN="{env["GH_TOKEN"]}"')
+                statements.append(f'export GH_TOKEN={shlex.quote(env["GH_TOKEN"])}')
             if "GIT_AUTHOR_NAME" in env:
-                statements.append(f'export GIT_AUTHOR_NAME="{env["GIT_AUTHOR_NAME"]}"')
+                statements.append(f'export GIT_AUTHOR_NAME={shlex.quote(env["GIT_AUTHOR_NAME"])}')
             if "GIT_COMMITTER_NAME" in env:
-                statements.append(f'export GIT_COMMITTER_NAME="{env["GIT_COMMITTER_NAME"]}"')
+                statements.append(f'export GIT_COMMITTER_NAME={shlex.quote(env["GIT_COMMITTER_NAME"])}')
             if "GIT_AUTHOR_EMAIL" in env:
-                statements.append(f'export GIT_AUTHOR_EMAIL="{env["GIT_AUTHOR_EMAIL"]}"')
+                statements.append(f'export GIT_AUTHOR_EMAIL={shlex.quote(env["GIT_AUTHOR_EMAIL"])}')
             if "GIT_COMMITTER_EMAIL" in env:
-                statements.append(f'export GIT_COMMITTER_EMAIL="{env["GIT_COMMITTER_EMAIL"]}"')
+                statements.append(f'export GIT_COMMITTER_EMAIL={shlex.quote(env["GIT_COMMITTER_EMAIL"])}')
             if "GIT_CONFIG_PARAMETERS" in env:
-                statements.append(f'export GIT_CONFIG_PARAMETERS="{env["GIT_CONFIG_PARAMETERS"]}"')
+                statements.append(f'export GIT_CONFIG_PARAMETERS={shlex.quote(env["GIT_CONFIG_PARAMETERS"])}')
             sys.stdout.write("\n".join(statements) + ("\n" if statements else ""))
             return 0
         json.dump(identity, sys.stdout, indent=2)
