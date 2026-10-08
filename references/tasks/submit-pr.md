@@ -38,6 +38,8 @@ When the PR is ready for review, move the issue it implements to In review, foll
 
 ## Request a review
 
+Apply any [user-approved exception](../shared/review.md#user-approved-exceptions) before arranging review or a fallback below. Report a waived requirement and its approved scope instead of requesting a substitute that the user made optional.
+
 For an agent pull request, the primary review source is a different-model local review, as [Review](../shared/review.md) states. A completed independent local review of the published head lets the PR proceed. A review that covers an earlier commit does not qualify. Do not request Copilot by default.
 
 Request Copilot review only when the user asked for it. Read the current requests and reviews with `pr-state`, described in [CLI results](../cli.md#reading-pr-state). Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
@@ -52,7 +54,7 @@ Read the CI and review state for the published head. Return:
 
 - The issue and PR URLs, base and published head commits, worktree, and branch.
 - Exact source revisions used for instructions and tools, and authorization limits for the remaining endpoint.
-- The review source used. For a local review, include its head, findings, and the recorded model identities that show it is different from the implementer. For a Copilot request, include its time, requested reviewer, and existing review identifiers.
+- The review source used, or the approved waiver and its scope. For a local review, include its head, findings, and recorded model identities, with any approved same-model exception. For a Copilot request, include its time, requested reviewer, and existing review identifiers.
 - The observed CI and review state, with checks and reviews tied to their commits. Preserve original review request times, deadlines, and identifiers on resumption.
 - The board transition result, or why it was skipped or failed.
 - Any other incomplete operations.

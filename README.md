@@ -121,7 +121,7 @@ Configure the machine account through [Agent identity](references/shared/identit
 The account needs access to the target repository. Board operations also need writer access to the selected project.
 Do not change accounts to work around access failures.
 
-Coordinated delivery requires subagent dispatch. Independent code review requires a fresh reviewer context and a different recorded model from the implementer.
+Coordinated delivery requires subagent dispatch. Independent code review normally requires a fresh reviewer context and a different recorded model from the implementer. Apply any [user-approved review exception](references/shared/review.md#user-approved-exceptions) within its recorded scope.
 Report unavailable dispatch or model information. Self-review does not replace independent review.
 Direct operations remain usable without a coordinator, subject to their own requirements and boundaries.
 

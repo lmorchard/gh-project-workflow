@@ -10,15 +10,25 @@ The user may request **Copilot** review manually, in the GitHub web interface or
 
 **Human review** comes from the user or another person.
 
-The local review must use a different model from the implementer. Record each model identity from runtime or dispatch metadata. Do not infer it from an agent's name, writing style, or claims. A different agent name, a fresh context, or a changed reasoning setting does not make a different model.
+By default, the local review must use a different model from the implementer. Apply an existing [user-approved exception](#user-approved-exceptions) before selecting a reviewer. Record each model identity from runtime or dispatch metadata. Do not infer it from an agent's name, writing style, or claims. A different agent name, a fresh context, or a changed reasoning setting does not make a different model.
 
 When the user requested Copilot and it is unavailable, a different-model local review is the review source. Do not return that choice to the user. If a model identity is unknown or a different model is unavailable, report that and return the review choice to the parent. A same-model second opinion can still help. Label it as same-model, and leave the different-model requirement unmet. A user-approved alternative stays explicit in later handoffs.
 
 No review source guarantees correct findings. Review does not replace tests or human judgment.
 
+## User-approved exceptions
+
+The user may approve another review method or waive the different-model review requirement. Record the user's instruction, its scope, and the review that remains required or optional. Scope can identify a project, task, agent application, or model setup. For example, approval for one local-model setup does not apply to an unrelated cloud-model workflow.
+
+Apply an exception only within its approved scope. Carry it through implementation, reviewer selection, submission, and follow-up without asking for the same approval again. Before checking reviewer availability or arranging a fallback, check the existing exception. If its scope does not cover the task, apply the default requirement or return the specific unresolved choice to the parent.
+
+Limited memory, cost, unavailable models, or dispatch limits can justify proposing an exception; they do not grant one. Do not silently replace different-model review with same-model review or self-review. If the user waived different-model review and made a same-model second opinion optional, do not make that second opinion a new gate.
+
+Report an approved waiver as waived, not completed or silently unmet. For an alternative review, report the method, actual model evidence, covered commit, and findings. Keep self-review and same-model review labeled accurately. An exception does not waive tests, CI, unresolved findings, repository protections, or separate merge authorization. Apply a stricter review condition for a particular delivery unless the user's exception explicitly covers it.
+
 ## Prepare required review
 
-For delivery that requires independent review, establish an available review path before substantial implementation depends on it. Inspect current tool, session, or dispatch metadata for available dispatch, usable model selection, and recorded implementer and reviewer model identities. Make sure that the selected reviewer model differs from the implementer model. Use that evidence, not assumptions about runtime names or model availability.
+First apply any [user-approved exception](#user-approved-exceptions) to establish what review this delivery requires. Establish an available path for that review before substantial implementation depends on it. Inspect current tool, session, or dispatch metadata for available dispatch, usable model selection, and recorded implementer and reviewer model identities. Unless the approved exception permits otherwise, make sure that the selected reviewer model differs from the implementer model. Use that evidence, not assumptions about runtime names or model availability.
 
 If dispatch, model selection, or model identity evidence is missing, report the precise unmet requirement and the next action to the parent. Continue useful preparation that does not depend on it. Do not substitute self-review or a same-model review for the required independent different-model review. Preserve an explicit user-approved exception and its scope in the handoff.
 

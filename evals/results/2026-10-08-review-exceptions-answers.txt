@@ -1,0 +1,22 @@
+Scenario: review-exception-local-model.md
+Session: /root/exception_approved_scenario
+
+Proceed with PR submission under the existing authorization, then have the parent dispatch `address-pr-review` for the authorized follow-up endpoint. Do not merge.
+
+The **User-approved exceptions** rule in Review carries the user’s waiver through submission and follow-up: the different-model review is waived for this OpenCode/Qwen setup, and the optional same-model second opinion is not a gate. The **Submit and hand off** rule says not to request a substitute review when the user made it optional. Since no external review exists or was requested, `address-pr-review` should report that and not wait; it should still check current-head CI and feedback, repair authorized CI failures, and return the follow-up report.
+
+Authorization continues through review follow-up without renewed approval, while **Limits** in Authorization and **PR follow-up ownership** in Coordination keep the endpoint before merge.
+
+Scenario: review-exception-not-approved.md
+Session: /root/exception_unapproved_scenario
+
+Use the default different-model review requirement. The user’s hardware constraint may support proposing an exception, but it does not approve one. Pause delivery that depends on review and return the choice to the parent: obtain approval for a scoped waiver or alternative, or establish a different-model reviewer.
+
+This follows `references/shared/review.md` (“User-approved exceptions” and “Prepare required review”) and `references/tasks/express-issue.md` (“Implement and review locally”). Preserve any existing work and continue preparation that does not depend on review.
+
+Scenario: review-exception-outside-scope.md
+Session: /root/exception_scope_scenario
+
+The local OpenCode/qwen3.8:latest exception does not cover this cloud Luna delivery. The default different-model review is still required, and dispatch metadata shows Sol is available. Establish Sol as the reviewer and dispatch `review-changes` in a fresh context when the changes are ready. Carry the authorized endpoint through PR follow-up, but do not merge.
+
+Deciding rules: [Review: User-approved exceptions](references/shared/review.md) limits exceptions to their approved scope; [Review: Prepare required review](references/shared/review.md) requires checking model identities and selecting a different model; [Take one issue through delivery](references/tasks/express-issue.md) requires independent review before submission and continuing follow-up to the agreed endpoint.

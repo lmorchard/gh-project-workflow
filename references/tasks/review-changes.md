@@ -10,7 +10,7 @@ The parent starts this review in a fresh context. It supplies the repository, is
 
 For an unpublished head, also require the supplied checkout path and publication state. Verify the supplied base and head with local Git in that checkout, following [Evidence](../shared/evidence.md#verifying-a-commit). Reject a missing commit, wrong checkout, or mismatched expected head and return it to the parent. For a published PR, read its current head with `pr-state` and verify that published commit remotely.
 
-Select the reviewer model explicitly through the available tool configuration. It must differ from the implementation model, as [Review](../shared/review.md) describes. Record both identities and their sources.
+Select the reviewer model explicitly through the available tool configuration. It must differ from the implementation model unless a [user-approved exception](../shared/review.md#user-approved-exceptions) permits this review method. Record both identities, their sources, and any applicable exception. If the agreed plan waives this review, return that status instead of starting an unrequested substitute.
 
 ## Establish the scope
 

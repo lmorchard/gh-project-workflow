@@ -158,3 +158,14 @@ Les requested this pass after the authorization split in PR #20.
 [Evidence](../references/shared/evidence.md) owns claim validity. [CLI results](../references/cli.md) owns PR and commit command contracts.
 [GitHub writes](../references/shared/github-writes.md) owns shared write recovery rules.
 The [burndown retrospective](trials/2026-10-05-ready-queue-burndown.md) preserves the detailed narrative formerly in the trial index.
+
+## User-approved review exceptions
+
+On 2026-10-08, Les approved skipping different-model review for this project's OpenCode setup with local `qwen3.8:latest`.
+The laptop could not effectively run two local models. A same-model second opinion remained optional.
+Les then requested an explicit shared rule for exceptions that the user approves.
+
+[Review](../references/shared/review.md#user-approved-exceptions) owns the approval, scope, handoff, and reporting rules.
+Task references apply that rule before selecting reviewers or arranging fallbacks.
+The default review requirement, tests, CI, and separate merge authorization remain in effect outside the approved exception.
+[Scenario results](../evals/results/2026-10-08-review-exceptions.md) record three fresh decision samples and their limits.
