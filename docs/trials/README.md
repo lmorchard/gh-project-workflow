@@ -118,6 +118,8 @@ Existing guidance remained unchanged. Later experiments and the umbrella issue r
 [Root-package setup trial, 2026-10-07](2026-10-07-ghflow-root-setup.md) repeats discovery and routing after the repository-root layout change.
 It records the subject-resolution correction and the unresolved OpenCode discovery of ignored nested worktrees.
 
+[Issue #32 unpublished handoff trial, 2026-10-08](2026-10-08-issue-32-unpublished-handoff.md) records an implementation commit passed to a fresh, different-model local reviewer without publication.
+
 ## 2026-10-07: issue 8 reviewer preparation
 
 The [reviewer preparation record](2026-10-07-issue-8-reviewer-capability.md) summarizes three historical paired trials and preserves pinned sources.
