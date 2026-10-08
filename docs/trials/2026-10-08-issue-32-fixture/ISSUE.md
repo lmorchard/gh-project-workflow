@@ -1,0 +1,1 @@
+Update `format_item_count` so that it returns `1 item` for a count of one and `<count> items` for other non-negative counts. Preserve the existing function name and string format. Add deterministic local tests for both cases.
