@@ -16,7 +16,7 @@ If a source is unavailable, report the gap and continue the work that does not d
 
 Every test result, check result, and review describes one commit. After a push, earlier results describe the earlier commit. Reassess which results still apply after a push, rebase, or conflict resolution.
 
-The **head** is the latest commit proposed for merge. If the head changes while you inspect it, read the results for the new head.
+The **head** is the latest commit proposed for merge. If the head changes while you inspect it, read the results for the new head. Compare the changes and reassess local checks, hosted CI, and review coverage, including unresolved findings. A branch-update notification is useful input, but it does not replace reading the actual head.
 
 ## Hosted CI
 
@@ -36,11 +36,17 @@ Use `latest_review_requests` to decide whether a review request exists and wheth
 
 A part that the tool could not read is `null` and has an entry in `errors`. Exit status 2 means some parts failed. Treat a `null` part as unread, not as empty. The tool does not judge whether a review is favorable; read the review bodies yourself.
 
+Invalid required values or collection entries produce an error for the affected part. If the primary PR response is invalid, the tool exits 1 without reporting a head. Optional read failures preserve the facts already read.
+
+Individual nullable fields can be `null` without an error. A review can have no author, commit, or submission time. A review with no author does not match a review request. These nullable fields follow the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json).
+
 ## Verifying a commit
 
 Before you put a commit identifier from a report or handoff into a handoff, a record, or a merge, verify it. Run `python3 "$GHFLOW_CLI" verify-commit SHA --repo OWNER/NAME` from the target project directory. Add the facts that you expect: `--subject` with the first line of the commit message, `--on BRANCH` for the branch that should contain it, and `--pr-head PR_URL` when it should be the PR's current head. Use the full SHA that the tool reports.
 
 Exit status 0 means the commit exists and each expectation holds. Exit status 3 means an expectation is false. Exit status 1 means GitHub did not find the commit, which can mean it is not pushed. Do not pass on an identifier that failed. Read the branch again or return the mismatch to the agent that reported it.
+
+An invalid primary commit response also exits 1. An invalid expectation response leaves that expectation `null` with an error. It exits 2 unless another expectation is false, which retains exit status 3. If GitHub provides no commit author or author date, `author_date` is `null` without an error, as the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json) permits.
 
 ## Writes to GitHub
 
@@ -59,3 +65,7 @@ Do not change accounts, credentials, subscriptions, repository settings, or prot
 Report what you did, what you checked, and what remains. State which checks you executed and which you only inspected. Report completed, failed, and uncertain steps separately, with enough information to resume.
 
 A partial result is useful when its limits are explicit. If you are blocked or interrupted, preserve the worktree and report the next useful action.
+
+For a partial PR follow-up report, name the last observed head, pending checks, unread evidence, and remaining actions. State that follow-up is incomplete. Pending required CI is incomplete work, even when local checks passed.
+
+Before a final PR follow-up report, independently read the current PR head, hosted checks, and review feedback again. If the head changed, reassess the evidence for the new head before reporting. Return the final report directly to the parent with the current head, hosted CI state, review coverage and limits, unresolved findings, and concrete blockers. If a read fails, name the last observed head and the blocker to obtaining current evidence instead of claiming completion.
