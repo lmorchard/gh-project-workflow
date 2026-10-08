@@ -62,6 +62,10 @@ Alternatively, export the environment into the current shell:
 eval "$(python3 "$GHFLOW_CLI" identity --export)"
 ```
 
+`identity --export` writes POSIX shell statements. You can evaluate them in a
+POSIX-compatible shell, including `sh`, `bash`, or `zsh`. The output quotes each
+value so shell characters in the configured identity remain literal.
+
 Do not print, log, or echo raw token content. Do not run `gh auth login`, `gh auth switch`, or `gh auth logout`.
 
 ## Personal approval
