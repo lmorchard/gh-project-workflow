@@ -75,8 +75,9 @@ Shared authorization, evidence, and delivery callers now apply the selected owne
 The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
 
 The new ownership scenarios are constructed decision checks, not observed deliveries.
-The required live trial for issue #13 remains unperformed.
-It must include submission, direct parent dispatch, an external branch update, and the responsible worker's final report.
+The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) records submission and direct parent dispatch.
+An external branch update and the responsible worker's final report remain pending.
+The initial handoff does not establish completion of the trial or issue #13.
 
 ## Earlier dev-session guidance
 
