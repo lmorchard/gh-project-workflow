@@ -22,6 +22,10 @@ Give each subagent the skill, necessary inputs, and the authorized scope. Return
 
 If a skill is incomplete, revise it here and let a subagent continue the task. If delegation is unavailable, report that limit. Only an explicit user exception permits the parent to act directly in the subject repository.
 
+## Local OpenCode review exception
+
+Les approved skipping different-model review for this project when using OpenCode with local `qwen3.8:latest` on his laptop. A fresh same-model second opinion is optional. Keep tests and self-review, and report the different-model review as waived under this approval. This exception does not apply to cloud-model workflows, waive other checks, or authorize merge. Carry its scope under [Review](references/shared/review.md#user-approved-exceptions).
+
 ## Authorization across issue tasks
 
 Les wants an agreed issue-preparation flow to continue through research, interviews, draft review, and publication without approval at every skill boundary. Carry that authorization and its limits into each subagent handoff. Once decisions are settled, publish the reviewed result within the agreed scope and report it. A subagent finishing a draft does not end the parent's authorized flow. Dispatch the next included task instead of waiting for the user to ask what is next.

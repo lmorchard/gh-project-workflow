@@ -40,9 +40,9 @@ Run [express-issue](express-issue.md) for the selected child with its endpoint, 
 
 If running as a delegated coordinator, relay the submission handoff and remaining child and parent scope to the conversation parent, then stop. Resume from the parent's endpoint result. A submission handoff does not complete a child whose endpoint includes follow-up or merge.
 
-In this flow, a child merges only with both affirmative independent review of its final changes and green hosted CI for its final head. Merge permission does not substitute for the favorable review here, and a pending or timed-out review is not favorable. Keep the exact-head checks and other rules in [merge-pr](merge-pr.md).
+In this flow, a child merges only with both affirmative independent review of its final changes and green hosted CI for its final head, unless a [user-approved exception](../shared/review.md#user-approved-exceptions) explicitly changes this flow's review condition. Merge permission alone does not substitute for the favorable review here, and a pending or timed-out review is not favorable. Keep the exact-head checks and other rules in [merge-pr](merge-pr.md).
 
-A subject agent can define, file, and implement in one dispatch; a nested agent per phase is not required. Independent review still needs a fresh context and a different model. Never replace it with self-review to work around a capacity limit.
+A subject agent can define, file, and implement in one dispatch; a nested agent per phase is not required. Apply the agreed review plan under [Review](../shared/review.md#user-approved-exceptions). A capacity limit alone does not permit replacing independent review with self-review.
 
 After the parent receives the responsible worker's final result for the chosen child endpoint, verify that result through the responsible subagent and credit only delivered behavior. Update the parent issue's progress and the coverage map, then continue to the next eligible child without another prompt.
 

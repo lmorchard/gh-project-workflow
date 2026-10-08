@@ -24,7 +24,7 @@ Changes to the selected issue can stay within the agreed flow. Creating a new ch
 
 Before substantial dependent implementation, apply [Prepare required review](../shared/review.md#prepare-required-review) for this delivery endpoint. Dispatch [implement-issue](implement-issue.md) when implementation remains, with the issue, confirmed scope, existing work, authorization, and established review path or explicit exception.
 
-Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. Apply [Review](../shared/review.md) to model evidence and unmet review requirements. Do not skip the review silently.
+Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head when required by the review plan. Carry any [user-approved exception](../shared/review.md#user-approved-exceptions) into that plan and subsequent handoffs. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. Apply [Review](../shared/review.md) to model evidence and unmet review requirements. Do not skip the review silently.
 
 If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer under [Coordination](../shared/coordination.md#handoffs). Do not review the changes yourself.
 

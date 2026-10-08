@@ -6,6 +6,8 @@ Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence
 
 ## Establish the task
 
+Apply any [user-approved exception](../shared/review.md#user-approved-exceptions) before arranging review or a fallback below. Preserve the agreed review plan while still reading feedback and checking CI.
+
 Read the issue, PR, project instructions, current branch, and any supplied review report. Confirm the current head.
 
 If the parent reports an external branch update, read the actual PR head and compare the changes before continuing. Reassess checks, review coverage, and unresolved findings under [Evidence](../shared/evidence.md#results-belong-to-a-commit). Preserve the original review deadline and one-cycle limit.
