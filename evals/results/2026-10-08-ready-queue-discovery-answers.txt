@@ -1,0 +1,17 @@
+Scenario: ready-queue-beyond-default-limit
+Run: /root/scenario27_later
+
+Use the complete, validated 35-item inventory. Include `acme/widgets#314` in the Ready queue at `P1`; the first 30 items cannot establish an empty queue.
+
+Sort all actionable Ready issues by priority and select the top unblocked issue. If that is #314, confirm it can branch independently from `origin/main`, establish the required review path, and dispatch `express-issue` for `acme/widgets#314` through review follow-up, leaving its PR open. Reuse the selected endpoint without asking again.
+
+The deciding rule is **burndown-ready-queue → Audit the Ready queue**: identify Ready items only after successful full traversal, and report the queue clear only when the complete inventory contains no Ready items. **Deliver issues sequentially** governs selection and dispatch.
+
+Scenario: ready-queue-later-page-failure
+Run: /root/scenario27_failure
+
+Treat discovery as incomplete and discard the command’s entire output, including the first page. Report the HTTP 502 and that the Ready queue is unknown. Do not declare it clear, dispatch an issue, or hand off to curation.
+
+The deciding rule is **“Audit the Ready queue”** in `references/tasks/burndown-ready-queue.md`: “Discard all output after a command failure” and “Do not use partial output to report a clear queue or dispatch work.” It also requires the final returned page to have `hasNextPage: false`.
+
+The next operational step would be to retry the complete traversal and validate every page before using any items. The first page’s lack of Ready items cannot establish that later pages contain none.
