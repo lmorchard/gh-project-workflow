@@ -1,6 +1,6 @@
 # Sweep issues needing definition
 
-Develop open issues labeled `triage:needs-definition` into concrete, bounded specifications grounded in current target code. Define file boundaries, observable success conditions, and required tests, advancing each issue to `triage:ready`.
+Develop open issues labeled `triage:needs-definition` into actionable definitions. Use [Define an issue](define-issue.md) for research, scope, and issue content. Keep each definition proportional to its goal and evidence.
 
 Apply [Triage labels](../shared/triage-labels.md), [Authorization](../shared/authorization.md), and [Evidence](../shared/evidence.md) throughout. The parent agent coordinates the sweep; subagents execute research and issue updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
@@ -16,37 +16,31 @@ Optionally filter by a specific parent issue or component area. If no issues car
 
 ## Define each issue
 
-Process issues one at a time or in bounded slices of 2 to 5 issues. For each issue, dispatch a subagent to apply [define-issue](define-issue.md):
+Process issues one at a time or in bounded slices of 2 to 5 issues. For each issue, dispatch a subagent to apply [Define an issue](define-issue.md). Give the agent the issue, current evidence, and existing authorization.
 
-1. Read the issue body and comments to understand the original intent and confirmed decisions.
-2. Inspect current code and test seams at the target revision (such as `main`). For client or UI features (Web UI or TUI), inspect whether backend REST or WebSocket endpoints already exist before scoping the client implementation; if backend APIs are missing, separate the task or explicitly note the prerequisite API contract.
-3. Structure the specification following ASD-STE100 guidelines into three distinct sections:
-   - **Problem & Bounded Slice**: The exact failure mode or desired outcome, scoped to an implementable first slice. Decouple overlapping concerns into separate, independent issues rather than expanding scope to fix everything in that subsystem.
-   - **Concrete Changes & File Targets**: Specific files, classes, methods, and configurations to modify. Prefer systemic autouse guards in shared test configuration (such as `conftest.py`) over per-test boilerplate when defining test hygiene rules.
-   - **Explicit Exclusions & Verification Criteria**: What remains out of scope, exact unit tests to add or run, and passing gate checks. For prompt or eval disambiguation tasks subject to model variance, specify repeat-pass bounds (such as 5 consecutive passes) to prove resolution.
-4. If the scope is too broad for a single implementation task, scope a bounded first slice and recommend child issues or follow-up tasks.
-5. If the specification depends on open issues that will change the code or supply a contract, stop specification. Set native blocked-by relationships, optionally replace the body with an outline as [Triage labels](../shared/triage-labels.md) describes, label the issue `triage:blocked`, and return it to the parent. If only part of the issue waits, propose a split instead.
-6. If technical investigation reveals a blocking product or design uncertainty that needs user judgment, stop specification, label the issue `triage:needs-input`, post the specific question, and return it to the parent.
+Use the shared [Decisions](../shared/decisions.md) rule when facts or choices are missing. Return material product decisions to the parent instead of choosing them in the sweep.
+
+If refinement depends on another open issue that will change the code or supply a contract, follow [Blocked issues](../shared/triage-labels.md#blocked-issues). Set the native blocked-by relationship and apply `triage:blocked`. Optionally replace the body with an outline. Return the issue to the parent. If only part waits, propose a split.
+
+If research finds a product or design decision that needs user judgment, stop the definition. Apply `triage:needs-input`, post the focused question, and return it to the parent.
 
 ## Update the issue record
 
 Once the specification is solid:
 
-1. Update the issue body in the subject repository to include the refined problem, boundaries, success conditions, and test criteria:
+1. Update the issue body in the subject repository with the reviewed definition:
    ```bash
    gh issue edit ISSUE_NUMBER --repo OWNER/REPO --body-file /tmp/defined-body.md
    ```
-2. Transition labels:
-   - Remove `triage:needs-definition`.
-   - Add `triage:ready`.
+2. Remove `triage:needs-definition` and add `triage:ready`.
 3. Post a brief comment linking to the revised body and noting that the issue is now actionable for implementation.
 4. When the issue belongs to a parent theme, update the parent issue's rollup comment to reflect the newly ready status.
 
 ## Conclude the sweep
 
-Return a summary table to the parent:
+Return a summary to the parent with:
 
-- Issue number and title.
-- Defined technical boundary (primary files and tests).
-- Updated label (`triage:ready`, `triage:needs-input` for a user decision, or `triage:blocked` for an open dependency).
-- Suggested next step (direct implementation or queue for board scheduling).
+- Issue number, title, and updated label.
+- The definition's main boundary and any unresolved question or dependency.
+- The next useful step.
+- If scenario answers assessed the sweep, report them as samples and state what they do not establish.

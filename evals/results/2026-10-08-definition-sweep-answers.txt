@@ -1,0 +1,19 @@
+Scenario: sweep-small-definition
+Session ID: /root/scenario31_small
+
+Define and review the remaining change: an invalid `board set-status` value must print the valid choices. Preserve the confirmed requirements that it exits nonzero and leaves the board unchanged.
+
+The definition should require a test for the newly displayed choices and regression checks for the existing exit status and unchanged board. Then, within the existing authorization, update the issue body, replace `triage:needs-definition` with `triage:ready`, post the ready comment, and update any parent rollup.
+
+The deciding rule is **Define an issue → Draft the issue**: success conditions must describe observable behavior and distinguish new behavior from tests protecting existing behavior. **Resolve the task** also says a missing implementation plan does not block readiness. No unresolved product decision remains, so no further approval is needed.
+
+This is a decision only; I have made no changes.
+
+Scenario: sweep-material-choice
+Session ID: /root/scenario31_choice
+
+Stop definition and return the unresolved behavior choice to the parent. In the authorized live task, replace `triage:needs-definition` with `triage:needs-input`, post the focused question “Should `board set-status` normalize common aliases, or reject them and list valid options?”, and update any parent rollup to show the pending decision.
+
+The deciding rule is **Sweep issues needing definition → Define each issue**: “If research finds a product or design decision that needs user judgment, stop the definition. Apply `triage:needs-input`, post the focused question, and return it to the parent.”
+
+**Decisions → Return unresolved decisions** also applies: these alternatives change user-visible behavior. Authorization to update the issue does not settle that choice. Do not mark it ready or blocked. No commands or changes were performed.
