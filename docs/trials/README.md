@@ -139,14 +139,9 @@ Lessons and resulting changes:
 [Root-package setup trial, 2026-10-07](2026-10-07-ghflow-root-setup.md) repeats discovery and routing after the repository-root layout change.
 It records the subject-resolution correction and the unresolved OpenCode discovery of ignored nested worktrees.
 
-## 2026-10-07: issue 8 reviewer capability
+## 2026-10-07: issue 8 reviewer preparation
 
-The [reviewer capability trial](2026-10-07-issue-8-reviewer-capability.md) records six native Claude Code sessions on two public synthetic fixtures.
-Skills came from `b47c9d5088f471da5d7b35a56ecda6078dee02be`.
-Dependent express delivery reported unavailable dispatch and different-model review before edits.
-Ordinary draft-only issue definition returned drafts without a reviewer capability assessment.
-
-Startup and assistant records identify `claude-opus-5-5`.
-General implementation dispatch, shell permission errors, and the missing GitHub remote limit the result.
-This is evidence for the first increment of [issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8), with no skill changes or full delivery claim.
-The broader issue remains open.
+The [reviewer preparation record](2026-10-07-issue-8-reviewer-capability.md) summarizes three historical paired trials and preserves pinned sources.
+The shared instruction now establishes the required review path before substantial dependent implementation.
+Four reusable [decision scenarios and results](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
+The broader identity and access scope remains open.

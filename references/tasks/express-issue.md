@@ -22,9 +22,9 @@ Changes to the selected issue can stay within the agreed flow. Creating a new ch
 
 ## Implement and review locally
 
-Dispatch [implement-issue](implement-issue.md) when implementation remains, with the issue, confirmed scope, existing work, and authorization.
+Before substantial dependent implementation, apply [Prepare required review](../shared/review.md#prepare-required-review) for this delivery endpoint. Dispatch [implement-issue](implement-issue.md) when implementation remains, with the issue, confirmed scope, existing work, authorization, and established review path or explicit exception.
 
-Plan reviewer selection before implementation when possible. Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. The reviewer must use a different model from the implementer, as [Review](../shared/review.md) describes. If that is not possible, return the review choice to the user and continue independent preparation meanwhile. Do not skip the review silently.
+Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. Apply [Review](../shared/review.md) to model evidence and unmet review requirements. Do not skip the review silently.
 
 If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer, as [Authorization](../shared/authorization.md) describes under handoffs. Do not review the changes yourself.
 

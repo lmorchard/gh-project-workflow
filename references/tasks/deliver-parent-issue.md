@@ -34,6 +34,8 @@ When the draft is ready and the flow includes publication, use [file-issue](file
 
 ## Deliver each child
 
+Before substantial dependent implementation of a child, apply [Prepare required review](../shared/review.md#prepare-required-review). Carry the established review path, model evidence, or explicit exception into the child handoff.
+
 Run [express-issue](express-issue.md) for the selected child with its endpoint, scope, decisions, and authorization. That skill owns implementation, independent review, submission, and review and CI follow-up.
 
 In this flow, a child merges only with both affirmative independent review of its final changes and green hosted CI for its final head. Merge permission does not substitute for the favorable review here, and a pending or timed-out review is not favorable. Keep the exact-head checks and other rules in [merge-pr](merge-pr.md).
