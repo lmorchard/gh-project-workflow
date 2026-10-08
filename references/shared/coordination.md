@@ -8,6 +8,8 @@ The **parent** agent owns the conversation with the user. It makes workflow deci
 
 A subagent returns questions to the parent instead of interviewing the user or waiting for an answer. Apply [Decisions](decisions.md#return-unresolved-decisions) to frame the question. Apply [Authorization](authorization.md#limits) to missing answers.
 
+For an unpublished implementation handoff, pass the supplied checkout path, branch, base, full tested head, and publication state. Verify the base and head locally before review, as [Evidence](evidence.md#verifying-a-commit) requires. Local verification establishes local existence only. Use remote verification after publication.
+
 In a direct session with no parent, the agent that does the work also talks to the user.
 
 ## Handoffs

@@ -35,8 +35,12 @@ Unread data is an evidence gap. The tool does not judge whether a review is favo
 
 ## Verifying a commit
 
-Before reusing a reported commit identifier in a handoff, record, or merge, verify it with `verify-commit`.
-Apply the [CLI verification rules](../cli.md#verifying-a-commit), including expected facts and failure handling. Use the full SHA that the tool reports.
+For an unpublished commit sent for local review, verify the reported identifier in the supplied checkout with Git.
+Use the [local Git verification rules](../cli.md#verifying-a-local-commit), including the expected branch, base, head, and subject when supplied.
+Use the full SHA that Git reports, and state that this result establishes local existence only.
+
+For a published commit, current PR head, or merge claim, use `verify-commit` and the [CLI verification rules](../cli.md#verifying-a-published-commit).
+Use the full SHA that the tool reports.
 
 ## Reports
 

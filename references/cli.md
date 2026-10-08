@@ -1,6 +1,6 @@
 # CLI results for PRs and commits
 
-Read this reference when using `pr-state` or `verify-commit`.
+Read this reference when using `pr-state`, local Git verification, or `verify-commit`.
 The entry skill resolves `GHFLOW_CLI` to the source checkout CLI. Run commands from the target project directory.
 These commands apply the configured [agent identity](shared/identity.md) to their GitHub reads.
 
@@ -18,9 +18,22 @@ Invalid required values or collection entries produce an error for the affected 
 
 Individual nullable fields can be `null` without an error. A review can have no author, commit, or submission time. A review with no author does not match a review request. These nullable fields follow the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json).
 
-## Verifying a commit
+## Verifying a local commit
 
-Before you put a commit identifier from a report or handoff into a handoff, a record, or a merge, verify it. Run `python3 "$GHFLOW_CLI" verify-commit SHA --repo OWNER/NAME` from the target project directory. Add the facts that you expect: `--subject` with the first line of the commit message, `--on BRANCH` for the branch that should contain it, and `--pr-head PR_URL` when it should be the PR's current head. Use the full SHA that the tool reports.
+Use local Git verification for an unpublished commit that another agent must review in the supplied checkout.
+Resolve the supplied identifier with `git -C "CHECKOUT" rev-parse --verify 'REV^{commit}'` and retain the full identifier it returns.
+Resolve the supplied base with the same command before comparing changes.
+Compare the resolved commit with the reported head and tested commit when they should match.
+If an expected subject is supplied, compare it with `git -C "CHECKOUT" show -s --format=%s FULL_SHA`.
+Resolve the reported branch with `git -C "CHECKOUT" rev-parse --verify 'BRANCH^{commit}'` and compare it with the expected head when the handoff makes that claim.
+Reject a missing commit, wrong checkout, or mismatched expected head, and return the mismatch to the sender.
+A valid local result establishes local existence only; it does not establish publication on GitHub.
+
+## Verifying a published commit
+
+For a published commit, current PR head, or merge claim, run `python3 "$GHFLOW_CLI" verify-commit SHA --repo OWNER/NAME` from the target project directory.
+Add the facts that you expect: `--subject` with the first line of the commit message, `--on BRANCH` for the branch that should contain it, and `--pr-head PR_URL` when it should be the PR's current head.
+Use the full SHA that the tool reports.
 
 Exit status 0 means the commit exists and each expectation holds. Exit status 3 means an expectation is false. Exit status 1 means GitHub did not find the commit, which can mean it is not pushed. Do not pass on an identifier that failed. Read the branch again or return the mismatch to the agent that reported it.
 

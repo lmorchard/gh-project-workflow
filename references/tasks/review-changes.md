@@ -8,6 +8,8 @@ Apply [Evidence](../shared/evidence.md) and [Review](../shared/review.md) throug
 
 The parent starts this review in a fresh context. It supplies the repository, issue, project instructions, and exact base and head commits. Give the reviewer the necessary facts, not the author's conversation or conclusions.
 
+For an unpublished head, also require the supplied checkout path and publication state. Verify the supplied base and head with local Git in that checkout, following [Evidence](../shared/evidence.md#verifying-a-commit). Reject a missing commit, wrong checkout, or mismatched expected head and return it to the parent. For a published PR, read its current head with `pr-state` and verify that published commit remotely.
+
 Select the reviewer model explicitly through the available tool configuration. It must differ from the implementation model, as [Review](../shared/review.md) describes. Record both identities and their sources.
 
 ## Establish the scope
