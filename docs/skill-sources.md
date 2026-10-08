@@ -121,3 +121,16 @@ The first layout used a portable launcher to resolve the CLI from the source che
 Les then selected a repository-root skill package for PR #17.
 The root entry now uses the existing CLI directly.
 It supplies the absolute source path and preserves the caller's directory.
+
+## Required reviewer preparation
+
+[Issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8) supplies the agreed first increment: establish review capabilities before dependent implementation.
+Les requested persistent instructions and reusable evaluations during the PR #21 revision.
+The shared [preparation rule](../references/shared/review.md#prepare-required-review) replaces optional early planning in the delivery coordinators.
+It preserves explicit exceptions, independent preparation, and the existing capacity handoff.
+
+The [historical paired trial](trials/2026-10-07-issue-8-reviewer-capability.md) supplies observations and their limits.
+The [reusable scenario results](../evals/results/2026-10-07-reviewer-preparation.md) assess decisions under constructed capability facts.
+Les accepted recorded fresh author selection before future implementation as a valid resolution of unknown planned identity.
+The unknown-author criteria reflect that interpretation of the existing shared rule. Evaluated instructions and raw prompts remain unchanged.
+Neither source establishes a completed different-model code review or full delivery in the trial environment.

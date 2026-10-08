@@ -1,0 +1,1 @@
+Use ghflow to prepare a draft issue for the idea in issue.md in this local synthetic repository. This is draft-only. Return the draft in your response; do not publish or implement it.
