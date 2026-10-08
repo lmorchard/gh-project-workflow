@@ -1,0 +1,100 @@
+SCENARIO flow-continues-after-draft
+SESSION 01a119b0-a501-7bc3-9ef5-bb1c5daf3aa1
+
+Next, I would dispatch **file-issue to a subagent**, carrying the reviewed draft and the existing authorization to file it under **#843 on project 6**.
+
+The deciding rule is **Coordination → Handoffs**: “When a subagent finishes one task, dispatch the next included task within existing authorization.” **Authorization → Use the authorization that exists** also says not to ask again because the next task uses a different skill. No interview or renewed approval is needed: there are no unresolved decisions, and filing was explicitly requested.
+
+The proposed handoff would:
+
+- Include the draft, subject repository, parent #843, project 6 and its owner, relevant evidence, instruction paths, and authorization limits. Resolve any missing repository or board identity without guessing.
+- Instruct the filing subagent to check authentication, duplicates, and project identity; create the issue; establish its native parent relationship; and add project membership.
+- Leave unspecified status, priority, labels, and assignee unset. Implementation readiness does not authorize implementation or a board status change.
+- Require readback verification and return the issue URL and confirmed relationships.
+
+I have only read the instructions; I have not dispatched an agent or performed any task actions.
+
+SCENARIO parent-external-head-update
+SESSION 01a119b0-a508-7aa3-b59e-3bd444cc389a
+
+Notify the **existing active follow-up worker** for PR #952 about the reported `d4e5f6a` update, including the changed file and the second worker’s source evidence. Keep that worker responsible for completing follow-up.
+
+The deciding rule is **[Coordination — PR follow-up ownership](references/shared/coordination.md#pr-follow-up-ownership)**:
+
+> “If another worker updates the PR branch during follow-up, the parent notifies the responsible follow-up worker with the PR, new head, and available change evidence.”
+
+It also explicitly prohibits the parent from replacing that worker’s CI repair or final verification with its own repository actions.
+
+The proposed next actions are:
+
+1. Send the update to the active follow-up worker.
+2. Have that worker independently verify the actual current PR head, compare the changes since `a1b2c3d`, and reassess local checks, hosted CI, review coverage, and unresolved findings.
+3. Preserve the original review deadline and one-cycle limit. If independent review of uncovered changes is needed, have the worker hand that review task back to the parent for dispatch.
+4. Await the responsible worker’s final report after it rereads current-head checks and feedback. Leave the PR open; this endpoint does not authorize merge.
+
+**[Evidence — Results belong to a commit](references/shared/evidence.md#results-belong-to-a-commit)** explains why: passed checks and completed review for `a1b2c3d` do not establish completion for `d4e5f6a`. A sourced trial-record update still changes the head; its effect on existing evidence must be assessed.
+
+No task actions have been performed.
+
+SCENARIO resolve-routine-choice
+SESSION 01a119b0-a4f5-75f2-9198-29f1018872d4
+
+Proceed with the local implementation without asking for clarification. The deciding rule is **Decisions → “Resolve facts and routine choices”**: resolve routine, reversible implementation choices from project conventions, current evidence, and confirmed decisions. The requested behavior is clear; parser wiring is an implementation choice.
+
+Proposed actions:
+
+1. Inspect the relevant code, tests, and workspace state; prepare the isolated task branch and run baseline tests.
+2. Add `--completed` in `build_parser()` using `argparse`’s `store_true`, preserving the default of `False`.
+3. Pass that value as `include_completed` to the existing `list_tasks()` helper, retaining the owner argument. Reuse the helper’s existing filtering.
+4. Add `unittest` coverage proving `--completed` includes completed tasks and works with `--owner`. Retain the existing default and owner-filter tests.
+5. Run targeted tests, then the broader required checks; review the diff and report the local result.
+
+**Authorization → “Limits”** makes this decision-only request controlling: no task commands, edits, delegation, or user questions now. No push or merge is proposed.
+
+SCENARIO reviewer-capacity-handoff
+SESSION 01a119b0-a4f5-74c3-a978-82e004d18e98
+
+I would finish my handoff to the conversation parent so it can dispatch the established model-b reviewer from its available slot.
+
+The deciding rule is **Review → Prepare required review** in `references/shared/review.md`:
+
+> “This dispatch failure does not create a new review choice or require renewed approval.”
+
+**express-issue → Implement and review locally** explicitly says a capacity failure is a dispatch problem: hand off the commits, checks, and recorded implementation model to the parent, and do not review the changes yourself. **Coordination → Handoffs** confirms this routing.
+
+Proposed next actions:
+
+1. Preserve the worktree and completed commits. Hand off issue #953, branch/worktree, exact base and head, reported checks and their revisions, model-a implementation metadata, established model-b review evidence, instruction paths/source revision, and the capacity failure. Mark independent review and delivery incomplete.
+2. Have the parent dispatch `review-changes` in a fresh context using model-b for that exact base/head, supplying necessary facts without the author’s conversation or desired conclusion. Record actual reviewer model evidence.
+3. Continue corrections, review, submission, and parent-owned PR review follow-up under the existing authorization. Leave the PR open; do not merge.
+
+No self-review, substitute review, renewed user approval, or implementation restart is warranted.
+
+SCENARIO subagent-has-question
+SESSION 01a119b0-a4fa-78c2-a224-ee767e5b8a64
+
+I would return the conflict to the parent with status **awaiting a decision**, rather than choose 401 or 403 myself or wait indefinitely.
+
+The deciding rule is **Coordination → Roles**: “A subagent returns questions to the parent instead of interviewing the user or waiting for an answer.” **Decisions → Return unresolved decisions** applies because this choice changes user-visible behavior and compatibility. **Authorization → Limits** adds: “Never infer a decision or a permission from silence.”
+
+Proposed next actions:
+
+- Hand the parent the evidence: issue #919 requires 401, while the frontend relies on 403 for the login redirect.
+- Frame one focused question: “Should we return 401 and update the frontend to preserve the login redirect, or retain 403 and revise the success condition?” Explain the scope and compatibility tradeoff.
+- Keep changes dependent on that answer pending. Continue only useful independent work.
+- If none remains, preserve the worktree and return completed work, evidence, and the blocker. Do not post blocker comments or make further board changes, as **Implement an issue → Return the result** directs.
+
+SCENARIO submission-parent-followup
+SESSION 01a119b0-a4fd-7f21-8500-6ed93b984ec4
+
+**Relay the submission handoff to the conversation parent, mark follow-up incomplete, and stop as the delegated queue coordinator.** Do not start the next issue yet.
+
+The deciding rule is **[Coordination — PR follow-up ownership](references/shared/coordination.md#pr-follow-up-ownership)**: an intervening coordinator relays the handoff to the conversation owner, who directly dispatches `address-pr-review` and receives its final report. **[Burndown Ready queue — Deliver issues sequentially, step 3](references/tasks/burndown-ready-queue.md#deliver-issues-sequentially)** explicitly requires waiting for that endpoint result before selecting another issue.
+
+The proposed next actions are:
+
+1. Hand off PR #950, reported head `a1b2c3d`, the local review’s coverage and model evidence, pending required CI, repository/worktree/branch/base details, board transition result, and remaining queue scope. Preserve source revision `b47c9d5088f471da5d7b35a56ecda6078dee02be` and the original review request time, deadline, and prior review identifiers. In actual execution, verify the reported head and use its full SHA.
+2. Have the conversation parent directly dispatch `address-pr-review` under Les’s existing authorization. The worker handles CI and review follow-up, preserving the original deadline and one-cycle limit, then independently rereads current-head evidence before reporting.
+3. Resume queue coordination only after the parent returns the verified endpoint result. Confirm the issue is `In review`, leave PR #950 open, and then proceed to the independent next issue if no disruption requires a halt.
+
+The local review does not replace hosted CI. **[Evidence — Reports](references/shared/evidence.md#reports)** states that pending required CI means follow-up remains incomplete. Independence makes the next issue eligible later; it does not override sequential delivery. No renewed permission or merge is needed or authorized.

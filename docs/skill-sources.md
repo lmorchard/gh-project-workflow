@@ -150,3 +150,6 @@ Neither source establishes a completed different-model code review or full deliv
 After merging PR #21, Les requested focused documents rather than the combined authorization reference. The restructure moves roles and handoffs into [Coordination](../references/shared/coordination.md). It moves factual resolution and question framing into [Decisions](../references/shared/decisions.md). [Authorization](../references/shared/authorization.md) retains permission and scope. Evidence and the interview task retain their existing responsibilities.
 
 The move preserves merged review preparation and parent-owned PR follow-up. Active callers use the new owners. Earlier trial hashes, answers, and grades describe their pinned instructions and remain historical evidence.
+
+The [bounded routing results](../evals/results/2026-10-08-shared-owners.md) concern the focused owners at `f3f3a9b`.
+They assess proposed decisions and source loading, not a new task-execution trial.
