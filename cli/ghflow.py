@@ -46,6 +46,10 @@ class GhError(Exception):
     pass
 
 
+class IdentityError(GhError):
+    pass
+
+
 def response_type(value, expected, label):
     """Check a consumed response value before attribute access or comparison."""
     valid = type(value) is expected if expected in (int, bool) else isinstance(value, expected)
@@ -73,11 +77,54 @@ def response_integer(value, label):
 
 def run_gh(args):
     """Run gh under the configured agent identity and return parsed JSON output."""
-    env = identity_env(resolve_identity())
+    identity = resolve_identity()
+    env = identity_env(identity)
+    if args[:2] in (["project", "item-add"], ["project", "item-edit"]):
+        confirm_authenticated_login(identity, env)
     result = subprocess.run(["gh", *args], capture_output=True, text=True, env=env)
     if result.returncode != 0:
         raise GhError((result.stderr or result.stdout).strip() or f"gh exited {result.returncode}")
     return json.loads(result.stdout) if result.stdout.strip() else None
+
+
+def confirm_authenticated_login(identity, env):
+    """Make sure a board mutation uses a token for the selected login."""
+    login = identity.get("login")
+    if not login:
+        raise IdentityError("A selected GitHub login is required before a board write.")
+    if not identity.get("ready"):
+        raise IdentityError("A selected login and usable token are required before a board write.")
+    result = subprocess.run(["gh", "api", "user"], capture_output=True, text=True, env=env)
+    if result.returncode != 0:
+        raise IdentityError("Could not confirm the authenticated GitHub login before a board write.")
+    try:
+        profile = json.loads(result.stdout)
+        actual = profile.get("login") if isinstance(profile, dict) else None
+    except (json.JSONDecodeError, AttributeError):
+        actual = None
+    if not isinstance(actual, str) or actual.casefold() != login.casefold():
+        raise IdentityError("The authenticated login does not match the selected GitHub login.")
+
+
+def is_git_commit_command(command):
+    """Recognize a direct Git commit invocation without inspecting scripts."""
+    if not command or os.path.basename(command[0]) not in {"git", "git.exe"}:
+        return False
+    index = 1
+    takes_value = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--super-prefix", "--config-env"}
+    while index < len(command):
+        token = command[index]
+        if token == "--":
+            index += 1
+            break
+        if token in takes_value:
+            index += 2
+            continue
+        if token.startswith("-"):
+            index += 1
+            continue
+        return token == "commit"
+    return index < len(command) and command[index] == "commit"
 
 
 def run_gh_paginated(path):
@@ -592,6 +639,11 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
         else:
             item_id = live[0]
             fact("membership", "reused")
+    except IdentityError as error:
+        result.update(action="refused", after=live_status)
+        result["errors"].append({"part": "identity", "error": str(error)})
+        fact("write", "refused")
+        return result, 1
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         result["errors"].append({"part": "add", "error": str(error)})
         fact("membership", "uncertain")
@@ -604,6 +656,11 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
               "--single-select-option-id", option_id, "--format", "json"])
         fact("status", "completed")
         result["action"] = "set"
+    except IdentityError as error:
+        result.update(action="refused", after=live_status)
+        result["errors"].append({"part": "identity", "error": str(error)})
+        fact("write", "refused")
+        return result, 1
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
          # The edit reported a failure but the remote change may have taken hold,
          # so reconcile through a fresh read rather than the failed response.
@@ -678,41 +735,62 @@ def resolve_identity(env=None, config_paths=None):
     token_present = False
     if token_file:
         token_path = Path(token_file).expanduser()
-        token_present = token_path.is_file()
+        try:
+            token_present = bool(token_path.read_text(encoding="utf-8").strip())
+        except (OSError, UnicodeError):
+            token_present = False
     elif "GH_TOKEN" in env:
         token_present = bool(env["GH_TOKEN"].strip())
 
+    configured = bool(login or token_path or "GH_TOKEN" in env)
     return {
         "login": login,
         "name": name,
         "email": email,
         "token_file": str(token_path) if token_path else None,
         "token_present": token_present,
-        "configured": bool(login or token_path or "GH_TOKEN" in env),
+        "configured": configured,
+        "ready": bool(login and token_present),
     }
 
 
 def identity_env(identity, base_env=None):
     """Build environment dict with GH_TOKEN, Git author/committer, and credential config."""
     env = dict(os.environ if base_env is None else base_env)
+    env.pop("GITHUB_TOKEN", None)
     token_file = identity.get("token_file")
-    if token_file and "GH_TOKEN" not in env:
+    if token_file:
         p = Path(token_file).expanduser()
-        if p.is_file():
-            env["GH_TOKEN"] = p.read_text(encoding="utf-8").strip()
+        try:
+            token = p.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            raise GhError("The selected token file is unavailable.") from None
+        if not token:
+            raise GhError("The selected token file is empty.")
+        env["GH_TOKEN"] = token
 
     name = identity.get("name")
     if name:
-        env.setdefault("GIT_AUTHOR_NAME", name)
-        env.setdefault("GIT_COMMITTER_NAME", name)
+        env["GIT_AUTHOR_NAME"] = name
+        env["GIT_COMMITTER_NAME"] = name
 
     email = identity.get("email")
     if email:
-        env.setdefault("GIT_AUTHOR_EMAIL", email)
-        env.setdefault("GIT_COMMITTER_EMAIL", email)
+        env["GIT_AUTHOR_EMAIL"] = email
+        env["GIT_COMMITTER_EMAIL"] = email
 
-    if "GH_TOKEN" in env and "GIT_CONFIG_PARAMETERS" not in env:
-        env["GIT_CONFIG_PARAMETERS"] = "'credential.https://github.com.helper=' 'credential.https://github.com.helper=!gh auth git-credential'"
+    if token_file or "GH_TOKEN" in env:
+        inherited_config = env.get("GIT_CONFIG_PARAMETERS", "").strip()
+        try:
+            parameters = shlex.split(inherited_config) if inherited_config else []
+        except ValueError:
+            raise GhError("Inherited Git configuration parameters could not be read.") from None
+        helper_key = "credential.https://github.com.helper"
+        parameters = [parameter for parameter in parameters if parameter.partition("=")[0].casefold() != helper_key.casefold()]
+        parameters.extend((f"{helper_key}=", f"{helper_key}=!gh auth git-credential"))
+        env["GIT_CONFIG_PARAMETERS"] = " ".join(
+            "'" + parameter.replace("'", "'\\''") + "'" for parameter in parameters
+        )
 
     return env
 
@@ -756,7 +834,11 @@ def main(argv=None):
     elif args.command == "identity":
         identity = resolve_identity()
         if args.export:
-            env = identity_env(identity)
+            try:
+                env = identity_env(identity)
+            except GhError as error:
+                sys.stderr.write(f"{error}\n")
+                return 1
             statements = []
             if "GH_TOKEN" in env:
                 statements.append(f'export GH_TOKEN={shlex.quote(env["GH_TOKEN"])}')
@@ -774,7 +856,7 @@ def main(argv=None):
             return 0
         json.dump(identity, sys.stdout, indent=2)
         sys.stdout.write("\n")
-        return 0 if identity["configured"] else 1
+        return 0 if identity["ready"] else 1
     elif args.command == "exec":
         cmd_args = args.exec_args
         if cmd_args and cmd_args[0] == "--":
@@ -783,7 +865,14 @@ def main(argv=None):
             sys.stderr.write("Give a command to run with exec.\n")
             return 1
         identity = resolve_identity()
-        env = identity_env(identity)
+        try:
+            env = identity_env(identity)
+        except GhError as error:
+            sys.stderr.write(f"{error}\n")
+            return 1
+        if is_git_commit_command(cmd_args) and (not identity.get("name") or not identity.get("email")):
+            sys.stderr.write("A selected Git author name and email are required before a commit.\n")
+            return 1
         res = subprocess.run(cmd_args, env=env)
         return res.returncode
     else:
