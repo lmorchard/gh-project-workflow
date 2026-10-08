@@ -189,7 +189,8 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
             elif kind == "CheckRun":
                 response_string(item.get("name"), "A check name")
                 response_string(item.get("status"), "A check status")
-                response_string(item.get("conclusion"), "A check conclusion", nullable=True)
+                # gh exports an unset conclusion as an empty Go string.
+                response_string(item.get("conclusion"), "A check conclusion", nullable=True, empty=item["status"] != "COMPLETED")
             else:
                 raise ValueError(f"Unknown check type: {kind}.")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:

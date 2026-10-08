@@ -860,6 +860,16 @@ class ResponseValueTests(unittest.TestCase):
             {"__typename": "CheckRun", "name": "test", "status": "IN_PROGRESS", "conclusion": None}])))
         self.assertEqual((status, result["ci"]), (0, "pending"))
 
+    def test_unfinished_checks_accept_empty_gh_conclusions(self):
+        for state in ("IN_PROGRESS", "QUEUED"):
+            with self.subTest(state=state):
+                data = pr(statusCheckRollup=[{"__typename": "CheckRun", "name": "test", "status": state, "conclusion": ""}])
+                result, status = pr_state("o/r", 7, **fake(data))
+                self.assertEqual(status, 0)
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["ci"], "pending")
+                self.assertEqual(result["errors"], [])
+
     def test_invalid_rule_entries_leave_required_checks_unread(self):
         for data in ([None], {}, [{"type": []}], rules([])):
             with self.subTest(data=data):
@@ -1126,6 +1136,18 @@ class PrStateSubprocessTests(unittest.TestCase):
         self.assertEqual(out["base"], "main")
         self.assertEqual(out["ci"], "green")
         self.assertIsNotNone(out["reviews"])
+
+    def test_unfinished_gh_checks_preserve_head_and_pending_ci(self):
+        for state in ("IN_PROGRESS", "QUEUED"):
+            with self.subTest(state=state):
+                h = self._harness()
+                h.replies["pr.view:o/r:7"]["out"]["statusCheckRollup"] = [
+                    {"__typename": "CheckRun", "name": "test", "status": state, "conclusion": ""}]
+                result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+                self.assertEqual(result.returncode, 0)
+                self.assertEqual(out["head"], HEAD)
+                self.assertEqual(out["ci"], "pending")
+                self.assertEqual(out["errors"], [])
 
     def test_pr_state_sends_repo_identifiers_to_gh(self):
         h = self._harness()
