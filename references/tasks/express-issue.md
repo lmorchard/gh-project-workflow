@@ -2,7 +2,7 @@
 
 Coordinate implementation, independent review, and submission for one selected issue. A delegated coordinator stops after submission and hands the remaining agreed endpoint to the parent. Dispatch tasks rather than repeating their procedures here. Each operation remains usable without this coordinator.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout, including the handoff rules.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs.
 
 ## Establish the task and endpoint
 
@@ -26,7 +26,7 @@ Before substantial dependent implementation, apply [Prepare required review](../
 
 Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. Apply [Review](../shared/review.md) to model evidence and unmet review requirements. Do not skip the review silently.
 
-If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer, as [Authorization](../shared/authorization.md) describes under handoffs. Do not review the changes yourself.
+If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer under [Coordination](../shared/coordination.md#handoffs). Do not review the changes yourself.
 
 Return actionable local findings to the implementation agent, on the same task branch, with affected checks run again. Return disputed findings and scope changes to the parent interview. After corrections, have the reviewer assess the changed code and the unresolved findings. Do not repeat completed checks without a new reason. If the same blocker persists without progress, report it instead of cycling.
 
@@ -36,7 +36,7 @@ When resuming with an existing PR, use current independent review evidence if it
 
 Dispatch [submit-pr](submit-pr.md) for reviewed local commits that are not yet published. Pass the verified worktree, branch, base, head, checks, review outcome, and authorization.
 
-If you are a delegated coordinator, return the submission result and remaining endpoint to the parent under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership). Include the exact source revisions and existing checks and reviews, with original request times, deadlines, and identifiers. Stop at this handoff instead of dispatching or waiting for a nested [address-pr-review](address-pr-review.md) worker. If resuming an existing PR, hand off its current evidence by the same route. For a direct session, continue as the conversation owner under the shared rule.
+If you are a delegated coordinator, return the submission result and remaining endpoint to the parent under [PR follow-up ownership](../shared/coordination.md#pr-follow-up-ownership). Include the exact source revisions and existing checks and reviews, with original request times, deadlines, and identifiers. Stop at this handoff instead of dispatching or waiting for a nested [address-pr-review](address-pr-review.md) worker. If resuming an existing PR, hand off its current evidence by the same route. For a direct session, continue as the conversation owner under the shared rule.
 
 ## Continue to the endpoint in the parent
 

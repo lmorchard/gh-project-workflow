@@ -10,7 +10,7 @@ Read the project instructions, the issue body, and relevant comments. Identify t
 
 Inspect the relevant code and tests at the current revision, and determine whether the reported problem still exists. If part of the issue is already satisfied, record the evidence and implement only what remains. If nothing remains, report that. Do not create unrelated work to justify a commit.
 
-When a fact or choice is missing, apply [Questions for the user](../shared/authorization.md#questions-for-the-user). Settle routine implementation choices from current evidence. Return decisions about the intended result instead of redefining the issue.
+When a fact or choice is missing, apply [Decisions](../shared/decisions.md). Settle routine implementation choices from current evidence. Return decisions about the intended result instead of redefining the issue.
 
 ## Prepare an isolated workspace
 

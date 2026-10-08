@@ -1,6 +1,6 @@
 ---
 skills: [express-issue, deliver-parent-issue, burndown-ready-queue, submit-pr]
-source: Constructed scenario for issue 13; references/shared/authorization.md PR follow-up ownership
+source: Constructed scenario for issue 13; references/shared/coordination.md PR follow-up ownership
 ---
 
 ## Situation

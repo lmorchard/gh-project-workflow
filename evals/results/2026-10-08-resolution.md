@@ -8,11 +8,13 @@ The implementation agent graded the answers. Independent review at `ba86c8c9799c
 
 ## Candidate and evaluator
 
-The candidate is the scoped working diff after `f5cdf43e677bbe593f5392640bf43dc94cc1f074`.
+The evaluated instructions are preserved at `0f2bed8fc5cae129902521dbde4b42b5fc8f746f`, before the shared-reference restructure.
+Grades use the [scenario criteria at that revision](https://github.com/lmorchard/gh-project-workflow/tree/0f2bed8fc5cae129902521dbde4b42b5fc8f746f/evals/scenarios).
+The candidate was the scoped working diff after `f5cdf43e677bbe593f5392640bf43dc94cc1f074`.
 The hashes below identify the exact supplied source text before commit.
 The first four cases received `SKILL.md`, `implement-issue.md`, Authorization, and Evidence.
 The maintenance case also received `docs/skill-style.md`.
-The source text remained unchanged after evaluation.
+The evaluated source text remained unchanged through `0f2bed8fc5cae129902521dbde4b42b5fc8f746f`. Later routing evaluations concern a different revision.
 
 | Source | SHA256 |
 | --- | --- |

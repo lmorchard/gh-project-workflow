@@ -12,6 +12,8 @@ The parent can then return the draft and decisions for another issue review. Aft
 
 ## When to ask
 
+The shared [Decisions](../references/shared/decisions.md) reference supplies the boundary. [Coordination](../references/shared/coordination.md#roles) assigns the conversation and delegated work. [Authorization](../references/shared/authorization.md) supplies permission limits.
+
 A missing fact calls for research when a source can answer it. A choice about intent or scope calls for a conversation. A routine implementation choice can remain open when the issue states sufficient success conditions.
 
 Editing unclear prose does not require a user interview. The reviewing agent makes that correction itself. The parent asks only when a correction changes a decision that belongs to the user.

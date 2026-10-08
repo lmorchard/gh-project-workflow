@@ -112,7 +112,7 @@ Independent review of this evidence commit remains a separate task.
 
 The existing [scenario procedure](../../evals/README.md) remains available for assessments that execute no commands.
 The installed Skill Creator reference, `~/.codex/skills/.system/skill-creator/SKILL.md`, supplied the independent, ordinary-request approach.
-The [authorization](../../references/shared/authorization.md) and [implementation](../../references/tasks/implement-issue.md) references supplied the decision boundary.
+The [authorization](https://github.com/lmorchard/gh-project-workflow/blob/b47c9d5088f471da5d7b35a56ecda6078dee02be/references/shared/authorization.md) and [implementation](https://github.com/lmorchard/gh-project-workflow/blob/b47c9d5088f471da5d7b35a56ecda6078dee02be/references/tasks/implement-issue.md) references supplied the decision boundary.
 Later issue #2 experiments cover failure diagnosis, discovery reuse, lesson routing, and handoff preservation.
 This comparison does not claim those results or closure of the umbrella issue.
 
@@ -120,4 +120,4 @@ The record applies the available Simple English guidance. Full ASD-STE100 compli
 
 ## Maintained follow-up
 
-Les later requested persistent guidance in PR #20. The shared [decision procedure](../../references/shared/authorization.md#questions-for-the-user) and [evidence reuse rule](../../references/shared/evidence.md#sources-and-revisions) now state the boundary explicitly. Five reusable scenarios assess those instructions and the maintenance rule. The [scenario results](../../evals/results/2026-10-08-resolution.md) record fresh samples with separate grading criteria. This historical action comparison remains evidence about `b47c9d5`, not an action trial of the revised text.
+Les later requested persistent guidance in PR #20. The shared [decision procedure](../../references/shared/decisions.md) and [evidence reuse rule](../../references/shared/evidence.md#sources-and-revisions) now state the boundary explicitly. Five reusable scenarios assess those instructions and the maintenance rule. The [scenario results](../../evals/results/2026-10-08-resolution.md) record fresh samples with separate grading criteria. This historical action comparison remains evidence about `b47c9d5`, not an action trial of the revised text.

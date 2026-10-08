@@ -18,7 +18,7 @@ python3 "$GHFLOW_CLI" --help
 
 Replace `ABSOLUTE_SKILL_DIRECTORY` with the resolved directory. The resolved skill directory is the source checkout root. Use its `cli/ghflow.py` directly. Keep the current directory at the target project so Git, GitHub, and identity configuration use that project. Resolve writing guidance through each reference's links, not through the current directory. If source reads need external directory permission, report the resolved checkout path and use the setup instructions in [Source access permissions](README.md#source-access-permissions). Do not silently change agent permissions.
 
-Apply [Authorization](references/shared/authorization.md) and [Evidence](references/shared/evidence.md). Before a subagent runs Git or GitHub commands, apply [Agent identity](references/shared/identity.md). CLI reads do not grant permission to write.
+Apply [Authorization](references/shared/authorization.md) and [Evidence](references/shared/evidence.md). When a fact or choice is missing, apply [Decisions](references/shared/decisions.md). Before a subagent runs Git or GitHub commands, apply [Agent identity](references/shared/identity.md). CLI reads do not grant permission to write.
 
 ## Select the requested operation
 
@@ -51,6 +51,6 @@ Match the user's explicit request to the operation below. Identify the subject r
 
 Follow the selected reference's scope and stopping point. Carry existing authorization across included tasks. Draft-only and read-only limits still apply; implementation or submission never implies merge permission.
 
-For delegation, give the subagent the resolved entry skill path, selected task-reference path, resolved CLI path, target checkout, subject, revisions, evidence, decisions, and authorization limits. Tell it to execute that operation without selecting another. If delegation or the required reviewer model is unavailable, follow the shared rules and report the limit.
+For delegation, apply [Coordination](references/shared/coordination.md#handoffs). Give the subagent the selected operation and required inputs. If delegation or the required reviewer model is unavailable, follow the shared rules and report the limit.
 
 Return the operation's actual result, sources, checks, and remaining decisions. Report missing capabilities and incomplete evidence explicitly.

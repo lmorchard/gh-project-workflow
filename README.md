@@ -106,7 +106,7 @@ The entry skill selects these independently usable operations:
 - [deliver-parent-issue](references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
 - [burndown-ready-queue](references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
 
-Each operation accepts an ordinary issue or PR. References share [authorization and evidence rules](references/shared).
+Each operation accepts an ordinary issue or PR. References share [authorization](references/shared/authorization.md), [coordination](references/shared/coordination.md), [decisions](references/shared/decisions.md), and [evidence](references/shared/evidence.md).
 Delivery through review follow-up leaves the PR open. Merge requires explicit authorization and the existing review policy.
 
 ## Requirements

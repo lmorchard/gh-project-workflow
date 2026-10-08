@@ -1,6 +1,6 @@
 ---
 skills: [implement-issue]
-source: docs/trials/2026-10-07-resolution.md; issue #2 persistent guidance request; references/shared/authorization.md; references/shared/evidence.md
+source: docs/trials/2026-10-07-resolution.md; issue #2 persistent guidance request; references/shared/decisions.md; references/shared/authorization.md; references/shared/coordination.md; references/shared/evidence.md
 ---
 
 ## Situation

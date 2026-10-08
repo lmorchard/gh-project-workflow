@@ -8,7 +8,9 @@ A task reference owns one operation: the judgment and procedure that are specifi
 
 Use these shared references instead of restating their rules:
 
-- [Authorization](../references/shared/authorization.md): what the user has permitted, how it carries between tasks, and what the parent and subagents each do.
+- [Authorization](../references/shared/authorization.md): permission, scope, and how authorization carries between tasks.
+- [Coordination](../references/shared/coordination.md): parent and subagent roles, dispatch, handoffs, and PR follow-up ownership.
+- [Decisions](../references/shared/decisions.md): factual research, routine choices, and questions that need user judgment.
 - [Evidence](../references/shared/evidence.md): source revisions, check states, hosted CI, safe GitHub writes, and honest reports.
 - [Review](../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
 - [Board status](../references/shared/board-status.md): moving an issue between project-board states.

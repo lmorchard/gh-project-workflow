@@ -71,7 +71,7 @@ Submission alone does not satisfy a review-follow-up endpoint.
 
 The issue cites ownership and reporting problems from the [Ready queue trial](trials/README.md#2026-10-05-ready-queue-burndown-on-board-6).
 At `b47c9d5088f471da5d7b35a56ecda6078dee02be`, express still waited for a nested follow-up worker.
-Shared authorization, evidence, and delivery callers now apply the selected ownership.
+Shared [coordination](../references/shared/coordination.md#pr-follow-up-ownership), evidence, and delivery callers apply the selected ownership.
 The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
 
 The new ownership scenarios are constructed decision checks, not observed deliveries.
@@ -126,7 +126,7 @@ It supplies the absolute source path and preserves the caller's directory.
 
 The [issue #2 comparison](trials/2026-10-07-resolution.md) observed three fresh agents using the existing guidance successfully at `b47c9d5`. They researched a fact, implemented a routine choice, and returned an unresolved product decision.
 
-Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [authorization rules](../references/shared/authorization.md#questions-for-the-user) now distinguish these three cases at the decision point. The [evidence rules](../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
+Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [decision rules](../references/shared/decisions.md) now distinguish these three cases at the decision point. The [evidence rules](../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
 
 The [maintenance rule](skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
 
@@ -144,3 +144,9 @@ The [reusable scenario results](../evals/results/2026-10-07-reviewer-preparation
 Les accepted recorded fresh author selection before future implementation as a valid resolution of unknown planned identity.
 The unknown-author criteria reflect that interpretation of the existing shared rule. Evaluated instructions and raw prompts remain unchanged.
 Neither source establishes a completed different-model code review or full delivery in the trial environment.
+
+## Shared reference responsibilities
+
+After merging PR #21, Les requested focused documents rather than the combined authorization reference. The restructure moves roles and handoffs into [Coordination](../references/shared/coordination.md). It moves factual resolution and question framing into [Decisions](../references/shared/decisions.md). [Authorization](../references/shared/authorization.md) retains permission and scope. Evidence and the interview task retain their existing responsibilities.
+
+The move preserves merged review preparation and parent-owned PR follow-up. Active callers use the new owners. Earlier trial hashes, answers, and grades describe their pinned instructions and remain historical evidence.

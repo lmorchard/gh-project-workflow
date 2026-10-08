@@ -2,7 +2,7 @@
 
 Work through the children needed to satisfy one selected parent issue, reusing the existing skills and carrying decisions between them. Continue from child to child without the user restarting the flow. Stop at the parent's boundary.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout, including the handoff rules.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs.
 
 ## Establish the boundary
 
@@ -36,7 +36,7 @@ When the draft is ready and the flow includes publication, use [file-issue](file
 
 Before substantial dependent implementation of a child, apply [Prepare required review](../shared/review.md#prepare-required-review). Carry the established review path, model evidence, or explicit exception into the child handoff.
 
-Run [express-issue](express-issue.md) for the selected child with its endpoint, scope, decisions, and authorization. Its delegated coordinator owns implementation, independent review, and submission. The conversation parent owns direct follow-up dispatch under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership).
+Run [express-issue](express-issue.md) for the selected child with its endpoint, scope, decisions, and authorization. Its delegated coordinator owns implementation, independent review, and submission. The conversation parent owns direct follow-up dispatch under [PR follow-up ownership](../shared/coordination.md#pr-follow-up-ownership).
 
 If running as a delegated coordinator, relay the submission handoff and remaining child and parent scope to the conversation parent, then stop. Resume from the parent's endpoint result. A submission handoff does not complete a child whose endpoint includes follow-up or merge.
 

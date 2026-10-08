@@ -1,6 +1,6 @@
 ---
 skills: [express-issue, address-pr-review]
-source: Constructed scenario for issue 13; references/shared/authorization.md PR follow-up ownership
+source: Constructed scenario for issue 13; references/shared/coordination.md PR follow-up ownership
 ---
 
 ## Situation

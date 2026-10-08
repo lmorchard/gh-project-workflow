@@ -55,4 +55,4 @@ Read the CI and review state for the published head. Return:
 - The board transition result, or why it was skipped or failed.
 - Any other incomplete operations.
 
-If the authorized endpoint includes follow-up, mark it incomplete and return the handoff under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership). The parent directly dispatches [address-pr-review](address-pr-review.md) within the existing authorization. For a submission-only request, stop here. Each follow-up task can also start from an existing PR without this handoff.
+If the authorized endpoint includes follow-up, mark it incomplete and return the handoff under [PR follow-up ownership](../shared/coordination.md#pr-follow-up-ownership). The parent directly dispatches [address-pr-review](address-pr-review.md) within the existing authorization. For a submission-only request, stop here. Each follow-up task can also start from an existing PR without this handoff.

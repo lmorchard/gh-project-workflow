@@ -1,6 +1,6 @@
 ---
 skills: [define-issue, file-issue]
-source: a4626c2
+source: a4626c2; references/shared/authorization.md; references/shared/coordination.md
 ---
 
 ## Situation

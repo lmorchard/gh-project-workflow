@@ -1,6 +1,6 @@
 ---
 skills: [implement-issue]
-source: issue #2 persistent guidance request; docs/skill-style.md; docs/trials/2026-10-07-resolution.md
+source: issue #2 persistent guidance request; docs/skill-style.md; references/shared/decisions.md; docs/trials/2026-10-07-resolution.md
 ---
 
 ## Situation
@@ -9,7 +9,7 @@ You are maintaining this workflow repository. The user asks you to improve how f
 
 ## Expected
 
-Clarify the decision boundary in the existing owning shared reference and link it at relevant task decision points. Add a reusable scenario with grading separate from evaluator inputs. Cite the successful trials and the user's request without inventing a reproduced failure. Preserve the broader experiment as deferred scope. A passive record alone does not satisfy the requested change in future behavior.
+Clarify the decision boundary in `references/shared/decisions.md` and link it at relevant task decision points. Add a reusable scenario with grading separate from evaluator inputs. Cite the successful trials and the user's request without inventing a reproduced failure. Preserve the broader experiment as deferred scope. A passive record alone does not satisfy the requested change in future behavior.
 
 ## Not acceptable
 

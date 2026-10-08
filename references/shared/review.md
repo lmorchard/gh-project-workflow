@@ -22,7 +22,7 @@ For delivery that requires independent review, establish an available review pat
 
 If dispatch, model selection, or model identity evidence is missing, report the precise unmet requirement and the next action to the parent. Continue useful preparation that does not depend on it. Do not substitute self-review or a same-model review for the required independent different-model review. Preserve an explicit user-approved exception and its scope in the handoff.
 
-Preparation establishes the available path and model evidence; it does not require executing the review before implementation. At review dispatch, record the actual selection and returned model evidence, including any remaining identity limit. If an established path later hits a capacity limit, preserve the work and model evidence and let the parent dispatch the reviewer under [Authorization](authorization.md#handoffs). This dispatch failure does not create a new review choice or require renewed approval.
+Preparation establishes the available path and model evidence; it does not require executing the review before implementation. At review dispatch, record the actual selection and returned model evidence, including any remaining identity limit. If an established path later hits a capacity limit, preserve the work and model evidence and let the parent dispatch the reviewer under [Coordination](coordination.md#handoffs). This dispatch failure does not create a new review choice or require renewed approval.
 
 Apply this preparation only when the selected flow requires independent review. A standalone implement-only operation, an ordinary draft, or a read-only task does not gain this requirement merely by using ghflow.
 

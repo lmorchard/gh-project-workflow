@@ -2,7 +2,7 @@
 
 Help the user settle the decisions that block a useful issue draft. The interview happens in the parent conversation. A subagent that loads this skill returns proposed questions to the parent instead.
 
-Apply [Authorization](../shared/authorization.md) throughout. Before proposing an interview question, apply [Questions for the user](../shared/authorization.md#questions-for-the-user).
+Apply [Authorization](../shared/authorization.md) throughout. Follow [Coordination](../shared/coordination.md#roles) for the parent and subagent roles. Before proposing an interview question, apply [Decisions](../shared/decisions.md#return-unresolved-decisions).
 
 ## Establish the starting point
 

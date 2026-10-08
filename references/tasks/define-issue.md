@@ -16,7 +16,7 @@ If board information is supplied, compare it with the issue. Do not expand one i
 
 State the intended user result before choosing a solution. Keep decisions the user already made, without asking for them again.
 
-When a fact or choice is missing, apply [Questions for the user](../shared/authorization.md#questions-for-the-user). A missing implementation plan does not block readiness.
+When a fact or choice is missing, apply [Decisions](../shared/decisions.md). A missing implementation plan does not block readiness.
 
 If the issue contains several independently useful changes, propose a smaller first issue. Explain what it proves and what remains. Do not silently replace the original goal with the smaller task.
 
