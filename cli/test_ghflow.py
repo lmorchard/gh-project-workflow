@@ -46,11 +46,13 @@ def fake(pr_data, rules_data=None, reviews=(), comments=(), timeline=(), fail=()
             if "compare" in fail:
                 raise GhError("HTTP 404")
             return {"behind_by": behind_by, "ahead_by": 1}
-        if "rules" in fail:
-            raise GhError("HTTP 403")
-        return rules_data if rules_data is not None else rules("test")
+        raise AssertionError(f"Unexpected gh call: {args}")
 
     def gh_paginated(path):
+        if "/rules/branches/" in path:
+            if "rules" in fail:
+                raise GhError("HTTP 403")
+            return rules_data if rules_data is not None else rules("test")
         if path.endswith("/reviews"):
             if "reviews" in fail:
                 raise GhError("HTTP 502")
@@ -1110,10 +1112,11 @@ def pr_view_out(**overrides):
 
 class PrStateSubprocessTests(unittest.TestCase):
     def _harness(self, head=HEAD, reviews=None, comments=None,
-                 timeline=None, rules_data=None, behind_by=0, missing=()):
+                 timeline=None, rules_data=None, rules_pages=None, behind_by=0, missing=()):
         replies = {
             "pr.view:o/r:7": {"out": pr_view_out(headRefOid=head)},
-            "api:repos/o/r/rules/branches/main": {"out": rules_data if rules_data is not None else rules("test")},
+            "api.paginate:repos/o/r/rules/branches/main": {
+                "out": rules_pages if rules_pages is not None else [rules_data if rules_data is not None else rules("test")]},
             "api:repos/o/r/compare/main...%s" % head: {"out": {"behind_by": behind_by}},
             "api.paginate:repos/o/r/pulls/7/reviews": {"out": [list(reviews or [])]},
             "api.paginate:repos/o/r/pulls/7/comments": {"out": [list(comments or [])]},
@@ -1121,7 +1124,7 @@ class PrStateSubprocessTests(unittest.TestCase):
         }
         for part in missing:
             if part == "rules":
-                replies["api:repos/o/r/rules/branches/main"] = {"code": 1, "err": "HTTP 403"}
+                replies["api.paginate:repos/o/r/rules/branches/main"] = {"code": 1, "err": "HTTP 403"}
             elif part == "compare":
                 replies["api:repos/o/r/compare/main...%s" % head] = {"code": 1, "err": "HTTP 404"}
             elif part == "reviews":
@@ -1157,8 +1160,41 @@ class PrStateSubprocessTests(unittest.TestCase):
         self.assertIn("--repo", pr_call)
         self.assertIn("o/r", pr_call)
         api_calls = FakeGhHarness.calls_by_cmd(calls, "api")
-        self.assertTrue(any("repos/o/r/rules/branches/main" in t for t in api_calls[0]))
-        self.assertTrue(any("repos/o/r/compare/main..." in t for t in api_calls[1]))
+        rules_call = next(c for c in api_calls if "repos/o/r/rules/branches/main" in c)
+        self.assertIn("--paginate", rules_call)
+        self.assertIn("--slurp", rules_call)
+        compare_call = next(c for c in api_calls if any("repos/o/r/compare/main..." in t for t in c))
+        self.assertTrue(any("repos/o/r/compare/main..." in t for t in compare_call))
+
+    def test_pr_state_reads_required_check_from_later_branch_rules_page(self):
+        first_page = [{"type": f"other_rule_{index}"} for index in range(30)]
+        second_page = rules("typecheck")
+        h = self._harness(rules_pages=[first_page, second_page])
+        result, out, calls = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(out["required_checks"], ["typecheck"])
+        self.assertEqual(out["ci"], "missing")
+        self.assertIn({"name": "typecheck", "state": "missing", "required": True}, out["checks"])
+        rules_call = next(c for c in FakeGhHarness.calls_by_cmd(calls, "api")
+                          if "repos/o/r/rules/branches/main" in c)
+        self.assertEqual(rules_call[:2], ["api", "repos/o/r/rules/branches/main"])
+        self.assertEqual(rules_call[2:], ["--paginate", "--slurp"])
+
+    def test_pr_state_partial_later_rule_page_failure_leaves_inventory_unread(self):
+        h = self._harness()
+        h.replies["api.paginate:repos/o/r/rules/branches/main"] = {
+            "out": [rules("test")], "code": 1, "err": "HTTP 502 on a later page"}
+        result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 2)
+        self.assertIsNone(out["required_checks"])
+        self.assertEqual(out["errors"][0]["part"], "required_checks")
+
+    def test_pr_state_invalid_later_branch_rules_page_leaves_inventory_unread(self):
+        h = self._harness(rules_pages=[rules("test"), {"not": "a page array"}])
+        result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 2)
+        self.assertIsNone(out["required_checks"])
+        self.assertEqual(out["errors"][0]["part"], "required_checks")
 
     def test_pr_state_exercises_rest_pagination(self):
         h = self._harness(reviews=[review(1, "bot", HEAD, "t1")],
@@ -1212,7 +1248,7 @@ class PrStateSubprocessTests(unittest.TestCase):
 
     def test_invalid_optional_values_exit_2_and_preserve_facts(self):
         cases = (
-            ("api:repos/o/r/rules/branches/main", [None], "required_checks"),
+            ("api.paginate:repos/o/r/rules/branches/main", [[None]], "required_checks"),
             ("api:repos/o/r/compare/main...%s" % HEAD, {"behind_by": "0"}, "base_behind_by"),
             ("api.paginate:repos/o/r/pulls/7/reviews", [None], "reviews"),
             ("api.paginate:repos/o/r/pulls/7/comments", {"message": "not pages"}, "reviews"),

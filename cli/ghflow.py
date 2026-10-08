@@ -200,7 +200,7 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
     base = pr["baseRefName"]
 
     def read_required():
-        rules = gh(["api", f"repos/{repo}/rules/branches/{base}"])
+        rules = gh_paginated(f"repos/{repo}/rules/branches/{base}")
         response_type(rules, list, "The branch rules")
         contexts = []
         for rule in rules:
