@@ -116,18 +116,20 @@ def check_state(item):
 
 
 def summarize_ci(checks, required):
-    """Combine check states. "green" needs every check passed or skipped and no required check missing."""
+    """Summarize observed check states and whether required-check discovery succeeded."""
     if checks is None:
         return None
     states = {c["state"] for c in checks}
-    if not checks:
-        return "none"
     if "failed" in states or "canceled" in states or "unknown" in states:
         return "failing"
     if any(c["state"] == "missing" for c in checks):
         return "missing"
     if "pending" in states:
         return "pending"
+    if required is None:
+        return "incomplete"
+    if not checks:
+        return "none"
     return "green"
 
 

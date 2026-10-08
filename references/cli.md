@@ -16,6 +16,10 @@ A part that the tool could not read is `null` and has an entry in `errors`. Exit
 
 Invalid required values or collection entries produce an error for the affected part. If the primary PR response is invalid, the tool exits 1 without reporting a head. Optional read failures preserve the facts already read.
 
+The `ci` summary reports automated project checks, or continuous integration (CI). `failing` takes precedence when a check failed, was canceled, or has an unknown state. Otherwise, `missing` reports a known required check without a result, and `pending` reports work that has not finished. `incomplete` means required-check discovery failed, and the observed checks show neither failure nor pending work. `green` requires successful required-check discovery and only passed or skipped reported checks. `none` means no checks were reported and no required checks were found.
+
+When required-check discovery fails, `required_checks` remains `null`, affected checks have `required: null`, and `errors` records the read error. The command exits 2. A failed optional review or timeline read does not change the CI summary.
+
 Individual nullable fields can be `null` without an error. A review can have no author, commit, or submission time. A review with no author does not match a review request. These nullable fields follow the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json).
 
 ## Verifying a local commit

@@ -132,6 +132,40 @@ class CiTests(unittest.TestCase):
         self.assertIsNone(result["checks"][0]["required"])
         self.assertEqual(status, 2)
 
+    def test_unreadable_rules_do_not_report_green_for_only_passing_or_empty_checks(self):
+        cases = (
+            (
+                "passed",
+                [{"__typename": "CheckRun", "name": "test", "status": "COMPLETED", "conclusion": "SUCCESS"}],
+                "incomplete",
+                [{"name": "test", "state": "passed", "required": None}],
+            ),
+            (
+                "pending",
+                [{"__typename": "CheckRun", "name": "test", "status": "IN_PROGRESS", "conclusion": None}],
+                "pending",
+                [{"name": "test", "state": "pending", "required": None}],
+            ),
+            (
+                "failed",
+                [{"__typename": "StatusContext", "context": "test", "state": "FAILURE"}],
+                "failing",
+                [{"name": "test", "state": "failed", "required": None}],
+            ),
+            ("empty", [], "incomplete", []),
+        )
+        for name, rollup, summary, checks in cases:
+            with self.subTest(name=name):
+                result, status = pr_state(
+                    "o/r", 7, **fake(pr(statusCheckRollup=rollup), fail={"rules"})
+                )
+                self.assertEqual(status, 2)
+                self.assertEqual(result["ci"], summary)
+                self.assertIsNone(result["required_checks"])
+                self.assertEqual(result["checks"], checks)
+                self.assertEqual(result["errors"][0]["part"], "required_checks")
+                self.assertIn("HTTP 403", result["errors"][0]["error"])
+
 
 class ReviewTests(unittest.TestCase):
     def test_copilot_request_matches_bot_review_after_it(self):
@@ -969,6 +1003,7 @@ class ResponseValueTests(unittest.TestCase):
                 self.assertIsNone(result["review_request_events"])
                 self.assertIsNone(result["latest_review_requests"])
                 self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["ci"], "green")
                 self.assertEqual(result["errors"][0]["part"], "review_request_events")
 
     def test_invalid_commit_scalars_are_structured_errors(self):
@@ -1235,6 +1270,40 @@ class PrStateSubprocessTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIsNone(out["required_checks"])
         self.assertEqual(out["errors"][0]["part"], "required_checks")
+
+    def test_pr_state_summarizes_checks_when_rules_are_unread(self):
+        cases = (
+            (
+                "passed",
+                [{"__typename": "CheckRun", "name": "test", "status": "COMPLETED", "conclusion": "SUCCESS"}],
+                "incomplete",
+                [{"name": "test", "state": "passed", "required": None}],
+            ),
+            (
+                "pending",
+                [{"__typename": "CheckRun", "name": "test", "status": "IN_PROGRESS", "conclusion": ""}],
+                "pending",
+                [{"name": "test", "state": "pending", "required": None}],
+            ),
+            (
+                "failed",
+                [{"__typename": "StatusContext", "context": "test", "state": "FAILURE"}],
+                "failing",
+                [{"name": "test", "state": "failed", "required": None}],
+            ),
+            ("empty", [], "incomplete", []),
+        )
+        for name, rollup, summary, checks in cases:
+            with self.subTest(name=name):
+                h = self._harness(missing={"rules"})
+                h.replies["pr.view:o/r:7"]["out"]["statusCheckRollup"] = rollup
+                result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(out["ci"], summary)
+                self.assertEqual(out["checks"], checks)
+                self.assertIsNone(out["required_checks"])
+                self.assertEqual(out["errors"][0]["part"], "required_checks")
+                self.assertIn("HTTP 403", out["errors"][0]["error"])
 
     def test_pr_state_invalid_later_branch_rules_page_leaves_inventory_unread(self):
         h = self._harness(rules_pages=[rules("test"), {"not": "a page array"}])
