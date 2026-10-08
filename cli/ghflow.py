@@ -127,6 +127,40 @@ def is_git_commit_command(command):
     return index < len(command) and command[index] == "commit"
 
 
+def git_config_parameter_tokens(parameters):
+    """Split GIT_CONFIG_PARAMETERS while preserving each parameter's original encoding."""
+    tokens = []
+    index = 0
+    while index < len(parameters):
+        while index < len(parameters) and parameters[index].isspace():
+            index += 1
+        if index == len(parameters):
+            break
+        start = index
+        quote = None
+        while index < len(parameters):
+            char = parameters[index]
+            if quote:
+                if char == quote:
+                    quote = None
+                elif char == "\\" and quote == '"' and index + 1 < len(parameters):
+                    index += 1
+            elif char in ("'", '"'):
+                quote = char
+            elif char == "\\" and index + 1 < len(parameters):
+                index += 1
+            elif char.isspace():
+                break
+            index += 1
+        if quote:
+            raise ValueError("An inherited Git configuration parameter has an unclosed quote.")
+        token = parameters[start:index]
+        if len(shlex.split(token)) != 1:
+            raise ValueError("An inherited Git configuration parameter has invalid quoting.")
+        tokens.append(token)
+    return tokens
+
+
 def run_gh_paginated(path):
     """Read every page of a REST list endpoint."""
     pages = run_gh(["api", path, "--paginate", "--slurp"])
@@ -782,15 +816,21 @@ def identity_env(identity, base_env=None):
     if token_file or "GH_TOKEN" in env:
         inherited_config = env.get("GIT_CONFIG_PARAMETERS", "").strip()
         try:
-            parameters = shlex.split(inherited_config) if inherited_config else []
+            parameters = git_config_parameter_tokens(inherited_config) if inherited_config else []
         except ValueError:
             raise GhError("Inherited Git configuration parameters could not be read.") from None
         helper_key = "credential.https://github.com.helper"
-        parameters = [parameter for parameter in parameters if parameter.partition("=")[0].casefold() != helper_key.casefold()]
-        parameters.extend((f"{helper_key}=", f"{helper_key}=!gh auth git-credential"))
-        env["GIT_CONFIG_PARAMETERS"] = " ".join(
-            "'" + parameter.replace("'", "'\\''") + "'" for parameter in parameters
-        )
+        kept_parameters = []
+        try:
+            for parameter in parameters:
+                decoded = shlex.split(parameter)
+                key = decoded[0].partition("=")[0]
+                if key.casefold() != helper_key.casefold():
+                    kept_parameters.append(parameter)
+        except (IndexError, ValueError):
+            raise GhError("Inherited Git configuration parameters could not be read.") from None
+        kept_parameters.extend((f"'{helper_key}='", f"'{helper_key}=!gh auth git-credential'"))
+        env["GIT_CONFIG_PARAMETERS"] = " ".join(kept_parameters)
 
     return env
 
@@ -839,7 +879,7 @@ def main(argv=None):
             except GhError as error:
                 sys.stderr.write(f"{error}\n")
                 return 1
-            statements = []
+            statements = ["unset GITHUB_TOKEN"]
             if "GH_TOKEN" in env:
                 statements.append(f'export GH_TOKEN={shlex.quote(env["GH_TOKEN"])}')
             if "GIT_AUTHOR_NAME" in env:

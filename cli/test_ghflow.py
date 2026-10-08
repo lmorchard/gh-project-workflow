@@ -778,7 +778,7 @@ class IdentityTests(unittest.TestCase):
             {"token_file": None},
             base_env={
                 "GH_TOKEN": "synthetic-token",
-                "GIT_CONFIG_PARAMETERS": "'example.unrelated=preserved' 'credential.https://github.com.helper=old-helper'",
+                "GIT_CONFIG_PARAMETERS": "'example.unrelated=preserved' 'credential.https://github.com.helper'='old-helper'",
             },
         )
         unrelated = subprocess.run(
@@ -789,6 +789,45 @@ class IdentityTests(unittest.TestCase):
         )
         self.assertEqual(unrelated.stdout.strip(), "preserved")
         self.assertEqual(helpers.stdout.strip(), "!gh auth git-credential")
+
+    def test_separately_quoted_git_config_key_and_value_survive(self):
+        parameters = "'url.https://example.com/?ref=main.insteadOf'='example-alias:'"
+        base_env = {
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+            "HOME": "/private/tmp/ghflow22-test-home",
+            "TMPDIR": "/private/tmp",
+            "GH_TOKEN": "synthetic-token",
+            "GIT_CONFIG_PARAMETERS": parameters,
+        }
+        before = subprocess.run(
+            ["git", "config", "--get-regexp", "^url\\."], env=base_env, text=True, capture_output=True,
+        )
+        env = identity_env({"token_file": None}, base_env=base_env)
+        after = subprocess.run(
+            ["git", "config", "--get-regexp", "^url\\."], env=env, text=True, capture_output=True,
+        )
+        self.assertEqual(before.returncode, 0, before.stderr)
+        self.assertEqual(after.returncode, 0, after.stderr)
+        self.assertEqual(after.stdout, before.stdout)
+        self.assertEqual(after.stdout.strip(), "url.https://example.com/?ref=main.insteadof example-alias:")
+
+    def test_identity_export_unsets_inherited_github_token(self):
+        ident = {"login": "FakeBot", "name": "FakeBot", "email": "bot@example.com", "token_file": None}
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "synthetic-inherited-token"}, clear=True), \
+                patch("ghflow.resolve_identity", return_value=ident):
+            stdout = io.StringIO()
+            with patch("sys.stdout", stdout):
+                status = main(["identity", "--export"])
+
+        self.assertEqual(status, 0)
+        helper = "import json, os; print(json.dumps({'present': 'GITHUB_TOKEN' in os.environ}))"
+        completed = subprocess.run(
+            ["/bin/sh", "-c", stdout.getvalue() + f"\nexec python3 -c {shlex.quote(helper)}"],
+            env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "GITHUB_TOKEN": "synthetic-inherited-token"},
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(json.loads(completed.stdout), {"present": False})
 
     def test_exec_stops_git_commit_without_selected_author_email(self):
         with patch.dict(os.environ, {}, clear=True), \
@@ -829,6 +868,7 @@ class IdentityTests(unittest.TestCase):
                 exported = stdout.getvalue()
                 names = [
                     "GH_TOKEN",
+                    "GITHUB_TOKEN",
                     "GIT_AUTHOR_NAME",
                     "GIT_COMMITTER_NAME",
                     "GIT_AUTHOR_EMAIL",
@@ -854,6 +894,7 @@ class IdentityTests(unittest.TestCase):
                     {key: value for key, value in exported_env.items() if key != "GIT_CONFIG_PARAMETERS"},
                     {
                         "GH_TOKEN": token,
+                        "GITHUB_TOKEN": None,
                         "GIT_AUTHOR_NAME": name,
                         "GIT_COMMITTER_NAME": name,
                         "GIT_AUTHOR_EMAIL": email,

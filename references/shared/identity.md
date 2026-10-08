@@ -38,6 +38,7 @@ Without a selected token file, `GH_TOKEN` can supply the token.
 `ghflow exec` removes inherited `GITHUB_TOKEN` values.
 The selected author name and email replace inherited Git author and committer values.
 The selected name falls back to the selected login.
+`identity --export` removes inherited `GITHUB_TOKEN` from the shell that evaluates its output.
 The `identity` result reports `configured` for configuration presence.
 It reports `ready` when a login and non-empty token are available.
 `ready` checks local inputs. It does not confirm that GitHub accepts the token.
