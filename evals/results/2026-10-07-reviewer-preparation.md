@@ -1,8 +1,7 @@
 # Reviewer preparation decisions, 2026-10-07
 
-Three scenarios passed on their first sample.
-The unknown-author scenario failed its immediate parent-report criterion, then passed on a fresh repeat.
-No skill correction followed that single failure.
+All five sessions across four scenarios pass under the refined criteria.
+The unknown-author case has two separate observed passes.
 These are decision samples, not completed implementation or code reviews.
 
 ## Inputs and execution
@@ -44,15 +43,18 @@ The prompts' constructed dispatch facts are separate from this actual read-only 
 |---|---|---|
 | [Unavailable dispatch](../scenarios/reviewer-dispatch-unavailable.md) | Pass | Stopped dependent implementation, named unavailable dispatch and selection, returned the next action to the parent, and allowed independent preparation. |
 | [Recorded models](../scenarios/reviewer-recorded-models.md) | Pass | Accepted the supported dispatch and different recorded models, continued authorized implementation, and reserved actual review for the later exact base and head. |
-| [Unknown author](../scenarios/reviewer-author-identity-unknown.md), first | Fail on immediate report | Recognized available dispatch and unknown author identity. Proposed explicit author selection first, and reported the gap to the parent only if selection could not be recorded. |
+| [Unknown author](../scenarios/reviewer-author-identity-unknown.md), first | Pass | Recognized missing identity. Proposed explicit fresh author selection as model-a and recorded evidence before implementation, with reviewer model-b. Returned the gap to the parent if selection could not be recorded. |
 | Unknown author, repeat | Pass | Reported unknown author identity to the parent before dispatch. Proposed supported explicit selection and recorded evidence as the next action, with independent preparation meanwhile. |
 | [Ordinary draft](../scenarios/reviewer-unneeded-draft.md) | Pass | Returned a draft and the open tab/newline decision without requiring dispatch or reviewer identity. Read no review source. |
 
-The first unknown-author answer did not guess the author model or claim different-model review.
-It respected the implementation boundary, but did not immediately return the known evidence gap as Expected requires.
-The repeat obeyed that requirement without a source change.
-One failure and one pass do not establish reliable behavior.
-The sample supports keeping the existing precise instruction and recording the variation.
+Les accepted the criteria refinement during the prior author session and requested this correction on 2026-10-07.
+Expected now permits actual existing identity evidence or recorded fresh author selection before future implementation.
+The first response supports the fresh-author path and reports the gap if that path cannot establish the evidence.
+The repeat separately passes through a parent handoff for supported selection and recorded evidence.
+Only grading criteria changed. Situation, raw prompts, responses, and evaluated instructions remain unchanged, so no new evaluation ran.
+The shared [preparation rule](../../references/shared/review.md#prepare-required-review) already permits establishing the path and evidence.
+Fresh selection does not identify authors of existing code. The [committed unknown-author case](../scenarios/reviewer-model-unknown.md) covers that separate limit.
+These samples do not establish reliable behavior or actual dispatch.
 The draft's broader product recommendation was not the decision under assessment.
 
 ## Exact source candidate and logs
@@ -76,8 +78,9 @@ SHA-256 hashes identify the exact bytes of every file the sessions read:
 
 The author compared these hashes with the final source files after all sessions finished.
 They were unchanged.
-The eventual local commit is recorded after commit in the temporary `committed-source.json` and parent handoff.
-This result record uses content hashes to avoid a future commit identifier or a commit that references itself.
+Commit `05859e1de3d8eba77e7221499bdbdb30c0215b46` contains those exact evaluated instruction bytes.
+The temporary `committed-source.json` preserves that original commit association.
+This criteria refinement changes no evaluated instruction hashes or original prompt hashes.
 
 Raw prompts, streams, extracted responses, stderr, and launch arguments remain under `/private/tmp/ghflow-issue8-evals-_t548b1u`.
 Each case directory contains `prompt.txt`, `events.jsonl`, `response.txt`, `stderr.txt`, `launch.json`, and `exit-code.txt`.
@@ -88,8 +91,9 @@ Full generic session telemetry stays outside the repository.
 
 ## Author and coverage limits
 
-The source, execution, and evaluation-record author has explicit native dispatch selection `gpt-6.1-sol`.
+The prior source, execution, and evaluation-record author has explicit native dispatch selection `gpt-6.1-sol`.
 This is selection evidence, not separate provider-returned confirmation.
+The fresh criteria-refinement author also has explicit native CLI `--model gpt-6.1-sol` selection in the user handoff.
 The orchestration host's original model is unknown and it authored no product content.
 A fresh independent native `gpt-6-astra` source review remains planned, not completed.
 The evaluation sessions independently produced decisions, but did not review this PR's source change.

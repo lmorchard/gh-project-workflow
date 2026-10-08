@@ -144,4 +144,5 @@ It records the subject-resolution correction and the unresolved OpenCode discove
 The [reviewer preparation record](2026-10-07-issue-8-reviewer-capability.md) summarizes three historical paired trials and preserves pinned sources.
 The shared instruction now establishes the required review path before substantial dependent implementation.
 Four reusable [decision scenarios and results](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
+All five recorded sessions pass after the accepted unknown-author criteria refinement. Evaluated instructions and raw prompts remain unchanged.
 The broader identity and access scope remains open.
