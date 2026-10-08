@@ -2,7 +2,7 @@
 
 Evaluate open `triage:ready` issues, assign their `Priority` (`P0`–`P3`) and `Size` (`XS`–`XL`) fields, and stage high-priority (`P0`/`P1`) issues into the project board's `Backlog`. Re-sweep lower-priority (`P2`/`P3`) issues when the high-priority queue runs low or circumstances warrant a rethink. This skill does not move issues to `Ready` or begin implementation.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), [Board status](../shared/board-status.md), and [Agent identity](../shared/identity.md) throughout. The parent agent conducts the ranking review with the user; subagents execute project board field updates in the subject repository.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), [Board status](../shared/board-status.md), and [Agent identity](../shared/identity.md) throughout. The parent agent conducts the ranking review with the user; subagents execute project board field updates in the subject repository. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Select the candidate pool
 

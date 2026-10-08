@@ -1,0 +1,29 @@
+diff --git a/tasks.py b/tasks.py
+index d0a9035..20cc264 100644
+--- a/tasks.py
++++ b/tasks.py
+@@ -17,0 +18,2 @@ def build_parser():
++    listing.add_argument("--completed", action="store_true",
++                         help="also show completed tasks")
+@@ -24 +26 @@ def main(argv=None):
+-    for task in list_tasks(tasks, owner=args.owner):
++    for task in list_tasks(tasks, owner=args.owner, include_completed=args.completed):
+diff --git a/test_tasks.py b/test_tasks.py
+index 2b75355..7dd52e0 100644
+--- a/test_tasks.py
++++ b/test_tasks.py
+@@ -31,0 +32,14 @@ class TaskTests(unittest.TestCase):
++    def test_public_list_command_includes_completed_tasks(self):
++        output = io.StringIO()
++        with contextlib.redirect_stdout(output):
++            main(["list", "--data", str(Path(__file__).with_name("sample.json")),
++                  "--completed"])
++        self.assertEqual(output.getvalue(), "1: Open\n2: Closed\n3: Another\n")
++
++    def test_public_list_command_filters_owner_with_completed_tasks(self):
++        output = io.StringIO()
++        with contextlib.redirect_stdout(output):
++            main(["list", "--data", str(Path(__file__).with_name("sample.json")),
++                  "--completed", "--owner", "Bo"])
++        self.assertEqual(output.getvalue(), "2: Closed\n3: Another\n")
++

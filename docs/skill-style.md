@@ -8,8 +8,11 @@ A task reference owns one operation: the judgment and procedure that are specifi
 
 Use these shared references instead of restating their rules:
 
-- [Authorization](../references/shared/authorization.md): what the user has permitted, how it carries between tasks, and what the parent and subagents each do.
-- [Evidence](../references/shared/evidence.md): source revisions, check states, hosted CI, safe GitHub writes, and honest reports.
+- [Authorization](../references/shared/authorization.md): permission, scope, and how authorization carries between tasks.
+- [Coordination](../references/shared/coordination.md): parent and subagent roles, dispatch, handoffs, and PR follow-up ownership.
+- [Decisions](../references/shared/decisions.md): factual research, routine choices, and questions that need user judgment.
+- [Evidence](../references/shared/evidence.md): source revisions, check states, hosted CI, and honest reports.
+- [GitHub writes](../references/shared/github-writes.md): duplicate prevention, saved-result readback, retries, and intervening changes.
 - [Review](../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
 - [Board status](../references/shared/board-status.md): moving an issue between project-board states.
 - [Agent identity](../references/shared/identity.md): configuring machine account credentials and running commands under that identity.
@@ -41,6 +44,8 @@ State the rule positively when you can. "Read checks for the current head" cover
 Use "Do not" for a specific temptation with a real cost, such as `gh pr create --dry-run` pushing changes. Keep concrete pitfalls like that one when they are not obvious and an error is expensive.
 
 Before you add a rule for an incident, look for the general rule that the agent missed. Strengthen or clarify that rule instead of adding a new special case. Record the incident and the commit in [Trial records](trials/README.md).
+
+When an authorized workflow improvement changes a future task decision, update the owning task or shared reference. Add a reusable scenario with separate grading criteria. Keep the observed evidence and its limits in the source or trial record. A passive record alone does not deliver that behavior change. Propose other opportunities separately when authorization does not cover them. This rule does not require changes or a report after every task.
 
 Test each sentence: would an agent act differently without it? If not, remove it. Remove rules when use shows that they add text without changing results.
 

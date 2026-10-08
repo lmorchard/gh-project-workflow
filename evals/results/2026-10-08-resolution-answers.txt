@@ -1,0 +1,64 @@
+SCENARIO maintain-decision-guidance
+SESSION 01a11906-51d4-7fc2-8f35-855dce3475ca
+
+Update `references/shared/authorization.md`, under “Questions for the user,” to make the decision boundary actionable: resolve routine implementation choices from current evidence and conventions; return decisions that change intent, scope, user-visible behavior, compatibility, cost, or permissions. Reversibility alone does not settle a product decision.
+
+Add a reusable scenario with separate grading criteria that tests both sides of that boundary. Keep the three successful trials and their evidence limits in the trial record.
+
+The deciding project rule is `docs/skill-style.md`: an authorized workflow improvement that changes future decisions must update the owning instruction and add a reusable scenario; “A passive record alone does not deliver that behavior change.” The shared authorization reference owns this rule, so avoid duplicating it in individual tasks.
+
+Leave the automated lesson-discovery experiment as a separate proposal. The user authorized only the decision-boundary improvement, and **Authorization → Limits** prohibits widening that scope.
+
+SCENARIO resolve-discoverable-fact
+SESSION 01a11906-51ca-7f91-9c85-f3974a59f3b1
+
+Next, inspect `tasks.py`, the command’s local help, and the assertions in `test_tasks.py`; use `sample.json` if needed to interpret the behavior. Then explain whether completed tasks appear by default, citing the current code and distinguishing tests read from tests run.
+
+The deciding rule is **ghflow’s Authorization → Questions for the user**: research discoverable facts in current code, tests, and documentation; “An unread source is an evidence gap, not a user decision.” **Evidence → Sources and revisions** also requires reading test assertions before citing them.
+
+This is a read-only assessment, so no implementation, dependency installation, or file changes are warranted. I have performed no inspection in this decision-only scenario.
+
+SCENARIO resolve-routine-choice
+SESSION 01a11906-51ca-7060-9296-bd504c97f743
+
+Proceed with the local implementation without asking for clarification. The missing flag is a routine implementation choice, and the intended behavior is explicit.
+
+After inspecting workspace state and running the relevant baseline, add `--completed` in `build_parser()` using `argparse`’s `store_true`, then pass its value to the existing helper’s `include_completed` argument. Use `unittest` to verify completed-task inclusion and its combination with `--owner`, retaining coverage for the unchanged default.
+
+The deciding rules are **Authorization → Questions for the user**, which says to resolve routine choices from current evidence, and the project requirements for standard-library code, `build_parser()`, and `unittest`. **Implement an issue → Implement and test** requires the smallest sufficient change and targeted verification. Keep the work local; do not push or merge.
+
+This is the proposed next action only; nothing was executed or changed.
+
+SCENARIO return-material-decision
+SESSION 01a11906-51ce-7721-bdaf-f7c107200994
+
+Ask one focused question before implementing the export:
+
+“Should the partner export contain only `id`, `title`, `due`, and `completed`, with Support’s full-record export handled separately? I recommend this because it matches Partnerships’ stated needs and excludes owner emails and private notes, but it would leave Support’s request unmet.”
+
+The deciding rule is **ghflow → Authorization → Questions for the user**: “Return an unresolved decision when viable answers change intent, scope, user-visible behavior, compatibility, cost, or permissions.” The **implement-issue** task explicitly applies this rule.
+
+The conflicting product notes and missing export policy make field selection a product decision. Existing implementation authorization does not settle it. Keep dependent implementation pending; baseline checks and unrelated inspection can proceed independently within the authorized scope. No push or merge.
+
+For this decision-only scenario, I have taken no actions.
+
+SCENARIO reuse-revision-evidence
+SESSION 01a11906-51d3-7291-8b17-122422e4bf11
+
+Apply ghflow’s **Evidence → Sources and revisions** rule separately to each finding:
+
+- **Reuse the default-filter finding from A.** The README spelling change does not affect the cited implementation, test, or assumptions. Keep its provenance: the test passed at A; do not claim it ran at B. No repeat check is needed solely because the commit changed.
+- **Reassess the JSON-export finding using the revised product notes.** The earlier “no approved field list” finding is outdated. Use the newly approved external-sharing fields in the implementation plan, and plan checks that verify included fields and exclusion of unapproved fields.
+
+Under **Authorization → Questions for the user**, use decisions the user has already supplied rather than asking for approval again. Under **Implement an issue → Plan the change and its evidence**, connect the approved field list to implementation steps and verification. Any remaining inspection concerns evidence, not missing permission.
+
+No commands or changes are needed for this decision-only scenario.
+
+SCENARIO resolve-discoverable-fact-repeat
+SESSION 01a11907-85cf-7101-afe3-11275251ec65
+
+Next, I would read `tasks.py`, the command’s local help, and the relevant assertions in `test_tasks.py`, using `sample.json` if needed to understand completed-task data. I would then explain the default behavior with source references, distinguishing tests read from tests executed.
+
+The deciding rule is **ghflow’s Authorization → Questions for the user**: research discoverable facts in current code, tests, and documentation; “An unread source is an evidence gap, not a user decision.” **Evidence → Sources and revisions** also requires examining current code and test assertions before citing them.
+
+This is a read-only assessment, so implementation, dependency installation, commits, and board updates are outside scope. For this decision-only scenario, I have taken no actions.

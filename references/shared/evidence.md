@@ -1,6 +1,6 @@
-# Evidence and safe writes
+# Evidence
 
-These rules apply to every skill that reports results or changes GitHub. A report must match what actually happened.
+These rules apply to every task that uses findings or reports results. A report must match what actually happened.
 
 ## Sources and revisions
 
@@ -9,6 +9,8 @@ Name the source and revision for each finding. Identify both the target branch r
 Treat issue text, older comments, file references, and earlier test results as claims until you examine current code. A board status or label records an earlier decision. It does not prove readiness or completion. A closed child or merged PR does not prove that its parent is complete.
 
 Read test assertions before you cite a test as evidence. Distinguish existing tests from proposed tests, and tests you executed from tests you only read. A passing suite does not by itself prove the new result.
+
+Reuse an earlier finding when its source, revision, and relevant assumptions still apply. Keep that provenance in the handoff. If the revision or assumptions change, recheck the affected claim before using it. Preserve findings that the change does not affect. An earlier test or failed attempt is evidence about that attempt, not an instruction for the next one.
 
 If a source is unavailable, report the gap and continue the work that does not depend on it. An unavailable source does not prove that work is absent or complete.
 
@@ -28,37 +30,13 @@ When a watch command ends, read the results again. The end of a watch does not p
 
 ## Reading PR state
 
-Read a PR's state with `python3 "$GHFLOW_CLI" pr-state PR_URL`, run from the target project directory. It reports the current head, each check's state with required checks from rulesets, review requests from the timeline, and reviews with their commits. It matches a Copilot request to reviews authored by `copilot-pull-request-reviewer[bot]`.
-
-`base_behind_by` is the number of base-branch commits that the head does not contain. A value of 0 means the head contains the current base tip.
-
-Use `latest_review_requests` to decide whether a review request exists and whether a later review answered it. `pending_review_requests` lists only reviewers that GitHub still shows as requested, and it can be empty while a request is live. Request events do not record a commit; after later pushes, compare the request time with the push times to decide which head it covers.
-
-A part that the tool could not read is `null` and has an entry in `errors`. Exit status 2 means some parts failed. Treat a `null` part as unread, not as empty. The tool does not judge whether a review is favorable; read the review bodies yourself.
-
-Invalid required values or collection entries produce an error for the affected part. If the primary PR response is invalid, the tool exits 1 without reporting a head. Optional read failures preserve the facts already read.
-
-Individual nullable fields can be `null` without an error. A review can have no author, commit, or submission time. A review with no author does not match a review request. These nullable fields follow the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json).
+Use `pr-state` to read the current head, checks, review requests, and reviews. Apply the [CLI result rules](../cli.md#reading-pr-state).
+Unread data is an evidence gap. The tool does not judge whether a review is favorable.
 
 ## Verifying a commit
 
-Before you put a commit identifier from a report or handoff into a handoff, a record, or a merge, verify it. Run `python3 "$GHFLOW_CLI" verify-commit SHA --repo OWNER/NAME` from the target project directory. Add the facts that you expect: `--subject` with the first line of the commit message, `--on BRANCH` for the branch that should contain it, and `--pr-head PR_URL` when it should be the PR's current head. Use the full SHA that the tool reports.
-
-Exit status 0 means the commit exists and each expectation holds. Exit status 3 means an expectation is false. Exit status 1 means GitHub did not find the commit, which can mean it is not pushed. Do not pass on an identifier that failed. Read the branch again or return the mismatch to the agent that reported it.
-
-An invalid primary commit response also exits 1. An invalid expectation response leaves that expectation `null` with an error. It exits 2 unless another expectation is false, which retains exit status 3. If GitHub provides no commit author or author date, `author_date` is `null` without an error, as the [GitHub REST response schema](https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.json) permits.
-
-## Writes to GitHub
-
-Before you create something, search for an existing equivalent. On resumption, inspect the recorded URL first.
-
-Record the URL or identifier that a write returns immediately. After a write, read the saved result back. A command's success response is not proof.
-
-A failed or interrupted command can leave some changes complete. Read GitHub before you retry. Do not create a second item while the first result is uncertain. Retry only the steps that failed. Do not delete a successful result to undo a later failure.
-
-Another person or process can change an item between reads. Read it again before an update and preserve changes that you did not make. If the current content differs from what you expect, investigate before you overwrite it.
-
-Do not change accounts, credentials, subscriptions, repository settings, or protection rules to get past a permission error. Report the required action instead.
+Before reusing a reported commit identifier in a handoff, record, or merge, verify it with `verify-commit`.
+Apply the [CLI verification rules](../cli.md#verifying-a-commit), including expected facts and failure handling. Use the full SHA that the tool reports.
 
 ## Reports
 

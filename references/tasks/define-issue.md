@@ -16,7 +16,7 @@ If board information is supplied, compare it with the issue. Do not expand one i
 
 State the intended user result before choosing a solution. Keep decisions the user already made, without asking for them again.
 
-If a missing decision changes scope or behavior, propose an answer with its tradeoff. Continue the investigation that does not depend on it. Keep routine implementation choices out of the questions unless they change cost, compatibility, permissions, or the intended result. A missing implementation plan does not block readiness.
+When a fact or choice is missing, apply [Decisions](../shared/decisions.md). A missing implementation plan does not block readiness.
 
 If the issue contains several independently useful changes, propose a smaller first issue. Explain what it proves and what remains. Do not silently replace the original goal with the smaller task.
 

@@ -2,7 +2,7 @@
 
 Publish the supplied draft with existing `gh` commands, add the requested relationships and fields, and confirm the saved result. Do not repeat issue definition or begin implementation.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. A request to file the draft, or an agreed flow that includes publication, authorizes issue creation.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. A request to file the draft, or an agreed flow that includes publication, authorizes issue creation. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Establish the requested changes
 

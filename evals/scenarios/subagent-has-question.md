@@ -1,6 +1,6 @@
 ---
 skills: [implement-issue]
-source: references/shared/authorization.md roles
+source: references/shared/coordination.md roles; references/shared/decisions.md return unresolved decisions
 ---
 
 ## Situation

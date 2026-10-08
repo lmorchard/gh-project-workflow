@@ -2,7 +2,7 @@
 
 Produce tested, committed changes for the requested issue, with enough evidence for another agent to prepare a PR. This skill ends with a local branch and a report. Do not push, open a PR, merge, or remove the worktree.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Read the issue and current code
 
@@ -10,7 +10,7 @@ Read the project instructions, the issue body, and relevant comments. Identify t
 
 Inspect the relevant code and tests at the current revision, and determine whether the reported problem still exists. If part of the issue is already satisfied, record the evidence and implement only what remains. If nothing remains, report that. Do not create unrelated work to justify a commit.
 
-Resolve routine implementation choices from the current code and project conventions. If a missing decision changes scope or user-visible behavior, explain the question and recommend an answer instead of redefining the issue.
+When a fact or choice is missing, apply [Decisions](../shared/decisions.md). Settle routine implementation choices from current evidence. Return decisions about the intended result instead of redefining the issue.
 
 ## Prepare an isolated workspace
 

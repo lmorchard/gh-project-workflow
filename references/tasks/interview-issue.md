@@ -2,7 +2,7 @@
 
 Help the user settle the decisions that block a useful issue draft. The interview happens in the parent conversation. A subagent that loads this skill returns proposed questions to the parent instead.
 
-Apply [Authorization](../shared/authorization.md) throughout, including its rules for questions.
+Apply [Authorization](../shared/authorization.md) throughout. Follow [Coordination](../shared/coordination.md#roles) for the parent and subagent roles. Before proposing an interview question, apply [Decisions](../shared/decisions.md).
 
 ## Establish the starting point
 
@@ -19,8 +19,6 @@ Order questions by their dependencies: the intended result, then scope boundarie
 Offer alternatives only when they are real choices. Do not hide uncertainty behind a recommendation. Let the user propose another approach.
 
 If the idea is unclear, discuss a concrete example before an implementation, and ask what the user expects to happen. If an answer stays vague, propose a concrete example of success and how someone could observe it. Do not make the user design a test or approve test commands.
-
-Leave routine implementation details for implementation. A choice belongs in the interview when it changes scope, behavior, compatibility, cost, or permissions.
 
 After each answer, update the affected parts of the draft and keep the requirements that the answer does not change. Ask the next question only if a material uncertainty remains. If an answer conflicts with an earlier decision, explain the conflict and ask which result the user intends.
 

@@ -2,7 +2,7 @@
 
 Produce a concrete path from the current project to the parent issue's intended result. Keep the confirmed scope, and prefer changes that are useful by themselves and can be implemented and reviewed separately. Decomposition alone does not authorize publication or implementation.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Establish what remains
 

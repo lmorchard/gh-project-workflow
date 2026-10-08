@@ -106,7 +106,7 @@ The entry skill selects these independently usable operations:
 - [deliver-parent-issue](references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
 - [burndown-ready-queue](references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
 
-Each operation accepts an ordinary issue or PR. References share [authorization and evidence rules](references/shared).
+Each operation accepts an ordinary issue or PR. References share [authorization](references/shared/authorization.md), [coordination](references/shared/coordination.md), [decisions](references/shared/decisions.md), and [evidence](references/shared/evidence.md).
 Delivery through review follow-up leaves the PR open. Merge requires explicit authorization and the existing review policy.
 
 ## Requirements
@@ -124,6 +124,17 @@ Coordinated delivery requires subagent dispatch. Independent code review require
 Report unavailable dispatch or model information. Self-review does not replace independent review.
 Direct operations remain usable without a coordinator, subject to their own requirements and boundaries.
 
+## Machine account access
+
+The repository owner grants access before an agent works in the repository or project board:
+
+- Add the machine user as a repository collaborator with Write access.
+- For a user-owned project board, add the machine user as a writer with `scripts/add-board-writer.sh OWNER PROJECT_NUMBER LOGIN`.
+
+Resolve the script from the source checkout containing the entry skill. Do not resolve it from the target project.
+The [identity reference](references/shared/identity.md) supplies runtime configuration and credential handling.
+The [identity research and trials](docs/agent-identity.md) records the adoption evidence and historical limits.
+
 ## Checks
 
 Run `make check` before you commit. It validates skill frontmatter, local Markdown links, and whitespace. It does not assess skill quality.
@@ -132,11 +143,11 @@ Run `make check` before you commit. It validates skill frontmatter, local Markdo
 
 Read these documents:
 
-- [Project direction](docs/direction.md) records decisions and open questions.
+- [Project direction](docs/direction.md) states current direction and links to decision history.
 - [Findings from agent-sessions](docs/findings.md) records lessons and their sources.
 - [First experiment](docs/first-experiment.md) describes the issue-definition trial.
 - [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
-- [Skill sources](docs/skill-sources.md) records ideas adapted from agent-sessions.
+- [Skill sources](docs/skill-sources.md) records the origins and selected adaptations of workflow guidance.
 - [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
 - [Skill scenarios](evals/README.md) checks whether agents make the decisions that the skills intend.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.

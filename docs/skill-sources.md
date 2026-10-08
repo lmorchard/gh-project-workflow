@@ -1,6 +1,8 @@
-# Sources for the issue definition skill
+# Sources for workflow guidance
 
-The draft adapts selected ideas from agent-sessions at commit `4379832`. It does not copy the old workflow. These notes separate inherited guidance from new choices.
+This index records the origins of workflow guidance and the selected adaptations.
+Agent-sessions sources use commit `4379832`. Project decisions and trials supply later sources.
+Linked task and shared references own current instructions. Linked trial records own observations and evidence limits.
 
 ## Research instructions
 
@@ -22,7 +24,7 @@ The new skill retains those distinctions. A proposed test remains a proposal unt
 
 ## Limits
 
-The old findings contain evidence about some instructions in their original context. That evidence does not establish the effectiveness of this adaptation. The fresh-agent trial will supply one observation, not a general reliability measure.
+The old findings contain evidence about some instructions in their original context. That evidence does not establish the effectiveness of this adaptation. Trial observations do not establish general reliability.
 
 ## Filing procedure
 
@@ -36,7 +38,7 @@ The skill uses installed command help instead of a fixed command template. The t
 
 The [implement-issue skill](../references/tasks/implement-issue.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
 
-The draft retains planning against current code, isolated worktrees, baseline results, requirement-specific checks, and small changes. It also retains explicit reports of blocked work and enough information for another session to resume. Project rules determine the required tests and record format.
+The implementation adaptation retains planning against current code, isolated worktrees, baseline results, requirement-specific checks, and small changes. It also retains explicit reports of blocked work and enough information for another session to resume. Project rules determine the required tests and record format.
 
 The [old PR phase](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/open_pr.md) supplies useful self-review questions. The new skill uses those questions before handoff. It does not import unconditional rebasing, pushes, PR creation, or merge decisions into implementation.
 
@@ -44,7 +46,7 @@ The [frozen-check reference](https://github.com/lmorchard/agent-sessions/blob/43
 
 The old reference contradicts itself about small tasks. Its opening requires checks.md at every size, but its ceremony paragraph permits skipping that file. The new skill requires evidence without that fixed file contract.
 
-The draft omits tier labels, marker requirements, write manifests, mandatory subagents, and a machine-readable merge verdict. It explicitly distinguishes self-review from independent review. Those omissions reduce machinery but do not preserve the old claim of independent verification.
+The implementation adaptation omits tier labels, marker requirements, write manifests, mandatory subagents, and a machine-readable merge verdict. It explicitly distinguishes self-review from independent review. Those omissions reduce machinery but do not preserve the old claim of independent verification.
 
 Static validation cannot establish that this adaptation guides implementation well. The [Trial records](trials/README.md) list the implementation trials.
 
@@ -56,11 +58,11 @@ The new skills use the old [PR phase](https://github.com/lmorchard/agent-session
 
 The [comment procedure](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/address_comments.md) distinguishes actual defects from disputed suggestions and unrelated work. The new review skill retains that assessment. It leaves code changes and thread resolution for a later task.
 
-The old workflow separated an author from a reviewer. The new local fallback also requests a different recorded model. This is a project preference, not a measured guarantee of better review. Unknown model identity remains unknown, including for Copilot.
+The old workflow separated an author from a reviewer. The adopted local review policy requests a different recorded model. This is a project preference, not a measured guarantee of better review. Unknown model identity remains unknown, including for Copilot.
 
 On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
 
-The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. The [Trial records](trials/README.md) list the submission and follow-up trials.
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. Submission and review follow-up do not merge. Current CI repair rules live in [address-pr-review](../references/tasks/address-pr-review.md). The [Trial records](trials/README.md) list the submission and follow-up trials.
 
 ## Parent ownership of PR follow-up
 
@@ -71,15 +73,11 @@ Submission alone does not satisfy a review-follow-up endpoint.
 
 The issue cites ownership and reporting problems from the [Ready queue trial](trials/README.md#2026-10-05-ready-queue-burndown-on-board-6).
 At `b47c9d5088f471da5d7b35a56ecda6078dee02be`, express still waited for a nested follow-up worker.
-Shared authorization, evidence, and delivery callers now apply the selected ownership.
+Shared [coordination](../references/shared/coordination.md#pr-follow-up-ownership), evidence, and delivery callers apply the selected ownership.
 The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
 
-The new ownership scenarios are constructed decision checks, not observed deliveries.
-The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) completed at `c7d7fdc40f1d0fcdc1c16ed2ccb333c34de571a9`, according to parent and worker handoffs.
-It records direct parent dispatch, an external branch update, independent worker reassessment, and the worker's final report directly to the parent.
-Initial and delta local review cover c7, and the worker reported green hosted CI for that head.
-Publication of the completed record needs fresh delta review and final CI and head reassessment, which the parent already owns.
-The c7 evidence does not cover that later documentation commit or authorize merge.
+The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) records direct parent dispatch and reassessment after an external branch update.
+It owns the trial revisions, review and CI evidence, and limits. The [parent-dispatch scenario](../evals/scenarios/submission-parent-followup.md) supplies a reusable decision check, not a live delivery.
 
 ## Earlier dev-session guidance
 
@@ -122,6 +120,17 @@ Les then selected a repository-root skill package for PR #17.
 The root entry now uses the existing CLI directly.
 It supplies the absolute source path and preserves the caller's directory.
 
+## Routine resolution and necessary decisions
+
+The [issue #2 comparison](trials/2026-10-07-resolution.md) observed three fresh agents using the existing guidance successfully at `b47c9d5`. They researched a fact, implemented a routine choice, and returned an unresolved product decision.
+
+Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [decision rules](../references/shared/decisions.md) now distinguish these three cases at the decision point. The [evidence rules](../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
+
+The [maintenance rule](skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
+
+The [resolution scenario results](../evals/results/2026-10-08-resolution.md) assess the revised guidance separately from the earlier action trials.
+The records own revisions, grades, and evidence limits. Broader issue #2 experiments remain deferred.
+
 ## Required reviewer preparation
 
 [Issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8) supplies the agreed first increment: establish review capabilities before dependent implementation.
@@ -130,7 +139,22 @@ The shared [preparation rule](../references/shared/review.md#prepare-required-re
 It preserves explicit exceptions, independent preparation, and the existing capacity handoff.
 
 The [historical paired trial](trials/2026-10-07-issue-8-reviewer-capability.md) supplies observations and their limits.
-The [reusable scenario results](../evals/results/2026-10-07-reviewer-preparation.md) assess decisions under constructed capability facts.
-Les accepted recorded fresh author selection before future implementation as a valid resolution of unknown planned identity.
-The unknown-author criteria reflect that interpretation of the existing shared rule. Evaluated instructions and raw prompts remain unchanged.
-Neither source establishes a completed different-model code review or full delivery in the trial environment.
+The [reviewer preparation scenario results](../evals/results/2026-10-07-reviewer-preparation.md) record the evaluated interpretation and constructed capability facts.
+These sources do not establish completed different-model review or full delivery in the trial environment.
+
+## Shared reference responsibilities
+
+After merging PR #21, Les requested focused documents rather than the combined authorization reference. The restructure moves roles and handoffs into [Coordination](../references/shared/coordination.md). It moves factual resolution and question framing into [Decisions](../references/shared/decisions.md). [Authorization](../references/shared/authorization.md) retains permission and scope. Evidence and the interview task retain their existing responsibilities.
+
+The move preserves merged review preparation and parent-owned PR follow-up. Active callers use the new owners. Earlier trial hashes, answers, and grades describe their pinned instructions and remain historical evidence.
+
+The [bounded routing results](../evals/results/2026-10-08-shared-owners.md) concern the focused owners at `f3f3a9b`.
+They assess proposed decisions and source loading, not a new task-execution trial.
+
+## Document focus
+
+Les requested this pass after the authorization split in PR #20.
+[Project direction](direction.md) owns current direction. [Direction history](direction-history.md) preserves the earlier discussion.
+[Evidence](../references/shared/evidence.md) owns claim validity. [CLI results](../references/cli.md) owns PR and commit command contracts.
+[GitHub writes](../references/shared/github-writes.md) owns shared write recovery rules.
+The [burndown retrospective](trials/2026-10-05-ready-queue-burndown.md) preserves the detailed narrative formerly in the trial index.

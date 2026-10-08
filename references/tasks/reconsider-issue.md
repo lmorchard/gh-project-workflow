@@ -2,7 +2,7 @@
 
 Determine what remains valid about an issue and what work remains. Keep its intended result while correcting outdated claims, and return a proposed update supported by current evidence. Reconsideration alone does not authorize edits, comments, status changes, child issues, or implementation.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Gather the evidence
 

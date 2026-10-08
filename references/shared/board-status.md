@@ -1,5 +1,7 @@
 # Board status
 
+Apply [GitHub writes](github-writes.md) to each board update.
+
 Three skills move a linked issue on the project board:
 
 | Skill | When | Target state |

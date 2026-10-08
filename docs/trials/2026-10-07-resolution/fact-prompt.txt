@@ -1,0 +1,5 @@
+Use ghflow at /var/folders/8p/p5kz_p794bbbwgg2_hgn34nw0000gn/T/ghflow-resolution-trial-ykc04jdq/skill-source/SKILL.md for this task in /var/folders/8p/p5kz_p794bbbwgg2_hgn34nw0000gn/T/ghflow-resolution-trial-ykc04jdq/fact-ready. You are working on a disposable local project.
+
+Does the current list command include completed tasks? Use the project to determine its actual behavior and report the evidence. This is read-only.
+
+Read the project files and follow their conventions. You may read the skill source and run local commands. Change files only when the task permits it, and only in this disposable task directory. Do not change the skill source, use the network or GitHub, read credential files, commit, push, merge, or dispatch other agents. Return your task result to the parent when you finish or need a decision.

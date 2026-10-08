@@ -1,0 +1,5 @@
+Awaiting a decision: Should the external JSON export include only `id`, `title`, `due`, and `completed`? I recommend this allowlist; it meets Partnerships’ needs but does not provide Support’s full-record export.
+
+[product-notes.md](product-notes.md) explicitly leaves that contract unresolved. The ghflow [implementation instructions](/var/folders/8p/p5kz_p794bbbwgg2_hgn34nw0000gn/T/ghflow-resolution-trial-ykc04jdq/skill-source/references/tasks/implement-issue.md) require: “If a missing decision changes scope or user-visible behavior, explain the question and recommend an answer instead of redefining the issue.”
+
+No files changed. All 4 baseline tests passed with `python3 -m unittest -v`. The worktree is clean on `main` at `fed38aecc649ba56deb103a790e23107f98121f9`.
