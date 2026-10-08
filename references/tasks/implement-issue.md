@@ -65,6 +65,7 @@ This self-review is not independent review. Do not claim independent verificatio
 Return:
 
 - The issue URL, worktree path, branch, base revision, final commits, the revision you tested, and any remaining uncommitted changes.
+- For an unpublished handoff, the supplied checkout path and publication state, plus the full local Git verification result for the reported head and base.
 - The board transition result, or why it was skipped or failed.
 - The implementation model from session metadata, or "unknown". The parent uses it to choose a different model for review.
 - The changes, and the result for each success condition.

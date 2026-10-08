@@ -10,6 +10,8 @@ Read the issue, project instructions, and implementation report. Confirm the rep
 
 Inspect the working tree and task commits, and preserve unrelated or uncommitted work. Do not publish an incomplete change as ready for review.
 
+For an unpublished implementation handoff, verify the supplied base and head in its supplied checkout with local Git, following [Evidence](../shared/evidence.md#verifying-a-commit). Confirm the reported branch points at the expected head. After publication, use `verify-commit` to confirm the remote commit and PR head.
+
 Refresh remote references and inspect changes on the base. Do not rebase merely to get a cleaner history. If integration is necessary, follow the project rules and repeat the affected checks after resolving conflicts.
 
 Review the task diff from the merge base of the base and task branches. Inspect the full list of changed files, including generated output and lockfiles, and explain unexpected changes before you publish. Make sure that the published commits contain the tested changes. Report missing or stale test evidence instead of copying an earlier success claim.
