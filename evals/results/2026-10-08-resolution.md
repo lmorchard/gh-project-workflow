@@ -1,9 +1,10 @@
 # Decision-boundary scenarios, 2026-10-08
 
-Six fresh sessions assessed five scenarios for the maintained guidance in PR #20. Four scenarios passed the full criteria.
-The fact scenario and its exact-prompt repeat reached the research decision but omitted a required detail from the reporting plan.
+Six fresh sessions assessed five scenarios for the maintained guidance in PR #20. Three scenarios passed the full criteria.
+The fact scenario and its exact-prompt repeat omitted revision provenance from their proposed reports.
+The maintenance answer omitted links at task decision points. Both scenarios are partial against their full criteria.
 The [returned answers](2026-10-08-resolution-answers.txt) preserve the output used for grading.
-The implementation agent graded the answers. Independent review remains separate.
+The implementation agent graded the answers. Independent review at `ba86c8c9799c9881f5e0337630f85e5aa47a5a81` identified the maintenance grading error corrected below.
 
 ## Candidate and evaluator
 
@@ -38,7 +39,7 @@ The warnings report an ignored, unknown `ultrafast_mode` feature requirement. Th
 
 | Scenario | Fresh session | Grade |
 | --- | --- | --- |
-| `maintain-decision-guidance` | `01a11906-51d4-7fc2-8f35-855dce3475ca` | Pass |
+| `maintain-decision-guidance` | `01a11906-51d4-7fc2-8f35-855dce3475ca` | Partial: caller links omitted |
 | `resolve-discoverable-fact` | `01a11906-51ca-7f91-9c85-f3974a59f3b1` | Partial: revision omitted |
 | `resolve-routine-choice` | `01a11906-51ca-7060-9296-bd504c97f743` | Pass |
 | `return-material-decision` | `01a11906-51ce-7721-bdaf-f7c107200994` | Pass |
@@ -55,7 +56,9 @@ The material-decision answer identified the conflicting field requirements, reco
 It kept dependent implementation pending while allowing independent checks.
 The reuse answer preserved the unchanged default finding and its revision, then reassessed only the revised export claim.
 The maintenance answer selected the shared owner and a reusable scenario, without inventing a failure or expanding into automated discovery.
-The other four scenarios needed no intervention or corrective retest.
+It omitted links at the relevant task decision points, which Expected requires. Independent review identified this incomplete plan.
+The actual implementation includes those links. This correction changes the recorded grade, not the criterion or original answer.
+No evaluator rerun followed this grading correction. The three fully passing scenarios needed no intervention or corrective retest.
 
 ## Inputs and limits
 
