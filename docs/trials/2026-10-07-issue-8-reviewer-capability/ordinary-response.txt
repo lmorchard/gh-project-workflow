@@ -1,0 +1,75 @@
+I drafted the issue with ghflow's **define-issue** operation. It's ready for implementation. I published nothing, implemented nothing and changed no files.
+
+---
+
+## Draft issue
+
+**Title:** Remove leading and trailing hyphens from slugs of padded input
+
+### Problem
+
+`slug()` changes each space to a hyphen. It does not remove spaces at the start or end of the input first. Those spaces become hyphens at the start or end of the slug.
+
+What the code does now (`slug.py:2`, worked out by reading `text.lower().replace(" ", "-")`):
+
+| Input | Current output |
+|---|---|
+| `" Hello World "` | `"-hello-world-"` |
+| `"hello world"` | `"hello-world"` |
+| `"   "` | `"---"` |
+
+### Intended result
+
+A slug must not start or end with a hyphen that came from surrounding whitespace. Spaces inside the text must still become hyphens. Letters must still become lowercase.
+
+### Included changes
+
+- Remove whitespace at the start and end of the input before spaces are changed to hyphens.
+- Keep the current lowercase behavior.
+- Add tests for the success conditions below.
+
+### Limits
+
+- Do not change how runs of spaces inside the text are handled. For example, `"a  b"` still becomes `"a--b"`.
+- Do not change how tabs or other characters inside the text are handled.
+- Do not add punctuation removal, Unicode normalization or other slug rules.
+
+### Success conditions
+
+A person can confirm each condition by calling `slug()` with the input, or by running `python3 -m unittest`.
+
+New behavior (the implementer must add these tests):
+
+1. `slug(" Hello World ")` returns `"hello-world"`. This proves that surrounding spaces no longer become hyphens.
+2. `slug("   ")` returns `""`. This proves that input with only whitespace gives an empty slug.
+
+Protected behavior:
+
+3. `slug("hello world")` returns `"hello-world"`. The implementer must add this test. It proves that input without padding is unchanged.
+4. `slug("Hello World")` returns `"hello-world"`. The existing test `test_words` (`test_slug.py:5-6`) already checks this. It protects the lowercase behavior.
+
+### Decisions
+
+- Confirmed (from the idea text): remove surrounding whitespace, change inner spaces as before, and keep lowercase.
+- Confirmed (from the idea text): input with only whitespace gives an empty string.
+- Left to the implementer: whether to remove only spaces or all whitespace characters, such as tabs and newlines, from the ends. The idea says "whitespace". Python's `str.strip()` with no argument removes all of them, and the success conditions are met either way.
+
+### Sources
+
+- `slug.py:1-2`: the `slug()` function.
+- `test_slug.py:5-6`: `test_words`, the only existing test.
+- `issue.md`: the original idea text.
+
+---
+
+## Notes
+
+- **Unresolved questions:** None that block work. Whether to remove only spaces or all whitespace from the ends is left to the implementer, as the draft says.
+- **What I checked:**
+  - I read `slug.py`, `test_slug.py`, `README.md` and `issue.md` at commit `5a1c463` on `main`.
+  - Bash was denied in this session, so I couldn't run `python3 -m unittest` or call `slug()`. The current outputs in the table come from reading the code, not from running it. For the same reason I didn't get the full commit SHA or a list of other code that calls `slug()`. The repo has only those four files, so it's unlikely anything else calls it.
+- **Changes from the original idea:**
+  - I added a limit that keeps runs of spaces inside the text out of scope.
+  - I split the tests into new behavior and protected behavior.
+  - I noted that only `"Hello World"` has a test today. `"hello world"` needs a new test.
+- **Next step, if you want it:** ghflow's `file-issue` operation can publish this draft. That needs your go-ahead.

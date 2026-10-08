@@ -1,0 +1,121 @@
+{
+  "source_directory": "/private/tmp/ghflow-issue8-trial-kzdmu9xm",
+  "files": {
+    "dependent/README.md": {
+      "bytes": 118,
+      "sha256": "fdeedc6d2ce485f012c3cb656c63d49c145d31660f06c03c0cdf32b26258b964"
+    },
+    "dependent/issue.md": {
+      "bytes": 396,
+      "sha256": "ee7e19c3111f6cd96af45e5842792d57a85fb6485ded012bda12531c1fb55b74"
+    },
+    "dependent/slug.py": {
+      "bytes": 58,
+      "sha256": "be1453a086d2e96c1c1f9b0ad8985fbe3e5f702bb2334c0701cc5c055155fbcf"
+    },
+    "dependent/test_slug.py": {
+      "bytes": 210,
+      "sha256": "29d357e96650fe901fe6fbdb2eaeb0e301454f2fb27f669aa66439d88fd4266a"
+    },
+    "dependent-events.jsonl": {
+      "bytes": 92476,
+      "sha256": "7f21c0efc972d459385bd83199c1cdc60f4d7d65163884241d963224d0d3d133"
+    },
+    "dependent-final-events.jsonl": {
+      "bytes": 71426,
+      "sha256": "653a7a1af3f64a7c8be6158d04dd4120a6623a4da24ec33a5a5870d8ab44301f"
+    },
+    "dependent-final-response.txt": {
+      "bytes": 2247,
+      "sha256": "ae4f6318a5f6fb83045401f60ab0063519f49ec1e3cbf364dd44ade00fab011c"
+    },
+    "dependent-final-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dependent-final.txt": {
+      "bytes": 1955,
+      "sha256": "82844b2859483f732711a46c2250dcf07c1010598e22986ff2f2369a4cdec32a"
+    },
+    "dependent-prompt.txt": {
+      "bytes": 321,
+      "sha256": "87ee256980f35e0273a58befcad153bd4007d0e78976a2f13615af6bc2f5013a"
+    },
+    "dependent-repeat-events.jsonl": {
+      "bytes": 71289,
+      "sha256": "95d982eeed9da5ec59f006a9023026a968a4f1ebf1ffd17394dddba3d9916e0e"
+    },
+    "dependent-repeat-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dependent-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dependent-summary.json": {
+      "bytes": 2844,
+      "sha256": "a1654fdc3e41a17f9bd5f091e5aecb5347fd54616737c1d0617e29bd65a3a3b3"
+    },
+    "fixture-metadata.json": {
+      "bytes": 233,
+      "sha256": "eb6180a7cdac7ca69ae529a023e1e4284cd0304431d564e7dc9685f50e4dfefb"
+    },
+    "ordinary/README.md": {
+      "bytes": 118,
+      "sha256": "fdeedc6d2ce485f012c3cb656c63d49c145d31660f06c03c0cdf32b26258b964"
+    },
+    "ordinary/issue.md": {
+      "bytes": 396,
+      "sha256": "ee7e19c3111f6cd96af45e5842792d57a85fb6485ded012bda12531c1fb55b74"
+    },
+    "ordinary/slug.py": {
+      "bytes": 58,
+      "sha256": "be1453a086d2e96c1c1f9b0ad8985fbe3e5f702bb2334c0701cc5c055155fbcf"
+    },
+    "ordinary/test_slug.py": {
+      "bytes": 210,
+      "sha256": "29d357e96650fe901fe6fbdb2eaeb0e301454f2fb27f669aa66439d88fd4266a"
+    },
+    "ordinary-events.jsonl": {
+      "bytes": 79589,
+      "sha256": "40e2887fbe1f973fc3763fcd13a6107c494bd4e9f7c904fe374b0c8760882565"
+    },
+    "ordinary-final-events.jsonl": {
+      "bytes": 82838,
+      "sha256": "ad1f5c30b8ab2f4e092977b8a0ca8374f8a23f33c1fe67c5a758da776276e17b"
+    },
+    "ordinary-final-response.txt": {
+      "bytes": 3628,
+      "sha256": "0bdc18b38cc129c96847a42322a1e9fbde529e33a7cb871291353c12fd84eb3d"
+    },
+    "ordinary-final-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ordinary-final.txt": {
+      "bytes": 3711,
+      "sha256": "a3c5fc921efaf5fbe7e3fd625442afbc6d5d23fc41af8ce317517a5a2ab80029"
+    },
+    "ordinary-prompt.txt": {
+      "bytes": 184,
+      "sha256": "3cc71854f865535798441d9be99755552544ceaf2ea04f1abd958ae5372266e6"
+    },
+    "ordinary-repeat-events.jsonl": {
+      "bytes": 80432,
+      "sha256": "9939bcaa8fbec133c42e66f5827218f89648f59b8ba6a6561431996df644d20b"
+    },
+    "ordinary-repeat-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ordinary-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ordinary-summary.json": {
+      "bytes": 2411,
+      "sha256": "a14ce9e485eae65a404f55bb06dc6bde6fee108ca516733c8b27a0a051946436"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+Use ghflow to deliver the selected issue in issue.md in this local synthetic repository through PR review follow-up. Implementation, tests, commits, and PR preparation are authorized; do not merge. The selected subject is this checkout. It has no GitHub remote, so keep publication local if remote access is unavailable.

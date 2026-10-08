@@ -1,0 +1,71 @@
+I used ghflow's define-issue step to write the draft below. **I think it's ready for implementation.** Your idea leaves no open decisions about scope or behaviour. I didn't publish, file or implement anything.
+
+---
+
+## Draft issue
+
+**Title:** Strip surrounding whitespace before `slug` makes a slug
+
+### Problem
+
+The `slug` function in `slug.py` makes the text lowercase and changes each space to a hyphen. It doesn't remove spaces at the start or end of the input first. So text with extra outer spaces gives a slug that starts or ends with a hyphen. For example, `slug(" Hello World ")` currently returns `-hello-world-`.
+
+### Intended result
+
+`slug` removes whitespace at the start and end of the input before it changes the remaining spaces to hyphens. The output stays lowercase, as it is now.
+
+### Included changes
+
+- Change `slug` in `slug.py` so that it removes surrounding whitespace before it replaces spaces.
+- Add tests to `test_slug.py` for the new behaviour.
+
+### Limits
+
+- Don't change how `slug` handles spaces inside the text. Each inner space still becomes one hyphen.
+- Don't add handling for punctuation, tabs inside the text, repeated inner spaces, or non-ASCII characters.
+- Don't change the lowercase behaviour.
+
+### Success conditions
+
+A person can confirm each condition by running `python3 -m unittest` and reading the new assertions.
+
+New behaviour (implementation must add these tests):
+
+1. `slug(" Hello World ")` returns `hello-world`. This test shows that outer spaces no longer become hyphens.
+2. `slug("   ")` returns an empty string. This test shows that input with only whitespace gives no hyphens.
+
+Existing behaviour (tests that must keep passing):
+
+3. `slug("hello world")` returns `hello-world`. Implementation must add this test. It shows that input with no outer spaces doesn't change.
+4. The existing test `test_words` still passes. It asserts that `slug("Hello World")` returns `hello-world`, which protects the lowercase behaviour.
+
+### Confirmed decisions
+
+- Remove whitespace at the start and end of the input before replacing the inner spaces.
+- Keep the existing lowercase behaviour.
+- Input with only whitespace becomes an empty string.
+
+### Dependencies and open questions
+
+None.
+
+### Source references
+
+At commit `5a1c463` on `main`:
+
+- `slug.py:1-2`: `slug` returns `text.lower().replace(" ", "-")` and doesn't remove outer whitespace.
+- `test_slug.py:5-6`: `test_words` is the only test. It checks `"Hello World"` and nothing with extra outer spaces.
+
+---
+
+## How I checked it
+
+- **Sources I read:** `issue.md`, `slug.py`, `test_slug.py` and `README.md` at commit `5a1c463`. The only call to `slug` is in `test_slug.py`, so the change can't break any other code.
+- **Not run:** I wasn't allowed to run shell commands in this session. So I didn't run `python3 -m unittest`, didn't confirm the full commit ID, and didn't check whether the GitHub copy differs from your local copy. The current `-hello-world-` result comes from reading the code, not from running it.
+- **Additions beyond `issue.md`:**
+  - I made the limits on inner whitespace and punctuation explicit, because your idea only mentions outer spaces.
+  - I added a test to prove that `hello world` doesn't change.
+  - I explained what each test proves, and kept tests for new behaviour separate from tests that protect existing behaviour.
+- **One thing you could decide differently:** "surrounding whitespace" means tabs and newlines at the ends would also be removed, not just spaces. The draft keeps that wording, as in your idea.
+
+To publish it, ask for the file-issue step and tell me which repository to use.
