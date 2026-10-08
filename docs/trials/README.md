@@ -125,3 +125,9 @@ The shared instruction now establishes the required review path before substanti
 Four reusable [decision scenarios and results](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
 All five recorded sessions pass after the accepted unknown-author criteria refinement. Evaluated instructions and raw prompts remain unchanged.
 The broader identity and access scope remains open.
+
+## 2026-10-08: decafclaw triage, interview, and definition sweeps
+
+The parent ran triage-issues, interview-issue, sweep-needs-input, and sweep-needs-definition on about 60 decafclaw issues at skills `9e64bd5`. Subagents performed subject-repository writes as `MokaGnome`.
+The definition sweep left 15 issues on `triage:needs-definition` that could not be specified: 12 waited on open issues and 2 were a parking lot and a parent. Les's needs-attention board view could not tell them from actionable work.
+This led to [Triage labels](../../references/shared/triage-labels.md), `triage:blocked`, `triage:parked`, and [sweep-blocked](../../references/tasks/sweep-blocked.md), with two new scenarios. Nobody has run the scenarios yet.
