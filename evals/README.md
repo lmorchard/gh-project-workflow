@@ -16,7 +16,7 @@ Write the situation as facts that the agent observes. Do not hint at the answer 
 
 ## Run a scenario
 
-Use `scripts/run_scenario.py` to build and run a prompt from one committed scenario. The runner reads only the Situation section. It resolves `skills` task names to paths in a read-only snapshot of the selected commit. It records the source fingerprint and prompt hash with the raw answers and run details. It does not grade answers.
+Use `scripts/run_scenario.py` to build and run a prompt from one committed scenario. The runner reads only the Situation section and resolves `skills` task names to paths in a snapshot of the selected commit. The snapshot contains the selected task files and their linked Markdown references. It excludes scenario criteria, prior results, trial records, and this evaluation guide. The runner records its source fingerprint, prompt hash, raw answers, and run details. It does not grade answers.
 
 Preview a prompt without launching a model session:
 
@@ -32,18 +32,7 @@ make run-scenario ARGS="SCENARIO --runner codex --model MODEL --repeat 2 --outpu
 
 Use `--runner claude` to select Claude Code. Use `--commit COMMIT` to select a source revision. The default source is `HEAD`. Review and grade the answers separately.
 
-Start a fresh agent with no conversation history. Give it this prompt, with the skill paths and the situation filled in:
-
-```text
-Read these skills from this repository and the shared references they link:
-SKILL_PATHS
-
-You are the agent applying them. Here is the current situation:
-
-SITUATION
-
-What do you do next, and why? Name the skill rule that decides it. Do not run commands or change anything.
-```
+The runner starts each session with no prior conversation. It applies runner-specific limits and records them in `provenance.json`. Claude Code can confine file tools to the source snapshot and disable command, code, web, and agent tools. Codex uses a read-only sandbox and disables integrations, but its CLI has no tool allowlist and does not confine reads to the snapshot. In Codex runs, the prompt forbids commands and reads outside the supplied sources; provenance marks those limits as prompt-only. Both runners need network access to call their model provider. Read the recorded limits before relying on a result.
 
 Compare the answer with the Expected and Not acceptable sections. Record the scenario, skill commit, model, and result in a dated file in `results/`. An answer passes when it reaches the expected decision for the expected reasons. Note when an answer passes for a wrong reason, because that points to unclear text.
 

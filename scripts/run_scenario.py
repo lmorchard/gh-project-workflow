@@ -3,21 +3,23 @@
 
 import argparse
 import hashlib
-import io
 import json
 import os
+import posixpath
 import re
 import shutil
 import subprocess
 import sys
-import tarfile
 import tempfile
 from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
 TASK_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
+SKIPPED_SOURCE_PREFIXES = ("evals/", "docs/trials/")
+SKIPPED_SOURCE_FILES = {"docs/skill-evaluations.md"}
 
 
 class ScenarioError(Exception):
@@ -33,46 +35,81 @@ def git(root, *args):
     return result.stdout.strip()
 
 
-def extract_archive(root, commit, destination):
-    archive = subprocess.run(
-        ["git", "-C", str(root), "archive", "--format=tar", commit],
+def source_paths(root, commit):
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-tree", "-r", "-z", "--full-tree", commit],
         capture_output=True,
     )
-    if archive.returncode:
-        raise ScenarioError("Git could not create the source snapshot")
+    if result.returncode:
+        raise ScenarioError("Git could not list the requested source commit")
+    paths = {}
+    for entry in result.stdout.split(b"\0"):
+        if not entry:
+            continue
+        metadata, path = entry.split(b"\t", 1)
+        mode, object_type, object_id = metadata.split()
+        if object_type == b"blob" and mode in (b"100644", b"100755"):
+            paths[path.decode("utf-8")] = object_id.decode("ascii")
+    return paths
 
+
+def allowed_source_path(path):
+    return (
+        path.endswith(".md")
+        and not path.startswith(SKIPPED_SOURCE_PREFIXES)
+        and path not in SKIPPED_SOURCE_FILES
+    )
+
+
+def linked_source_paths(root, commit, skills):
+    available = source_paths(root, commit)
+    selected_tasks = {f"references/tasks/{name}.md" for name in skills}
+    pending = list(selected_tasks)
+    included = set()
+    while pending:
+        path = pending.pop()
+        if path in included:
+            continue
+        if not allowed_source_path(path) or path not in available:
+            raise ScenarioError(f"Required skill source is unavailable: {path}")
+        included.add(path)
+        content = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "blob", available[path]],
+            capture_output=True,
+        )
+        if content.returncode:
+            raise ScenarioError(f"Git could not read skill source: {path}")
+        base = posixpath.dirname(path)
+        for target in MARKDOWN_LINK.findall(content.stdout.decode("utf-8")):
+            if target.startswith("#") or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
+                continue
+            target_path = target.split("#", 1)[0].split("?", 1)[0]
+            if not target_path:
+                continue
+            resolved = posixpath.normpath(posixpath.join(base, target_path))
+            if resolved == ".." or resolved.startswith("../") or resolved.startswith("/"):
+                continue
+            if resolved.startswith("references/tasks/") and resolved not in selected_tasks:
+                continue
+            if allowed_source_path(resolved) and resolved in available:
+                pending.append(resolved)
+    return {path: available[path] for path in sorted(included)}
+
+
+def extract_source_snapshot(root, commit, skills, destination):
+    paths = linked_source_paths(root, commit, skills)
     destination.mkdir(parents=True)
-    with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:") as bundle:
-        for member in bundle.getmembers():
-            relative = PurePosixPath(member.name)
-            if relative.is_absolute() or ".." in relative.parts:
-                raise ScenarioError("Source snapshot contains an unsafe path")
-            target = destination.joinpath(*relative.parts)
-            if member.isdir():
-                target.mkdir(parents=True, exist_ok=True)
-            elif member.isfile():
-                target.parent.mkdir(parents=True, exist_ok=True)
-                source = bundle.extractfile(member)
-                if source is None:
-                    raise ScenarioError("Source snapshot contains an unreadable file")
-                with source, target.open("wb") as output:
-                    shutil.copyfileobj(source, output)
-            elif member.issym():
-                link_target = PurePosixPath(member.linkname)
-                if link_target.is_absolute():
-                    raise ScenarioError("Source snapshot contains an unsafe link")
-                parts = list(relative.parent.parts)
-                for part in link_target.parts:
-                    if part == "..":
-                        if not parts:
-                            raise ScenarioError("Source snapshot contains an unsafe link")
-                        parts.pop()
-                    elif part not in ("", "."):
-                        parts.append(part)
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.symlink_to(member.linkname)
-            else:
-                raise ScenarioError("Source snapshot contains an unsupported entry")
+    for relative, object_id in paths.items():
+        output = destination / relative
+        output.parent.mkdir(parents=True, exist_ok=True)
+        source = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "blob", object_id],
+            capture_output=True,
+        )
+        if source.returncode:
+            raise ScenarioError(f"Git could not copy skill source: {relative}")
+        output.write_bytes(source.stdout)
+    return list(paths)
 
 
 def source_fingerprint(snapshot):
@@ -89,8 +126,7 @@ def source_fingerprint(snapshot):
     return hashlib.sha256(stream).hexdigest()
 
 
-def scenario_parts(path):
-    text = path.read_text(encoding="utf-8")
+def scenario_parts(text):
     if not text.startswith("---\n"):
         raise ScenarioError("Scenario is missing frontmatter")
     end = text.find("\n---\n", 4)
@@ -150,20 +186,48 @@ def resolve_tasks(snapshot, skills):
 def make_prompt(paths, situation):
     path_list = "\n".join(str(path) for path in paths)
     return (
-        "Read these skills from this source snapshot and the shared references they link:\n"
+        "Read only these skills from the committed source snapshot and the references they link:\n"
         f"{path_list}\n\n"
         "You are the agent applying them. Here is the current situation:\n\n"
         f"{situation}\n\n"
-        "What do you do next, and why? Name the skill rule that decides it. Do not run commands or change anything.\n"
+        "What do you do next, and why? Name the skill rule that decides it.\n"
+        "Do not run commands, make edits, use network tools, dispatch agents, or ask the user questions.\n"
+        "Use only the skill source and linked references that are available in the session source directory.\n"
     )
 
 
-def runner_environment():
-    env = os.environ.copy()
-    for key in list(env):
-        upper = key.upper()
-        if upper.startswith(("GH_", "GITHUB_", "GHFLOW_", "GIT_")):
-            env.pop(key)
+def runner_environment(runner, runtime_root):
+    inherited = os.environ
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    home = runtime_root / "home"
+    home.mkdir(exist_ok=True)
+    temp_dir = runtime_root / "tmp"
+    temp_dir.mkdir(exist_ok=True)
+    env = {"PATH": inherited.get("PATH", "/usr/bin:/bin"), "HOME": str(home),
+           "TMPDIR": str(temp_dir)}
+    for key in ("LANG", "LC_ALL", "LC_CTYPE", "TERM", "NO_COLOR"):
+        if key in inherited:
+            env[key] = inherited[key]
+
+    if runner == "codex":
+        codex_home = runtime_root / "codex-home"
+        codex_home.mkdir(exist_ok=True)
+        env["CODEX_HOME"] = str(codex_home)
+        if inherited.get("OPENAI_API_KEY"):
+            env["OPENAI_API_KEY"] = inherited["OPENAI_API_KEY"]
+        else:
+            original_home = Path(
+                inherited.get("CODEX_HOME", Path.home() / ".codex"),
+            ).expanduser()
+            auth = original_home / "auth.json"
+            if auth.is_file():
+                shutil.copyfile(auth, codex_home / "auth.json")
+                (codex_home / "auth.json").chmod(0o600)
+    elif runner == "claude":
+        # Claude's safe mode uses its normal authentication store but ignores user settings.
+        if inherited.get("ANTHROPIC_API_KEY"):
+            env["ANTHROPIC_API_KEY"] = inherited["ANTHROPIC_API_KEY"]
+        env["HOME"] = inherited.get("HOME", str(Path.home()))
     return env
 
 
@@ -193,7 +257,18 @@ def cli_version(runner, env):
 def run_codex(prompt, model, snapshot, answer_path, env):
     command = [
         "codex", "exec", "--ephemeral", "--sandbox", "read-only",
-        "--skip-git-repo-check", "--json", "--model", model,
+        "--ask-for-approval", "never", "--skip-git-repo-check",
+        "--ignore-user-config", "--ignore-rules", "--no-daemon",
+        "--disable", "apps", "--disable", "plugins", "--disable", "multi_agent",
+        "--disable", "web_search_request", "--disable", "browser_use",
+        "--config", 'shell_environment_policy.inherit="none"',
+        "--config", "shell_environment_policy.ignore_default_excludes=false",
+        "--config", 'shell_environment_policy.filters.PATH="include"',
+        "--config", 'shell_environment_policy.filters.CODEX_HOME="exclude"',
+        "--config", 'shell_environment_policy.filters.HOME="exclude"',
+        "--config", 'shell_environment_policy.filters.OPENAI_API_KEY="exclude"',
+        "--config", "sandbox_workspace_write.network_access=false",
+        "--json", "--model", model,
         "--output-last-message", str(answer_path), "-",
     ]
     try:
@@ -213,17 +288,18 @@ def run_codex(prompt, model, snapshot, answer_path, env):
         return None, None, None, ""
 
 
-def run_claude(prompt, model, snapshot, env):
+def run_claude(prompt, model, snapshot, session_cwd, env):
     command = [
-        "claude", "--print", "--model", model, "--permission-mode", "dontAsk",
-        "--tools", "Read,Glob,Grep,Skill", "--allowedTools", "Read", "Glob",
-        "Grep", "Skill", "--add-dir", str(snapshot), "--strict-mcp-config",
-        "--setting-sources", "project", "--no-session-persistence",
+        "claude", "--print", "--model", model, "--safe-mode", "--restricted",
+        "--permission-mode", "dontAsk", "--tools", "Read,Glob,Grep",
+        "--allowedTools", "Read", "Glob", "Grep", "--add-dir", str(snapshot),
+        "--strict-mcp-config", "--permission-prompts", "none",
+        "--no-session-persistence",
         "--output-format", "stream-json", "--verbose",
     ]
     try:
         result = subprocess.run(
-            command, input=prompt, text=True, capture_output=True, cwd=snapshot,
+            command, input=prompt, text=True, capture_output=True, cwd=session_cwd,
             env=env,
         )
         session = None
@@ -257,6 +333,44 @@ def parser():
     return result
 
 
+def isolation_record(runner, source_files):
+    shared = {
+        "model_visible_source_files": source_files,
+        "scenario_input": "Situation only; scenario criteria and evaluation records are not copied",
+        "identity_and_github_environment": "removed by a minimal runner environment",
+    }
+    if runner == "claude":
+        return {
+            **shared,
+            "runner_controls": [
+                "--safe-mode", "--restricted", "--tools Read,Glob,Grep",
+                "--allowedTools Read Glob Grep", "--strict-mcp-config",
+                "--permission-prompts none", "--add-dir SOURCE_SNAPSHOT",
+                "--no-session-persistence",
+            ],
+            "commands_and_edits": "blocked by restricted mode and the explicit read-only tool list",
+            "network_and_dispatch": "no web, code, MCP, or agent tools are enabled; the runner still calls its model provider",
+            "user_questions": "prompt-only; this noninteractive run has no user messaging tool",
+            "source_boundary": "file tools are confined to the empty session directory and source snapshot",
+            "authentication": "normal Claude authentication is available to the CLI; restricted file tools cannot read the home directory",
+        }
+    return {
+        **shared,
+        "runner_controls": [
+            "--ephemeral", "--sandbox read-only", "--ask-for-approval never",
+            "--ignore-user-config", "--ignore-rules", "--no-daemon",
+            "--disable apps/plugins/multi_agent/web_search_request/browser_use",
+            "shell_environment_policy.inherit=none",
+        ],
+        "edits_and_network": "blocked by the Codex read-only sandbox; MCP, apps, browser, and web search integrations are disabled",
+        "commands": "prompt-only; the installed Codex CLI exposes shell commands without a tool allowlist",
+        "agent_dispatch": "disabled by the multi_agent feature flag and isolated configuration",
+        "user_questions": "prompt-only; this noninteractive run has no user messaging tool",
+        "source_boundary": "the session workspace contains only allowed linked skill files; the Codex read-only sandbox can read files outside the workspace, so host-wide source access is not enforced",
+        "authentication": "only OPENAI_API_KEY or auth.json is provided to the CLI; shell commands inherit neither CODEX_HOME nor HOME nor OPENAI_API_KEY",
+    }
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
     if args.repeat < 1:
@@ -270,13 +384,21 @@ def main(argv=None):
     try:
         commit = git(ROOT, "rev-parse", "--verify", f"{args.commit}^{{commit}}")
         with tempfile.TemporaryDirectory(prefix="ghflow-scenario-") as temp:
-            snapshot = Path(temp) / "source"
-            extract_archive(ROOT, commit, snapshot)
-            fingerprint = source_fingerprint(snapshot)
-            scenario = snapshot / "evals" / "scenarios" / f"{scenario_name}.md"
-            if not scenario.is_file():
+            tree = source_paths(ROOT, commit)
+            scenario_path = f"evals/scenarios/{scenario_name}.md"
+            scenario_object = tree.get(scenario_path)
+            if scenario_object is None:
                 raise ScenarioError(f"Unknown scenario: {scenario_name}")
-            skills, situation = scenario_parts(scenario)
+            scenario_result = subprocess.run(
+                ["git", "-C", str(ROOT), "cat-file", "blob", scenario_object],
+                capture_output=True, text=True,
+            )
+            if scenario_result.returncode:
+                raise ScenarioError(f"Git could not read scenario: {scenario_name}")
+            skills, situation = scenario_parts(scenario_result.stdout)
+            snapshot = Path(temp) / "source"
+            snapshot_files = extract_source_snapshot(ROOT, commit, skills, snapshot)
+            fingerprint = source_fingerprint(snapshot)
             paths = resolve_tasks(snapshot, skills)
             prompt = make_prompt(paths, situation)
             prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -294,9 +416,11 @@ def main(argv=None):
 
             output_dir = args.output_dir.expanduser().resolve()
             output_dir.mkdir(parents=True, exist_ok=False)
-            env = runner_environment()
+            env = runner_environment(args.runner, Path(temp) / "runtime")
             command_name = args.runner
             version = cli_version(command_name, env)
+            session_cwd = Path(temp) / "session"
+            session_cwd.mkdir()
             runs = []
             answers = []
             started_at = datetime.now(timezone.utc).isoformat()
@@ -308,7 +432,7 @@ def main(argv=None):
                     )
                 else:
                     code, session, runtime_model, answer = run_claude(
-                        prompt, args.model, snapshot, env,
+                        prompt, args.model, snapshot, session_cwd, env,
                     )
                 runs.append({
                     "repeat": index,
@@ -329,13 +453,11 @@ def main(argv=None):
                 "prompt_sha256": prompt_hash,
                 "repeat_count": args.repeat,
                 "resolved_skill_paths": [str(path.relative_to(snapshot.resolve())) for path in paths],
+                "source_snapshot_files": snapshot_files,
                 "runs": runs,
                 "started_at_utc": started_at,
                 "completed_at_utc": datetime.now(timezone.utc).isoformat(),
-                "isolation": {
-                    "source": "read-only git archive snapshot",
-                    "scrubbed_environment_prefixes": ["GH_", "GITHUB_", "GHFLOW_", "GIT_"],
-                },
+                "isolation": isolation_record(args.runner, snapshot_files),
             }
             (output_dir / "answers.txt").write_text("\n".join(answers), encoding="utf-8")
             (output_dir / "provenance.json").write_text(
@@ -343,7 +465,7 @@ def main(argv=None):
             )
             print(f"Wrote answers and provenance to {output_dir}")
             return 0 if all(run["exit_code"] == 0 for run in runs) else 1
-    except (ScenarioError, OSError, tarfile.TarError) as error:
+    except (ScenarioError, OSError) as error:
         print(f"run_scenario: {error}", file=sys.stderr)
         return 2
 

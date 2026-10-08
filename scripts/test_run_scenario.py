@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import check
 import run_scenario
@@ -25,12 +26,21 @@ class ScenarioRunnerTests(unittest.TestCase):
         self.repo = self.temp_path / "repo"
         (self.repo / "scripts").mkdir(parents=True)
         (self.repo / "references/tasks").mkdir(parents=True)
+        (self.repo / "references/shared").mkdir(parents=True)
         (self.repo / "evals/scenarios").mkdir(parents=True)
+        (self.repo / "evals/results").mkdir(parents=True)
+        (self.repo / "docs/trials").mkdir(parents=True)
         (self.repo / "scripts/run_scenario.py").write_bytes(
             (ROOT / "scripts/run_scenario.py").read_bytes(),
         )
         (self.repo / "references/tasks/review-changes.md").write_text(
-            "Review the supplied changes.\n", encoding="utf-8",
+            "Read [Policy](../shared/policy.md).\n", encoding="utf-8",
+        )
+        (self.repo / "references/tasks/unselected-task.md").write_text(
+            "UNSELECTED TASK MARKER\n", encoding="utf-8",
+        )
+        (self.repo / "references/shared/policy.md").write_text(
+            "Use the stated policy.\n", encoding="utf-8",
         )
         (self.repo / "evals/scenarios/runner-case.md").write_text(
             "---\nskills: [review-changes]\nsource: test fixture\n---\n\n"
@@ -39,6 +49,9 @@ class ScenarioRunnerTests(unittest.TestCase):
             "## Not acceptable\n\nNot acceptable sentinel.\n",
             encoding="utf-8",
         )
+        (self.repo / "evals/results/prior.md").write_text("PRIOR RESULT MARKER\n")
+        (self.repo / "docs/trials/prior.md").write_text("PRIOR TRIAL MARKER\n")
+        (self.repo / "docs/skill-evaluations.md").write_text("EVALUATION GUIDANCE MARKER\n")
         subprocess.run(["git", "init", "-q", str(self.repo)], check=True)
         subprocess.run(["git", "-C", str(self.repo), "config", "user.name", "Test"], check=True)
         subprocess.run(["git", "-C", str(self.repo), "config", "user.email", "test@example.invalid"], check=True)
@@ -50,24 +63,66 @@ class ScenarioRunnerTests(unittest.TestCase):
     def runner_script(self):
         return self.repo / "scripts/run_scenario.py"
 
-    def install_fake_runner(self, name, body):
+    def install_fake_runner(self, name, log_path):
         path = self.bin / name
-        path.write_text("#!" + sys.executable + "\n" + body, encoding="utf-8")
+        log_literal = repr(str(log_path))
+        path.write_text("#!" + sys.executable + "\n" + f"LOG = {log_literal}\n" + """
+import json
+import os
+import sys
+from pathlib import Path
+if '--version' in sys.argv:
+    print('fake-runner-1')
+else:
+    cwd = Path.cwd()
+    files = sorted(path.relative_to(cwd).as_posix() for path in cwd.rglob('*') if path.is_file())
+    source_arg = sys.argv.index('--add-dir') + 1 if '--add-dir' in sys.argv else None
+    source = Path(sys.argv[source_arg]) if source_arg is not None else cwd
+    source_files = sorted(path.relative_to(source).as_posix() for path in source.rglob('*') if path.is_file())
+    record = {
+        'args': sys.argv[1:],
+        'cwd': str(cwd),
+        'files': files,
+        'source_files': source_files,
+        'prompt': sys.stdin.read(),
+        'env_keys': sorted(os.environ),
+        'codex_config_exists': (Path(os.environ.get('CODEX_HOME', '/missing')) / 'config.toml').exists(),
+        'codex_auth_exists': (Path(os.environ.get('CODEX_HOME', '/missing')) / 'auth.json').exists(),
+        'codex_home': os.environ.get('CODEX_HOME'),
+        'home': os.environ.get('HOME'),
+        'xdg_config_home': os.environ.get('XDG_CONFIG_HOME'),
+    }
+    with open(LOG, 'a', encoding='utf-8') as output:
+        output.write(json.dumps(record) + '\\n')
+    if '--output-last-message' in sys.argv:
+        answer = Path(sys.argv[sys.argv.index('--output-last-message') + 1])
+        answer.write_text('fake answer', encoding='utf-8')
+        event = {'type': 'thread.started', 'thread_id': 'fake-session', 'model': 'reported-model'}
+    else:
+        event = {'type': 'result', 'session_id': 'fake-session', 'result': 'fake answer'}
+    print(json.dumps(event))
+""", encoding="utf-8")
         path.chmod(path.stat().st_mode | stat.S_IXUSR)
         return path
 
+    def run_fixture(self, runner, output):
+        env = os.environ.copy()
+        env.update({
+            "PATH": str(self.bin) + os.pathsep + env.get("PATH", ""),
+            "GH_TOKEN": "synthetic-gh-value",
+            "GITHUB_TOKEN": "synthetic-github-value",
+            "GHFLOW_IDENTITY_LOGIN": "synthetic-login",
+            "GIT_AUTHOR_NAME": "synthetic-author",
+        })
+        result = subprocess.run(
+            [sys.executable, str(self.runner_script), "runner-case", "--runner", runner,
+             "--model", "fake-model", "--repeat", "1", "--output-dir", str(output)],
+            cwd=self.repo, env=env, capture_output=True, text=True,
+        )
+        return result
+
     def test_every_scenario_uses_known_task_names(self):
         self.assertEqual(check.check_scenario_skills(ROOT), [])
-
-    def test_fingerprint_uses_sorted_path_nul_digest_lines(self):
-        snapshot = self.temp_path / "snapshot"
-        snapshot.mkdir()
-        (snapshot / "z.txt").write_text("z", encoding="utf-8")
-        (snapshot / "a.txt").write_text("a", encoding="utf-8")
-        stream = b"a.txt\0" + hashlib.sha256(b"a").hexdigest().encode() + b"\n"
-        stream += b"z.txt\0" + hashlib.sha256(b"z").hexdigest().encode() + b"\n"
-        expected = hashlib.sha256(stream).hexdigest()
-        self.assertEqual(run_scenario.source_fingerprint(snapshot), expected)
 
     def test_unknown_task_name_fails_check(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -81,127 +136,146 @@ class ScenarioRunnerTests(unittest.TestCase):
                 "evals/scenarios/unknown.md: unknown task in skills: missing-task",
             ])
 
-    def test_prompt_contains_situation_but_not_grading_sections(self):
-        with tempfile.TemporaryDirectory() as temp:
-            snapshot = Path(temp)
-            (snapshot / "references/tasks").mkdir(parents=True)
-            skill = snapshot / "references/tasks/review-changes.md"
-            skill.write_text("skill")
-            scenario = snapshot / "scenario.md"
-            scenario.write_text(
-                "---\nskills: [review-changes]\n---\n\n"
-                "## Situation\n\nSituation sentinel.\n\n"
-                "## Expected\n\nExpected sentinel.\n\n"
-                "## Not acceptable\n\nNot acceptable sentinel.\n"
-            )
-            skills, situation = run_scenario.scenario_parts(scenario)
-            prompt = run_scenario.make_prompt(
-                run_scenario.resolve_tasks(snapshot, skills), situation,
-            )
-            self.assertIn("Situation sentinel.", prompt)
-            self.assertNotIn("Expected sentinel.", prompt)
-            self.assertNotIn("Not acceptable sentinel.", prompt)
+    def test_fingerprint_uses_sorted_path_nul_digest_lines(self):
+        snapshot = self.temp_path / "snapshot"
+        snapshot.mkdir()
+        (snapshot / "z.txt").write_text("z", encoding="utf-8")
+        (snapshot / "a.txt").write_text("a", encoding="utf-8")
+        stream = b"a.txt\0" + hashlib.sha256(b"a").hexdigest().encode() + b"\n"
+        stream += b"z.txt\0" + hashlib.sha256(b"z").hexdigest().encode() + b"\n"
+        expected = hashlib.sha256(stream).hexdigest()
+        self.assertEqual(run_scenario.source_fingerprint(snapshot), expected)
+
+    def test_snapshot_contains_only_selected_skill_and_linked_references(self):
+        commit = run_scenario.git(self.repo, "rev-parse", "HEAD")
+        snapshot = self.temp_path / "source"
+        files = run_scenario.extract_source_snapshot(
+            self.repo, commit, ["review-changes"], snapshot,
+        )
+        self.assertEqual(files, [
+            "references/shared/policy.md",
+            "references/tasks/review-changes.md",
+        ])
+        for excluded in (
+            "evals/scenarios/runner-case.md", "evals/results/prior.md",
+            "docs/trials/prior.md", "docs/skill-evaluations.md",
+            "references/tasks/unselected-task.md",
+        ):
+            self.assertFalse((snapshot / excluded).exists(), excluded)
+
+    def test_prompt_contains_situation_and_explicit_limits_only(self):
+        text = (self.repo / "evals/scenarios/runner-case.md").read_text()
+        skills, situation = run_scenario.scenario_parts(text)
+        snapshot = self.temp_path / "prompt-source"
+        run_scenario.extract_source_snapshot(
+            self.repo, run_scenario.git(self.repo, "rev-parse", "HEAD"), skills, snapshot,
+        )
+        prompt = run_scenario.make_prompt(
+            run_scenario.resolve_tasks(snapshot, skills), situation,
+        )
+        self.assertIn("Situation sentinel.", prompt)
+        self.assertNotIn("Expected sentinel.", prompt)
+        self.assertNotIn("Not acceptable sentinel.", prompt)
+        for limit in ("Do not run commands", "make edits", "use network tools",
+                      "dispatch agents", "ask the user questions"):
+            self.assertIn(limit, prompt)
 
     def test_dry_run_prints_prompt_and_does_not_launch_runner(self):
         marker = self.temp_path / "invoked"
-        self.install_fake_runner("codex", """
-import os
-from pathlib import Path
-Path(os.environ['FAKE_MARKER']).write_text('called')
-print('fake version')
-""")
+        self.install_fake_runner("codex", marker)
         env = os.environ.copy()
         env["PATH"] = str(self.bin) + os.pathsep + env.get("PATH", "")
-        env["FAKE_MARKER"] = str(marker)
         result = subprocess.run(
-            [sys.executable, str(self.runner_script),
-             "runner-case", "--runner", "codex",
+            [sys.executable, str(self.runner_script), "runner-case", "--runner", "codex",
              "--model", "fake-model", "--dry-run"],
             cwd=self.repo, env=env, capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("resolved_skill_paths:", result.stdout)
         self.assertIn("references/tasks/review-changes.md", result.stdout)
         self.assertIn("Situation sentinel.", result.stdout)
         self.assertNotIn("Expected sentinel.", result.stdout)
-        self.assertNotIn("Not acceptable", result.stdout)
+        self.assertNotIn("Not acceptable sentinel.", result.stdout)
         self.assertFalse(marker.exists())
 
-    def test_codex_fake_records_provenance_and_scrubbed_environment(self):
-        invocation_log = self.temp_path / "invocations.jsonl"
-        self.install_fake_runner("codex", """
-import json
-import os
-import sys
-from pathlib import Path
-if '--version' in sys.argv:
-    print('codex fake-1')
-else:
-    prompt = sys.stdin.read()
-    with open(os.environ['FAKE_LOG'], 'a') as log:
-        log.write(json.dumps({'prompt': prompt, 'keys': sorted(os.environ)}) + '\\n')
-    Path(sys.argv[sys.argv.index('--output-last-message') + 1]).write_text('fake answer')
-    print(json.dumps({'type': 'thread.started', 'thread_id': 'fake-session', 'model': 'reported-model'}))
-""")
-        output = self.temp_path / "run"
-        env = os.environ.copy()
-        env.update({
-            "PATH": str(self.bin) + os.pathsep + env.get("PATH", ""),
-            "FAKE_LOG": str(invocation_log),
-            "GH_TOKEN": "do-not-log-this-gh-token",
-            "GITHUB_TOKEN": "do-not-log-this-github-token",
-            "GHFLOW_IDENTITY_LOGIN": "do-not-log-this-login",
-            "GIT_AUTHOR_NAME": "do-not-log-this-author",
-        })
-        result = subprocess.run(
-            [sys.executable, str(self.runner_script),
-             "runner-case", "--runner", "codex",
-             "--model", "fake-model", "--repeat", "2", "--output-dir", str(output)],
-            cwd=self.repo, env=env, capture_output=True, text=True,
+    def test_codex_isolates_user_config_and_records_effective_workspace(self):
+        log = self.temp_path / "codex.jsonl"
+        self.install_fake_runner("codex", log)
+        old_home = self.temp_path / "caller-home"
+        old_codex_home = old_home / ".codex"
+        old_codex_home.mkdir(parents=True)
+        (old_codex_home / "config.toml").write_text(
+            '[mcp_servers.unrelated]\nurl = "https://example.invalid"\n',
         )
+        (old_codex_home / "auth.json").write_text('{"synthetic_auth": true}')
+        output = self.temp_path / "codex-run"
+        with patch.dict(os.environ, {
+            "HOME": str(old_home), "CODEX_HOME": str(old_codex_home),
+            "XDG_CONFIG_HOME": str(old_home / ".config"),
+        }, clear=False):
+            result = self.run_fixture("codex", output)
         self.assertEqual(result.returncode, 0, result.stderr)
+        record = json.loads(log.read_text().splitlines()[0])
+        args = record["args"]
+        for flag in ("--ignore-user-config", "--ignore-rules", "--no-daemon",
+                     "--ephemeral", "--sandbox", "read-only", "--disable", "multi_agent"):
+            self.assertIn(flag, args)
+        self.assertNotIn("--search", args)
+        self.assertTrue(any("shell_environment_policy.inherit=\"none\"" in value for value in args))
+        self.assertFalse(record["codex_config_exists"])
+        self.assertTrue(record["codex_auth_exists"])
+        self.assertNotEqual(record["codex_home"], str(old_codex_home))
+        self.assertNotEqual(record["home"], str(old_home))
+        self.assertIsNone(record["xdg_config_home"])
+        self.assertEqual(record["files"], [
+            "references/shared/policy.md", "references/tasks/review-changes.md",
+        ])
+        self.assertEqual(record["prompt"].count("Situation sentinel."), 1)
+        self.assertNotIn("Expected sentinel.", record["prompt"])
+        self.assertNotIn("Not acceptable sentinel.", record["prompt"])
+        self.assertNotIn("GH_TOKEN", record["env_keys"])
+        self.assertNotIn("GITHUB_TOKEN", record["env_keys"])
+        self.assertNotIn("GHFLOW_IDENTITY_LOGIN", record["env_keys"])
+        self.assertNotIn("GIT_AUTHOR_NAME", record["env_keys"])
+        self.assertNotIn("XDG_CONFIG_HOME", record["env_keys"])
         provenance = json.loads((output / "provenance.json").read_text())
-        self.assertEqual(provenance["runner_version"], "codex fake-1")
-        self.assertEqual(provenance["repeat_count"], 2)
-        self.assertEqual(provenance["source_commit"], run_scenario.git(self.repo, "rev-parse", "HEAD"))
-        self.assertEqual(len(provenance["source_fingerprint_sha256"]), 64)
-        self.assertEqual([run["session_id"] for run in provenance["runs"]],
-                         ["fake-session", "fake-session"])
-        self.assertEqual([run["exit_code"] for run in provenance["runs"]], [0, 0])
-        self.assertEqual(provenance["runs"][0]["runner_model"], "reported-model")
-        answer = (output / "answers.txt").read_text()
-        self.assertEqual(answer.count("fake answer"), 2)
-        self.assertNotIn("Expected sentinel.", answer)
-        records = [json.loads(line) for line in invocation_log.read_text().splitlines()]
-        self.assertEqual(len(records), 2)
-        for record in records:
-            self.assertIn("Situation sentinel.", record["prompt"])
-            self.assertNotIn("Expected sentinel.", record["prompt"])
-            self.assertNotIn("Not acceptable", record["prompt"])
-            for key in ("GH_TOKEN", "GITHUB_TOKEN", "GHFLOW_IDENTITY_LOGIN", "GIT_AUTHOR_NAME"):
-                self.assertNotIn(key, record["keys"])
-        all_output = result.stdout + result.stderr + answer + (output / "provenance.json").read_text()
-        for secret in ("do-not-log-this-gh-token", "do-not-log-this-github-token",
-                       "do-not-log-this-login", "do-not-log-this-author"):
-            self.assertNotIn(secret, all_output)
+        self.assertEqual(provenance["source_snapshot_files"], record["files"])
+        self.assertIn("host-wide source access is not enforced",
+                      provenance["isolation"]["source_boundary"])
+        self.assertIn("prompt-only", provenance["isolation"]["commands"])
+        self.assertEqual((output / "answers.txt").read_text().count("fake answer"), 1)
 
-    def test_claude_fake_extracts_answer_and_session(self):
-        self.install_fake_runner("claude", """
-import json
-import sys
-if '--version' in sys.argv:
-    print('claude fake-2')
-else:
-    sys.stdin.read()
-    print(json.dumps({'type': 'result', 'session_id': 'claude-session', 'result': 'claude answer'}))
-""")
-        code, session, model, answer = run_scenario.run_claude(
-            "prompt", "fake-model", self.temp_path, {
-                "PATH": str(self.bin) + os.pathsep + os.environ.get("PATH", ""),
-            },
+    def test_claude_restricts_tools_and_source_directories(self):
+        log = self.temp_path / "claude.jsonl"
+        self.install_fake_runner("claude", log)
+        old_home = self.temp_path / "claude-home"
+        (old_home / ".claude").mkdir(parents=True)
+        (old_home / ".claude/settings.json").write_text(
+            '{"hooks":{"SessionStart":[{"command":"unrelated"}]}}',
         )
-        self.assertEqual((code, session, answer), (0, "claude-session", "claude answer"))
-        self.assertIsNone(model)
+        output = self.temp_path / "claude-run"
+        with patch.dict(os.environ, {"HOME": str(old_home)}, clear=False):
+            result = self.run_fixture("claude", output)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        record = json.loads(log.read_text().splitlines()[0])
+        args = record["args"]
+        for flag in ("--safe-mode", "--restricted", "--strict-mcp-config",
+                     "--permission-prompts", "none", "--no-session-persistence",
+                     "Read,Glob,Grep"):
+            self.assertIn(flag, args)
+        self.assertNotIn("--setting-sources", args)
+        self.assertNotIn("Bash", args)
+        self.assertEqual(record["files"], [])
+        self.assertEqual(record["source_files"], [
+            "references/shared/policy.md", "references/tasks/review-changes.md",
+        ])
+        self.assertEqual(record["prompt"].count("Situation sentinel."), 1)
+        self.assertNotIn("Expected sentinel.", record["prompt"])
+        self.assertNotIn("Not acceptable sentinel.", record["prompt"])
+        self.assertNotIn("GH_TOKEN", record["env_keys"])
+        self.assertNotIn("GITHUB_TOKEN", record["env_keys"])
+        provenance = json.loads((output / "provenance.json").read_text())
+        self.assertIn("file tools are confined", provenance["isolation"]["source_boundary"])
+        self.assertIn("blocked", provenance["isolation"]["commands_and_edits"])
 
 
 if __name__ == "__main__":
