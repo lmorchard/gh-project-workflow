@@ -14,9 +14,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Run unit tests
-        run: python3 -m unittest discover -s cli
-      - name: Validate skill frontmatter and links
-        run: python3 scripts/check.py
-      - name: Check tracked files for whitespace errors
-        run: git diff --check $(git hash-object -t tree /dev/null)
+      - name: Run checks
+        run: make check
