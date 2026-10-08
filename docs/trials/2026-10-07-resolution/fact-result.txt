@@ -1,0 +1,14 @@
+No. The current `list` command excludes completed tasks.
+
+- `tasks.py:6–9` defaults `include_completed=False` and filters out completed records.
+- `main()` at `tasks.py:24` uses that default. The CLI exposes only `--data` and `--owner`; it has no option to include completed tasks.
+- Running `python3 -B tasks.py list --data sample.json` produced:
+  ```text
+  1: Open
+  3: Another
+  ```
+  Task 2 (`Closed`, marked completed) was omitted.
+
+The helper supports `include_completed=True`, but the command does not expose it. All four existing unittest tests passed, including the public-command assertion.
+
+Inspected clean local `main` at `fed38aecc649ba56deb103a790e23107f98121f9`. No files changed; no network used.

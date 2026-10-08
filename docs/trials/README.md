@@ -134,6 +134,11 @@ Lessons and resulting changes:
 
 ## ghflow installation
 
+[Routine-resolution comparison, 2026-10-07](2026-10-07-resolution.md) supplies the agreed first increment of issue #2.
+Three fresh native sessions used public skills at `b47c9d5` and isolated task-list fixtures.
+Observed commands and artifacts established factual resolution, a routine patch, and a returned consequential decision.
+Existing guidance remained unchanged. Later experiments and the umbrella issue remain open.
+
 [Setup trial, 2026-10-07](2026-10-07-ghflow-setup.md) assesses one registered skill, symbolic-link discovery, routing, and dependency access in Claude Code, Codex, and OpenCode.
 
 [Root-package setup trial, 2026-10-07](2026-10-07-ghflow-root-setup.md) repeats discovery and routing after the repository-root layout change.

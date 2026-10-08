@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "Open",
+    "owner": "Ana",
+    "owner_email": "ana@example.test",
+    "completed": false,
+    "due": "2026-10-10",
+    "private_notes": "Customer account investigation"
+  },
+  {
+    "id": 2,
+    "title": "Closed",
+    "owner": "Bo",
+    "owner_email": "bo@example.test",
+    "completed": true,
+    "due": "2026-10-01",
+    "private_notes": "Internal pricing discussion"
+  },
+  {
+    "id": 3,
+    "title": "Another",
+    "owner": "Bo",
+    "owner_email": "bo@example.test",
+    "completed": false,
+    "due": null,
+    "private_notes": ""
+  }
+]

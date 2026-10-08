@@ -1,0 +1,5 @@
+Implemented `list --completed` using the existing filter. It includes open and completed tasks and works with `--owner`. Default behavior is unchanged.
+
+Validation: all 6 tests passed with `python3 -m unittest -v`; `git diff --check` passed.
+
+Local patch is ready in `tasks.py` and `test_tasks.py`, left uncommitted. No decisions remain.

@@ -1,0 +1,165 @@
+{
+  "skill_revision": "b47c9d5088f471da5d7b35a56ecda6078dee02be",
+  "fixture_revision": "fed38aecc649ba56deb103a790e23107f98121f9",
+  "client": "codex-cli 0.161.0",
+  "selected_model": "gpt-6-astra",
+  "model_source": "Explicit --model flag; no provider-returned model identity",
+  "source_files": [
+    {
+      "path": "README.md",
+      "sha256": "4a04799985bdc5ca9ee429dd03adcf7052f928a17d5ae516fd16cff8a8ef3d66"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "2511269e35099da8bd75ddbc99a506664f493cca1d7963fefb2c862008c7748c"
+    },
+    {
+      "path": "cli/fake_gh.py",
+      "sha256": "19f6fcee5ffa96f69a3f42deb9ebd55ca6a8209fbd588ce6c0fb4437fb5e04cb"
+    },
+    {
+      "path": "cli/ghflow.py",
+      "sha256": "3fd8d5b62b321827b3b7bb6a357a62fe33454745e30bc4cc9ed9e17f866f7f82"
+    },
+    {
+      "path": "cli/test_ghflow.py",
+      "sha256": "f91732e3032e6500d78575435c3e95d9bdafc6606fc9d52f59bcac47e23bece7"
+    },
+    {
+      "path": "docs/direction.md",
+      "sha256": "803ce3fd0e61c4dff78b179f58e02006f1305b4d67e1a494f423cde08770b8cf"
+    },
+    {
+      "path": "docs/skill-style.md",
+      "sha256": "2ed8a1387830f8a79a0514eff6b376672d44d683f13ae07684db61c717d6d031"
+    },
+    {
+      "path": "docs/writing.md",
+      "sha256": "2eacc1a0204a194341ac7489933367d3ac66f017a7abb4c5533dd70d677ed2ab"
+    },
+    {
+      "path": "references/shared/authorization.md",
+      "sha256": "cb2de7b05c7ef85789c4821f2cc5cc9a7932893225dc9cb6d881ab3105eaf0f5"
+    },
+    {
+      "path": "references/shared/board-status.md",
+      "sha256": "5879ebff8d03e9a54c647a036a93cdc399b466ed5cf736f504b0406778d89cb8"
+    },
+    {
+      "path": "references/shared/evidence.md",
+      "sha256": "67ad4e19d34ec6b2123357368e26e149516df2d5ab350548c58b6125526abcb8"
+    },
+    {
+      "path": "references/shared/identity.md",
+      "sha256": "bf6b670110f18541e4dcc23c13228ef283f7b105d366f5b99d68616162849207"
+    },
+    {
+      "path": "references/shared/review.md",
+      "sha256": "c48d868f5c74d1f51905f6971573ade8afeda7026eda731411502375d42ed7db"
+    },
+    {
+      "path": "references/tasks/address-pr-review.md",
+      "sha256": "0ce678a48876be5774840370766936f68f4816036a3e1dd237331aa4ccab7039"
+    },
+    {
+      "path": "references/tasks/bundle-issues.md",
+      "sha256": "44b4d0bc30c177b1ea482c32edd11e1b91b25388f650723c64dc805ccca82f35"
+    },
+    {
+      "path": "references/tasks/burndown-ready-queue.md",
+      "sha256": "43d797adc0eb893d11df0998981e77bb60f40f564d8d3cf77c626d2cab01386d"
+    },
+    {
+      "path": "references/tasks/curate-ready-queue.md",
+      "sha256": "76f9ef02b0abc133e0aa8ea982bde00a0c769b471c2342d16c05f3d71487c9eb"
+    },
+    {
+      "path": "references/tasks/decompose-parent-issue.md",
+      "sha256": "c240453e586e7413570cf70e4542c82f343926ba6ed02bc654514064b4004d97"
+    },
+    {
+      "path": "references/tasks/define-issue.md",
+      "sha256": "3794c1d991cc8286a264fd43eefc59d05d939efaac638a622cf27e66784bf414"
+    },
+    {
+      "path": "references/tasks/deliver-parent-issue.md",
+      "sha256": "119a07d0fb4d7af28ce9821a3c1146f4b389c443f9823e3102fd4fdba7497ded"
+    },
+    {
+      "path": "references/tasks/express-issue.md",
+      "sha256": "f92e6cf3d4c7b0a621513e3374a513bdd2dc5710a4721d66484011214e9362e4"
+    },
+    {
+      "path": "references/tasks/file-issue.md",
+      "sha256": "9f0870f0d551b8b1171bdd388be7f0f4b83548c965320605b1deaad5be354246"
+    },
+    {
+      "path": "references/tasks/implement-issue.md",
+      "sha256": "660d6268c245cd19a1e858230035104c8c11a7c157615f128bf1cfd2a0bbdecd"
+    },
+    {
+      "path": "references/tasks/interview-issue.md",
+      "sha256": "ab9efd7d30688dfd98fb651631a6e61b2b27e271a2f4ea5a941a7dff4342f4d7"
+    },
+    {
+      "path": "references/tasks/merge-pr.md",
+      "sha256": "ff495f3b06faec9a424a8d02dc6ed24916d7a13733ee7c47519ac0f5373af5b3"
+    },
+    {
+      "path": "references/tasks/reconsider-issue.md",
+      "sha256": "382da397a25f34e6e86f3d713ed3f4459744db478aae2f315c7364ccf09f6495"
+    },
+    {
+      "path": "references/tasks/research.md",
+      "sha256": "50d5a1fea7d178f8dfd2419c71f3dfcfb179d7f1961c8d25e0d98de0fa383656"
+    },
+    {
+      "path": "references/tasks/review-changes.md",
+      "sha256": "f113bf41d7a9bf017865362e7ea982d8262433f105cd447fb49c07e7d178125c"
+    },
+    {
+      "path": "references/tasks/submit-pr.md",
+      "sha256": "f991f8d102307c82fdd8a219617c13b2c5818c324a092d483c962b712cb2aa58"
+    },
+    {
+      "path": "references/tasks/sweep-audit-closed.md",
+      "sha256": "24c484ab8e50710dd9bb201919b36a411ffba5c8e753f2a2b47f13f232970cc2"
+    },
+    {
+      "path": "references/tasks/sweep-needs-definition.md",
+      "sha256": "f3b674205551fddf35dfd1a5cfbedc1c1ef67987403491d6371b70106782bd7d"
+    },
+    {
+      "path": "references/tasks/sweep-needs-input.md",
+      "sha256": "07433721a8b221e244b1349832ae3ef895130328a2277d2063e2452471363410"
+    },
+    {
+      "path": "references/tasks/sweep-prioritize.md",
+      "sha256": "f8ea40fefde74cf525dab477ecc52972e7e21fe2be1c727498d6640b034c1152"
+    },
+    {
+      "path": "references/tasks/triage-issues.md",
+      "sha256": "ca130611019e82e71db29baddad6d0246fc5ee9d9b9b922411ac7268e567dfa4"
+    }
+  ],
+  "sessions": {
+    "fact": {
+      "thread_id": "01a118e8-1a8b-7ef2-8bf9-8a81c452da33",
+      "sandbox": "read-only",
+      "exit_status": 0,
+      "raw_events_sha256": "f53254e0385415af08566f692abc933483bb66a36f3ba09b162a1d893318889b"
+    },
+    "routine": {
+      "thread_id": "01a118e8-0a6f-73b0-9bf8-1903036ac333",
+      "sandbox": "workspace-write",
+      "exit_status": 0,
+      "raw_events_sha256": "ea2ef52d68bac87fdd65e1af30e1a7ea377d2d89033d825654fa0969c9492151"
+    },
+    "decision": {
+      "thread_id": "01a118e8-04c9-7363-9053-e892b7a9da0a",
+      "sandbox": "workspace-write",
+      "exit_status": 0,
+      "raw_events_sha256": "8312ca369fdc0e7aab3e1a8d1c455489234cdbe39ed9fba8e29858eb5012d917"
+    }
+  }
+}
