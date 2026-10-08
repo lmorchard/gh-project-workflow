@@ -6,18 +6,65 @@ Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence
 
 ## Audit the Ready queue
 
-Read the current items from the project board:
+Resolve the selected project to its node ID:
 
 ```bash
-gh project item-list NUMBER --owner OWNER --format json
+gh project view NUMBER --owner OWNER --format json
 ```
 
-1. Identify all items where `status` is `Ready`.
-2. Sort them by priority (`P0` before `P1`).
-3. If the `Ready` column is empty, report that the queue is clear and hand off to [curate-ready-queue](curate-ready-queue.md).
-4. Confirm the delivery endpoint with the user:
-   - **Through review follow-up (default)**: Implements, verifies with independent review, submits PR, and addresses feedback, leaving the PR open for user review.
-   - **Through merge**: Merges the PR upon green CI and affirmative review, following the merge policy in [merge-pr](merge-pr.md).
+Read the returned `id`. Read the `Status` and `Priority` item values by name in the query below.
+
+Use `gh api graphql --paginate --slurp` to read every project item:
+
+```bash
+gh api graphql --paginate --slurp \
+  -F project_id=PROJECT_NODE_ID \
+  -f query='query($project_id: ID!, $endCursor: String) {
+    node(id: $project_id) {
+      ... on ProjectV2 {
+        id
+        items(first: 100, after: $endCursor) {
+          nodes {
+            id
+            content {
+              __typename
+              ... on Issue { url repository { nameWithOwner } }
+              ... on PullRequest { url repository { nameWithOwner } }
+            }
+            status: fieldValueByName(name: "Status") {
+              ... on ProjectV2ItemFieldSingleSelectValue { name }
+            }
+            priority: fieldValueByName(name: "Priority") {
+              ... on ProjectV2ItemFieldSingleSelectValue { name }
+            }
+          }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    }
+  }'
+```
+
+`--paginate` follows `endCursor` until `hasNextPage` is false. `--slurp` returns each page in one JSON array.
+Check every page before you use any item. Require valid JSON, no GraphQL `errors`, the selected project ID, an item array, and valid `pageInfo` on every page.
+Require each item to have an ID and `status` and `priority` keys. A `null` value means that field is unset.
+Treat a missing key or unexpected value shape as incomplete discovery.
+Require a non-empty `endCursor` when `hasNextPage` is true. Require the final returned page to set `hasNextPage` to false.
+Require every earlier returned page to set `hasNextPage` to true.
+Treat a command failure, missing project, malformed page, or failed validation as incomplete discovery.
+Discard all output after a command failure, because earlier pages can still appear in that output.
+Do not use partial output to report a clear queue or dispatch work.
+
+After the full traversal succeeds, identify every item whose named `Status` value is `Ready`.
+If a Ready item has no actionable issue URL and repository identity, report it as unresolved and do not call the queue clear.
+Sort actionable Ready issues by priority (`P0` before `P1`).
+Report the queue clear only when the complete inventory contains no Ready items, then hand off to [curate-ready-queue](curate-ready-queue.md).
+This traversal is not an atomic snapshot. Report that limit if the board could change during retrieval.
+
+Use the delivery endpoint the user already selected. If none is set, confirm it with the user:
+
+- **Through review follow-up (default)**: Implements, verifies with independent review, submits PR, and addresses feedback, leaving the PR open for user review.
+- **Through merge**: Merges the PR upon green CI and affirmative review, following the merge policy in [merge-pr](merge-pr.md).
 
 ## Deliver issues sequentially
 

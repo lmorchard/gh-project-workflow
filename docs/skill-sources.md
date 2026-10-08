@@ -151,6 +151,14 @@ The move preserves merged review preparation and parent-owned PR follow-up. Acti
 The [bounded routing results](../evals/results/2026-10-08-shared-owners.md) concern the focused owners at `f3f3a9b`.
 They assess proposed decisions and source loading, not a new task-execution trial.
 
+## Ready queue discovery
+
+Issue #27 selected complete pagination of the project item inventory with `gh api graphql --paginate --slurp`.
+The [Ready queue skill](../references/tasks/burndown-ready-queue.md#audit-the-ready-queue) follows the installed [`gh api` pagination contract](https://cli.github.com/manual/gh_api).
+A controlled local fixture showed `gh` requesting a second page with the first response's cursor and returning the final page.
+When the fixture failed on page two, `gh` returned an error with earlier page output still present.
+These checks demonstrate cursor traversal and error reporting. They do not establish atomic snapshots or behavior when a live board changes.
+
 ## Document focus
 
 Les requested this pass after the authorization split in PR #20.
