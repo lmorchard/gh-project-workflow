@@ -826,6 +826,212 @@ class StructuredResponseTests(unittest.TestCase):
          self.assertEqual(result["errors"][0]["part"], "board")
 
 
+class ResponseValueTests(unittest.TestCase):
+    def test_null_check_entry_is_structured_error(self):
+        result, status = pr_state("o/r", 7, **fake(pr(statusCheckRollup=[None])))
+        self.assertEqual(status, 1)
+        self.assertEqual(result["errors"][0]["part"], "pr")
+        self.assertNotIn("head", result)
+
+    def test_invalid_required_pr_scalars_are_structured_errors(self):
+        for field in ("number", "url", "state", "isDraft", "mergeable", "headRefOid", "headRefName", "baseRefName"):
+            for value in (None, [], {}, 123 if field != "number" else True):
+                with self.subTest(field=field, value=value):
+                    result, status = pr_state("o/r", 7, **fake(pr(**{field: value})))
+                    self.assertEqual(status, 1)
+                    self.assertEqual(result["errors"][0]["part"], "pr")
+                    self.assertNotIn("head", result)
+
+    def test_invalid_pr_collection_entries_are_structured_errors(self):
+        for field, entry in (("reviewRequests", None), ("reviewRequests", {}),
+                             ("reviewRequests", {"login": 123}),
+                             ("statusCheckRollup", {}),
+                             ("statusCheckRollup", {"__typename": "CheckRun", "name": "test", "status": []}),
+                             ("statusCheckRollup", {"__typename": "StatusContext", "context": [], "state": "SUCCESS"})):
+            with self.subTest(field=field, entry=entry):
+                result, status = pr_state("o/r", 7, **fake(pr(**{field: [entry]})))
+                self.assertEqual(status, 1)
+                self.assertEqual(result["errors"][0]["part"], "pr")
+
+    def test_nullable_rollup_and_check_conclusion_still_work(self):
+        result, status = pr_state("o/r", 7, **fake(pr(statusCheckRollup=None), rules_data=[]))
+        self.assertEqual((status, result["checks"], result["ci"]), (0, [], "none"))
+        result, status = pr_state("o/r", 7, **fake(pr(statusCheckRollup=[
+            {"__typename": "CheckRun", "name": "test", "status": "IN_PROGRESS", "conclusion": None}])))
+        self.assertEqual((status, result["ci"]), (0, "pending"))
+
+    def test_unfinished_checks_accept_empty_gh_conclusions(self):
+        for state in ("IN_PROGRESS", "QUEUED"):
+            with self.subTest(state=state):
+                data = pr(statusCheckRollup=[{"__typename": "CheckRun", "name": "test", "status": state, "conclusion": ""}])
+                result, status = pr_state("o/r", 7, **fake(data))
+                self.assertEqual(status, 0)
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["ci"], "pending")
+                self.assertEqual(result["errors"], [])
+
+    def test_invalid_rule_entries_leave_required_checks_unread(self):
+        for data in ([None], {}, [{"type": []}], rules([])):
+            with self.subTest(data=data):
+                result, status = pr_state("o/r", 7, **fake(pr(), rules_data=data))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["required_checks"])
+                self.assertIsNone(result["checks"][0]["required"])
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["errors"][0]["part"], "required_checks")
+
+    def test_invalid_behind_counts_leave_compare_unread(self):
+        for value in (None, "0", True, -1, [], {}):
+            with self.subTest(value=value):
+                result, status = pr_state("o/r", 7, **fake(pr(), behind_by=value))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["base_behind_by"])
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["errors"][0]["part"], "base_behind_by")
+
+    def test_invalid_reviews_and_comments_preserve_pr_facts(self):
+        for kwargs in ({"reviews": [None]}, {"reviews": [review([], "bot", HEAD, "t")]},
+                       {"reviews": [review(1, 123, HEAD, "t")]},
+                       {"reviews": [review(1, "bot", HEAD, [])]},
+                       {"comments": [None]}, {"comments": [{"pull_request_review_id": []}]}):
+            with self.subTest(kwargs=kwargs):
+                result, status = pr_state("o/r", 7, **fake(pr(), **kwargs))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["reviews"])
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["ci"], "green")
+                self.assertEqual(result["errors"][0]["part"], "reviews")
+
+    def test_nullable_review_values_preserve_other_facts(self):
+        data = review(1, "bot", None, None, state="PENDING", body=None)
+        data["user"] = None
+        result, status = pr_state("o/r", 7, **fake(pr(), reviews=[data], timeline=[requested("bot", "t")]))
+        self.assertEqual(status, 0)
+        self.assertIsNone(result["reviews"][0]["author"])
+        self.assertIsNone(result["reviews"][0]["commit"])
+        self.assertFalse(result["reviews"][0]["covers_head"])
+        self.assertFalse(result["latest_review_requests"][0]["answered"])
+
+    def test_invalid_timeline_entries_leave_requests_unread(self):
+        for entry in (None, {"event": []}, requested([], "t"), requested("bot", [])):
+            with self.subTest(entry=entry):
+                result, status = pr_state("o/r", 7, **fake(pr(), timeline=[entry]))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["review_request_events"])
+                self.assertIsNone(result["latest_review_requests"])
+                self.assertEqual(result["head"], HEAD)
+                self.assertEqual(result["errors"][0]["part"], "review_request_events")
+
+    def test_invalid_commit_scalars_are_structured_errors(self):
+        for field, value in (("sha", 123), ("sha", None), ("date", []), ("parent", {"sha": 123})):
+            with self.subTest(field=field):
+                data = {"sha": HEAD, "commit": {"message": "fix", "author": {"date": "d"}}, "parents": []}
+                if field == "date":
+                    data["commit"]["author"]["date"] = value
+                elif field == "parent":
+                    data["parents"] = [value]
+                else:
+                    data[field] = value
+                result, status = verify_commit("o/r", "abc", gh=lambda args: data)
+                self.assertEqual(status, 1)
+                self.assertNotIn("sha", result)
+                self.assertEqual(result["errors"][0]["part"], "commit")
+
+    def test_nullable_commit_author_is_preserved(self):
+        for author in (None, {}, {"date": None}):
+            with self.subTest(author=author):
+                result, status = verify_commit("o/r", "abc", gh=lambda args: {
+                    "sha": HEAD, "commit": {"message": "fix", "author": author}, "parents": []})
+                self.assertEqual((status, result["author_date"]), (0, None))
+
+    def test_nullable_request_actor_and_team_request_still_work(self):
+        event = {"event": "review_requested", "requested_team": {"slug": "maintainers"},
+                 "requested_reviewer": None, "actor": None, "created_at": "t"}
+        result, status = pr_state("o/r", 7, **fake(pr(reviewRequests=[{"slug": "maintainers"}]), timeline=[event]))
+        self.assertEqual(status, 0)
+        self.assertEqual(result["pending_review_requests"], ["maintainers"])
+        self.assertEqual(result["latest_review_requests"][0]["reviewer"], "maintainers")
+        self.assertIsNone(result["review_request_events"][0]["actor"])
+
+    def test_invalid_verification_values_are_unread_not_false(self):
+        for value in (123, None, [], {}, ""):
+            with self.subTest(value=value):
+                result, status = verify_commit("o/r", "abc", on="main", **commit_fake(compare=value))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["expectations"]["on_branch"])
+                self.assertEqual(result["sha"], HEAD)
+                result, status = verify_commit("o/r", "abc", pr_head=("o/r", 7), **commit_fake(head=value))
+                self.assertEqual(status, 2)
+                self.assertIsNone(result["expectations"]["is_pr_head"])
+                self.assertNotIn("pr_head", result)
+        result, status = verify_commit("o/r", "abc", on="main", **commit_fake(compare="unexpected"))
+        self.assertEqual(status, 2)
+        self.assertIsNone(result["expectations"]["on_branch"])
+
+    def test_invalid_board_values_fail_before_write(self):
+        for part in ("project", "fields", "field", "option", "node", "status", "url"):
+            with self.subTest(part=part):
+                board = FakeBoard("Backlog")
+                def gh(args):
+                    data = board(args)
+                    if part == "project" and args[:2] == ["project", "view"]:
+                        data["id"] = 123
+                    elif args[:2] == ["project", "field-list"]:
+                        if part == "fields": data["fields"] = {}
+                        if part == "field": data["fields"] = [None]
+                        if part == "option": data["fields"][1]["options"][0]["id"] = None
+                    elif "graphql" in args:
+                        issue = data["data"]["repository"]["issue"]
+                        if part == "node": issue["projectItems"]["nodes"] = [None]
+                        if part == "status": issue["projectItems"]["nodes"][0]["fieldValueByName"] = 123
+                        if part == "url": issue["url"] = None
+                    return data
+                result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=gh, sleep=lambda _: None)
+                self.assertEqual(status, 1)
+                self.assertTrue(result["errors"])
+                self.assertEqual(board.writes, [])
+
+    def test_invalid_board_readback_preserves_completed_write(self):
+        board = FakeBoard("Backlog")
+        def gh(args):
+            data = board(args)
+            if "graphql" in args and board.writes:
+                data["data"]["repository"]["issue"]["projectItems"]["nodes"] = [None]
+            return data
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=gh, sleep=lambda _: None)
+        self.assertEqual(status, 2)
+        self.assertEqual(result["before"], "Backlog")
+        self.assertIn({"step": "status", "state": "completed"}, result["facts"])
+        self.assertIsNone(result["after"])
+        self.assertFalse(result["readback_matches"])
+        self.assertEqual(result["errors"][0]["part"], "readback")
+
+    def test_nullable_board_status_moves_forward(self):
+        board = FakeBoard()
+        def gh(args):
+            data = board(args)
+            if "graphql" in args and not board.writes:
+                data["data"]["repository"]["issue"]["projectItems"]["nodes"][0]["fieldValueByName"] = None
+            return data
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=gh, sleep=lambda _: None)
+        self.assertEqual(status, 0)
+        self.assertIsNone(result["before"])
+        self.assertEqual(result["after"], "In progress")
+
+    def test_empty_next_cursor_refuses_add_without_repeating_page(self):
+        board = FakeBoard(on_board=False)
+        def gh(args):
+            data = board(args)
+            if "graphql" in args:
+                self.assertEqual(board.member_reads, 1, "The reader repeated the same membership page.")
+                data["data"]["repository"]["issue"]["projectItems"]["pageInfo"] = {"hasNextPage": True, "endCursor": ""}
+            return data
+        result, status = board_set_status("o/r", 5, "o", 6, "In progress", gh=gh, sleep=lambda _: None)
+        self.assertEqual(status, 1)
+        self.assertFalse(result["membership_complete"])
+        self.assertEqual(board.writes, [])
+
+
 class FakeGhHarness:
     """Run ghflow.py as a subprocess with a fake `gh` on PATH.
 
@@ -931,6 +1137,18 @@ class PrStateSubprocessTests(unittest.TestCase):
         self.assertEqual(out["ci"], "green")
         self.assertIsNotNone(out["reviews"])
 
+    def test_unfinished_gh_checks_preserve_head_and_pending_ci(self):
+        for state in ("IN_PROGRESS", "QUEUED"):
+            with self.subTest(state=state):
+                h = self._harness()
+                h.replies["pr.view:o/r:7"]["out"]["statusCheckRollup"] = [
+                    {"__typename": "CheckRun", "name": "test", "status": state, "conclusion": ""}]
+                result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+                self.assertEqual(result.returncode, 0)
+                self.assertEqual(out["head"], HEAD)
+                self.assertEqual(out["ci"], "pending")
+                self.assertEqual(out["errors"], [])
+
     def test_pr_state_sends_repo_identifiers_to_gh(self):
         h = self._harness()
         _, _, calls = h.run(["pr-state", "7", "--repo", "o/r"])
@@ -978,6 +1196,38 @@ class PrStateSubprocessTests(unittest.TestCase):
         self.assertEqual(out["errors"][0]["part"], "reviews")
         self.assertTrue(out["errors"][0]["error"])
         self.assertEqual(out["ci"], "green")
+
+    def test_invalid_primary_values_exit_1_with_json_and_no_traceback(self):
+        for overrides in ({"statusCheckRollup": [None]}, {"headRefOid": 123},
+                          {"reviewRequests": [None]}):
+            with self.subTest(overrides=overrides):
+                h = self._harness()
+                h.replies["pr.view:o/r:7"] = {"out": pr_view_out(**overrides)}
+                result, out, calls = h.run(["pr-state", "7", "--repo", "o/r"])
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(out["errors"][0]["part"], "pr")
+                self.assertNotIn("head", out)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertEqual(len(calls), 1)
+
+    def test_invalid_optional_values_exit_2_and_preserve_facts(self):
+        cases = (
+            ("api:repos/o/r/rules/branches/main", [None], "required_checks"),
+            ("api:repos/o/r/compare/main...%s" % HEAD, {"behind_by": "0"}, "base_behind_by"),
+            ("api.paginate:repos/o/r/pulls/7/reviews", [None], "reviews"),
+            ("api.paginate:repos/o/r/pulls/7/comments", {"message": "not pages"}, "reviews"),
+            ("api.paginate:repos/o/r/issues/7/timeline", [[None]], "review_request_events"),
+        )
+        for endpoint, value, part in cases:
+            with self.subTest(endpoint=endpoint):
+                h = self._harness()
+                h.replies[endpoint] = {"out": value}
+                result, out, _ = h.run(["pr-state", "7", "--repo", "o/r"])
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(out["head"], HEAD)
+                self.assertEqual(out["errors"][0]["part"], part)
+                self.assertIsNone(out[part])
+                self.assertNotIn("Traceback", result.stderr)
 
 
 class VerifyCommitSubprocessTests(unittest.TestCase):
@@ -1035,6 +1285,32 @@ class VerifyCommitSubprocessTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertNotIn("sha", out)
         self.assertIn("full SHA", out["note"])
+
+    def test_invalid_commit_sha_exits_1_without_invented_facts(self):
+        h = self._harness()
+        h.replies["api:repos/o/r/commits/aaaaaaa"]["out"]["sha"] = 123
+        result, out, _ = h.run(["verify-commit", "aaaaaaa", "--repo", "o/r"])
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(out["errors"][0]["part"], "commit")
+        self.assertNotIn("sha", out)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_expectations_exit_2_without_false_mismatch(self):
+        for part, value, endpoint in (
+            ("on_branch", {"status": 123}, "api.jq:repos/o/r/compare/main...%s:{status}" % HEAD),
+            ("is_pr_head", {"headRefOid": 123}, "pr.view:o/r:7"),
+        ):
+            with self.subTest(part=part):
+                h = self._harness()
+                h.replies[endpoint] = {"out": value}
+                argv = ["verify-commit", "aaaaaaa", "--repo", "o/r"]
+                argv += ["--on", "main"] if part == "on_branch" else ["--pr-head", "7"]
+                result, out, _ = h.run(argv)
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(out["sha"], HEAD)
+                self.assertIsNone(out["expectations"][part])
+                self.assertEqual(out["errors"][0]["part"], part)
+                self.assertNotIn("Traceback", result.stderr)
 
 
 class BoardSetStatusSubprocessTests(unittest.TestCase):

@@ -45,6 +45,31 @@ class GhError(Exception):
     pass
 
 
+def response_type(value, expected, label):
+    """Check a consumed response value before attribute access or comparison."""
+    valid = type(value) is expected if expected in (int, bool) else isinstance(value, expected)
+    if not valid:
+        description = {dict: "an object", list: "a list", str: "a string", int: "an integer", bool: "a boolean"}[expected]
+        raise ValueError(f"{label} is not {description}.")
+    return value
+
+
+def response_string(value, label, nullable=False, empty=False):
+    if nullable and value is None:
+        return None
+    response_type(value, str, label)
+    if not empty and not value:
+        raise ValueError(f"{label} is empty.")
+    return value
+
+
+def response_integer(value, label):
+    response_type(value, int, label)
+    if value < 0:
+        raise ValueError(f"{label} is negative.")
+    return value
+
+
 def run_gh(args):
     """Run gh under the configured agent identity and return parsed JSON output."""
     env = identity_env(resolve_identity())
@@ -57,6 +82,9 @@ def run_gh(args):
 def run_gh_paginated(path):
     """Read every page of a REST list endpoint."""
     pages = run_gh(["api", path, "--paginate", "--slurp"])
+    response_type(pages, list, "The paginated response")
+    for page in pages:
+        response_type(page, list, "A response page")
     return [item for page in pages for item in page]
 
 
@@ -108,6 +136,8 @@ def same_reviewer(requested, author):
     GitHub records a Copilot request as "Copilot" but its reviews as
     "copilot-pull-request-reviewer".
     """
+    if requested is None or author is None:
+        return False
     requested, author = requested.lower(), author.lower()
     if requested == author:
         return True
@@ -120,7 +150,7 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
     def part(name, read):
         try:
             return read()
-        except (GhError, json.JSONDecodeError, TypeError, KeyError) as error:
+        except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": name, "error": str(error)})
             return None
 
@@ -128,18 +158,41 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
     required_pr_fields = ("number", "url", "state", "isDraft", "mergeable", "headRefOid", "headRefName", "baseRefName")
     try:
         pr = gh(["pr", "view", str(number), "--repo", repo, "--json", fields])
-        if not isinstance(pr, dict):
-            raise TypeError("The PR response is not an object.")
+        response_type(pr, dict, "The PR response")
         missing = [field for field in required_pr_fields if field not in pr]
         if missing:
             raise ValueError(f"The PR response is missing {', '.join(missing)}.")
-        for coll_name, coll_value in pr.items():
-            if coll_name in ("reviewRequests", "statusCheckRollup"):
-                if not isinstance(coll_value, list):
-                    raise ValueError("The PR response has a malformed " + str(coll_name) + ".")
-                for coll_item in coll_value:
-                    if coll_item is not None and not isinstance(coll_item, dict):
-                        raise ValueError("The PR response has a malformed " + str(coll_name) + " entry.")
+        response_integer(pr["number"], "The PR number")
+        if pr["number"] == 0:
+            raise ValueError("The PR number is zero.")
+        response_type(pr["isDraft"], bool, "The PR draft flag")
+        for name in ("url", "state", "mergeable", "headRefOid", "headRefName", "baseRefName"):
+            response_string(pr[name], f"The PR {name}")
+        for name in ("reviewRequests", "statusCheckRollup"):
+            collection = pr[name]
+            # A nullable GraphQL connection can have no check or request nodes.
+            if collection is None:
+                continue
+            response_type(collection, list, f"The PR {name}")
+            for item in collection:
+                response_type(item, dict, f"A PR {name} entry")
+        for request in pr["reviewRequests"] or []:
+            for name in ("login", "slug", "name"):
+                if name in request:
+                    response_string(request[name], f"A requested reviewer's {name}", nullable=True)
+            response_string(request.get("login") or request.get("slug") or request.get("name"), "A requested reviewer")
+        for item in pr["statusCheckRollup"] or []:
+            kind = response_string(item.get("__typename"), "A check type")
+            if kind == "StatusContext":
+                response_string(item.get("context"), "A status context")
+                response_string(item.get("state"), "A status context state")
+            elif kind == "CheckRun":
+                response_string(item.get("name"), "A check name")
+                response_string(item.get("status"), "A check status")
+                # gh exports an unset conclusion as an empty Go string.
+                response_string(item.get("conclusion"), "A check conclusion", nullable=True, empty=item["status"] != "COMPLETED")
+            else:
+                raise ValueError(f"Unknown check type: {kind}.")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         return {"repo": repo, "number": number, "errors": [{"part": "pr", "error": str(error)}]}, 1
 
@@ -148,17 +201,25 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
 
     def read_required():
         rules = gh(["api", f"repos/{repo}/rules/branches/{base}"])
-        return sorted(
-            check["context"]
-            for rule in rules
-            if rule.get("type") == "required_status_checks"
-            for check in rule["parameters"]["required_status_checks"]
-        )
+        response_type(rules, list, "The branch rules")
+        contexts = []
+        for rule in rules:
+            response_type(rule, dict, "A branch rule")
+            kind = response_string(rule.get("type"), "A branch rule type")
+            if kind != "required_status_checks":
+                continue
+            parameters = response_type(rule["parameters"], dict, "The required check parameters")
+            entries = response_type(parameters["required_status_checks"], list, "The required checks")
+            for check in entries:
+                response_type(check, dict, "A required check")
+                contexts.append(response_string(check["context"], "A required check context"))
+        return sorted(contexts)
 
     required = part("required_checks", read_required)
 
     def read_behind():
-        return gh(["api", f"repos/{repo}/compare/{base}...{head}"])["behind_by"]
+        comparison = response_type(gh(["api", f"repos/{repo}/compare/{base}...{head}"]), dict, "The branch comparison")
+        return response_integer(comparison["behind_by"], "The behind count")
 
     behind = part("base_behind_by", read_behind)
 
@@ -171,16 +232,29 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
             checks.append({"name": name, "state": "missing", "required": True})
 
     def read_reviews():
-        reviews = gh_paginated(f"repos/{repo}/pulls/{number}/reviews")
-        comments = gh_paginated(f"repos/{repo}/pulls/{number}/comments")
+        reviews = response_type(gh_paginated(f"repos/{repo}/pulls/{number}/reviews"), list, "The reviews")
+        comments = response_type(gh_paginated(f"repos/{repo}/pulls/{number}/comments"), list, "The review comments")
         counts = {}
         for comment in comments:
+            response_type(comment, dict, "A review comment")
             review_id = comment.get("pull_request_review_id")
+            if review_id is not None:
+                response_integer(review_id, "A comment review id")
             counts[review_id] = counts.get(review_id, 0) + 1
+        for review in reviews:
+            response_type(review, dict, "A review")
+            response_integer(review["id"], "A review id")
+            user = review["user"]
+            if user is not None:
+                response_type(user, dict, "A review user")
+                response_string(user["login"], "A review author")
+            response_string(review["state"], "A review state")
+            for name in ("submitted_at", "commit_id", "body"):
+                response_string(review.get(name), f"A review {name}", nullable=True, empty=name == "body")
         return [
             {
                 "id": review["id"],
-                "author": review["user"]["login"],
+                "author": review["user"]["login"] if review["user"] is not None else None,
                 "state": review["state"],
                 "submitted_at": review.get("submitted_at"),
                 "commit": review.get("commit_id"),
@@ -194,12 +268,21 @@ def pr_state(repo, number, gh=run_gh, gh_paginated=run_gh_paginated):
     reviews = part("reviews", read_reviews)
 
     def read_requests():
-        events = gh_paginated(f"repos/{repo}/issues/{number}/timeline")
+        events = response_type(gh_paginated(f"repos/{repo}/issues/{number}/timeline"), list, "The timeline events")
         requests = []
         for event in events:
-            if event.get("event") not in ("review_requested", "review_request_removed"):
+            response_type(event, dict, "A timeline event")
+            kind = response_string(event.get("event"), "A timeline event type")
+            if kind not in ("review_requested", "review_request_removed"):
                 continue
+            for name, key in (("requested_reviewer", "login"), ("requested_team", "slug"), ("actor", "login")):
+                person = event.get(name)
+                if person is not None:
+                    response_type(person, dict, f"A timeline {name}")
+                    response_string(person.get(key), f"A timeline {name} {key}")
             reviewer = (event.get("requested_reviewer") or {}).get("login") or (event.get("requested_team") or {}).get("slug")
+            response_string(reviewer, "A review request recipient")
+            response_string(event.get("created_at"), "A review request time")
             requests.append({
                 "event": event["event"],
                 "reviewer": reviewer,
@@ -269,11 +352,11 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
         if "author" not in body:
             raise ValueError("The commit response is missing its author.")
         author = body["author"]
-        if not isinstance(author, dict):
-            raise ValueError("The commit author is not an object.")
-        if "date" not in author:
-            raise ValueError("The commit author is missing its date.")
-        sha = commit["sha"]
+        author_date = None
+        if author is not None:
+            response_type(author, dict, "The commit author")
+            author_date = response_string(author.get("date"), "The commit author date", nullable=True)
+        sha = response_string(commit["sha"], "The commit sha")
         message = body["message"]
         if not isinstance(message, str):
             raise ValueError("The commit message is not a string.")
@@ -285,6 +368,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
         for parent in parents:
             if not isinstance(parent, dict) or "sha" not in parent:
                 raise ValueError("A commit parent is missing its sha.")
+            response_string(parent["sha"], "A commit parent sha")
     except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
         result = {"repo": repo, "rev": rev, "errors": [{"part": "commit", "error": str(error)}]}
         if "No commit found" in str(error):
@@ -296,7 +380,7 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
          "rev": rev,
          "sha": sha,
          "subject": message.splitlines()[0] if message else "",
-         "author_date": author["date"],
+         "author_date": author_date,
          "parents": [parent["sha"] for parent in parents],
          "expectations": expectations,
          "errors": errors,
@@ -308,7 +392,10 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
     if on is not None:
         try:
             # "behind" or "identical" means the commit is in the branch's history.
-            status = gh(["api", f"repos/{repo}/compare/{on}...{sha}", "--jq", "{status}"])["status"]
+            comparison = response_type(gh(["api", f"repos/{repo}/compare/{on}...{sha}", "--jq", "{status}"]), dict, "The branch comparison")
+            status = response_string(comparison["status"], "The branch comparison status")
+            if status not in ("behind", "identical", "ahead", "diverged"):
+                raise ValueError(f"Unknown branch comparison status: {status}.")
             expectations["on_branch"] = status in ("behind", "identical")
         except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
             errors.append({"part": "on_branch", "error": str(error)})
@@ -317,7 +404,8 @@ def verify_commit(repo, rev, subject=None, on=None, pr_head=None, gh=run_gh):
     if pr_head is not None:
         pr_repo, number = pr_head
         try:
-            head = gh(["pr", "view", str(number), "--repo", pr_repo, "--json", "headRefOid"])["headRefOid"]
+            pr = response_type(gh(["pr", "view", str(number), "--repo", pr_repo, "--json", "headRefOid"]), dict, "The PR head response")
+            head = response_string(pr["headRefOid"], "The PR head")
             result["pr_head"] = head
             expectations["is_pr_head"] = head == sha
         except (GhError, json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
@@ -381,14 +469,27 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             args = ["api", "graphql", "-f", f"query={ISSUE_ITEMS_QUERY}", "-f", f"owner={repo_owner}", "-f", f"name={name}", "-F", f"number={number}"]
             if cursor:
                 args += ["--raw-field", f"page={cursor}"]
-            issue = gh(args)["data"]["repository"]["issue"]
+            data = response_type(gh(args), dict, "The issue response")
+            data = response_type(data["data"], dict, "The issue data")
+            repository = response_type(data["repository"], dict, "The issue repository")
+            issue = response_type(repository["issue"], dict, "The issue")
+            issue_url = response_string(issue["url"], "The issue URL")
             if url is None:
-                url = issue["url"]
-            items = issue["projectItems"]
+                url = issue_url
+            items = response_type(issue["projectItems"], dict, "The issue project items")
             info = items.get("pageInfo")
-            for node_item in items["nodes"]:
-                if node_item["project"]["id"] == project_id:
-                    node = (node_item["id"], (node_item.get("fieldValueByName") or {}).get("name"))
+            for node_item in response_type(items["nodes"], list, "The project item nodes"):
+                response_type(node_item, dict, "A project item")
+                item_project = response_type(node_item["project"], dict, "A project item project")
+                item_project_id = response_string(item_project["id"], "A project item project id")
+                item_id = response_string(node_item["id"], "A project item id")
+                if item_project_id == project_id:
+                    value = node_item.get("fieldValueByName")
+                    item_status = None
+                    if value is not None:
+                        response_type(value, dict, "A project item Status value")
+                        item_status = response_string(value.get("name"), "A project item Status name", nullable=True)
+                    node = (item_id, item_status)
             if not isinstance(info, dict):
                 incomplete = True
                 break
@@ -399,15 +500,21 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
             if not has_next:
                 break
             cursor = info.get("endCursor")
-            if not isinstance(cursor, str):
+            if not isinstance(cursor, str) or not cursor:
                 incomplete = True
                 break
         return url, node, incomplete
 
     try:
-        project_id = gh(["project", "view", str(project), "--owner", owner, "--format", "json"])["id"]
-        fields = gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"])["fields"]
+        board = response_type(gh(["project", "view", str(project), "--owner", owner, "--format", "json"]), dict, "The project response")
+        project_id = response_string(board["id"], "The project id")
+        field_list = response_type(gh(["project", "field-list", str(project), "--owner", owner, "--format", "json"]), dict, "The project field response")
+        fields = response_type(field_list["fields"], list, "The project fields")
+        for entry in fields:
+            response_type(entry, dict, "A project field")
+            response_string(entry["name"], "A project field name")
         field = next(f for f in fields if f["name"] == "Status")
+        response_string(field["id"], "The Status field id")
         if not isinstance(field.get("options"), list):
             raise ValueError("The Status field has no option list.")
         options = []
@@ -416,6 +523,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
                 raise ValueError("A Status option is not a named string.")
             if "id" not in option:
                 raise ValueError("A Status option is missing its id.")
+            response_string(option["id"], "A Status option id")
+            response_string(option["name"], "A Status option name")
             options.append(option["name"])
     except StopIteration:
         return fail("status_field", "The board has no Status field.")
@@ -473,7 +582,8 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
 
     try:
         if live is None:
-            item_id = gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"])["id"]
+            added = response_type(gh(["project", "item-add", str(project), "--owner", owner, "--url", url, "--format", "json"]), dict, "The added item response")
+            item_id = response_string(added["id"], "The added item id")
             result["added"] = True
             fact("membership", "completed")
         else:
