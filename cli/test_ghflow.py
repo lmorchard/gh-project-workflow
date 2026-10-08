@@ -687,6 +687,159 @@ class IdentityTests(unittest.TestCase):
         finally:
             os.unlink(token_path)
 
+    def test_selected_token_and_git_identity_override_inherited_values(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as f:
+            f.write("selected-token\n")
+            token_path = f.name
+        try:
+            inherited_config = "'example.unrelated=value' 'credential.https://github.com.helper=old-helper'"
+            env = identity_env(
+                {"login": "BotUser", "name": "Selected Bot", "email": "selected@example.com", "token_file": token_path},
+                base_env={
+                    "GH_TOKEN": "inherited-token",
+                    "GITHUB_TOKEN": "other-inherited-token",
+                    "GIT_AUTHOR_NAME": "Inherited Author",
+                    "GIT_COMMITTER_NAME": "Inherited Committer",
+                    "GIT_AUTHOR_EMAIL": "inherited-author@example.com",
+                    "GIT_COMMITTER_EMAIL": "inherited-committer@example.com",
+                    "GIT_CONFIG_PARAMETERS": inherited_config,
+                },
+            )
+            self.assertEqual(env["GH_TOKEN"], "selected-token")
+            self.assertNotIn("GITHUB_TOKEN", env)
+            self.assertEqual(env["GIT_AUTHOR_NAME"], "Selected Bot")
+            self.assertEqual(env["GIT_COMMITTER_NAME"], "Selected Bot")
+            self.assertEqual(env["GIT_AUTHOR_EMAIL"], "selected@example.com")
+            self.assertEqual(env["GIT_COMMITTER_EMAIL"], "selected@example.com")
+            parameters = shlex.split(env["GIT_CONFIG_PARAMETERS"])
+            self.assertIn("example.unrelated=value", parameters)
+            self.assertNotIn("credential.https://github.com.helper=old-helper", parameters)
+            self.assertIn("credential.https://github.com.helper=!gh auth git-credential", parameters)
+        finally:
+            os.unlink(token_path)
+
+    def test_selected_token_file_must_exist_and_be_nonempty(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing = os.path.join(temp_dir, "missing-token")
+            with self.assertRaisesRegex(GhError, "selected token file is unavailable"):
+                identity_env({"token_file": missing}, base_env={"GH_TOKEN": "inherited-token"})
+            with self.assertRaisesRegex(GhError, "selected token file is unavailable"):
+                identity_env({"token_file": temp_dir}, base_env={"GH_TOKEN": "inherited-token"})
+            empty = os.path.join(temp_dir, "empty-token")
+            open(empty, "w").close()
+            with self.assertRaisesRegex(GhError, "selected token file is empty"):
+                identity_env({"token_file": empty}, base_env={"GH_TOKEN": "inherited-token"})
+
+    def test_exec_stops_before_child_when_selected_token_file_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            ident = {"login": "BotUser", "name": "BotUser", "email": "bot@example.com",
+                     "token_file": os.path.join(temp_dir, "missing-token"), "token_present": False,
+                     "configured": True, "ready": False}
+            with patch.dict(os.environ, {}, clear=True), \
+                    patch("ghflow.resolve_identity", return_value=ident), \
+                    patch("ghflow.subprocess.run") as run:
+                stderr = io.StringIO()
+                with patch("sys.stderr", stderr):
+                    status = main(["exec", "--", "gh", "api", "user"])
+            self.assertEqual(status, 1)
+            self.assertIn("selected token file is unavailable", stderr.getvalue())
+            run.assert_not_called()
+
+    def test_identity_configuration_and_readiness_are_distinct(self):
+        ident = resolve_identity(env={"GHFLOW_IDENTITY_LOGIN": "BotUser"}, config_paths=[])
+        self.assertTrue(ident["configured"])
+        self.assertFalse(ident["ready"])
+        self.assertFalse(ident["token_present"])
+
+    def test_identity_login_with_inherited_gh_token_is_ready(self):
+        ident = resolve_identity(env={"GHFLOW_IDENTITY_LOGIN": "BotUser", "GH_TOKEN": "fake-token"}, config_paths=[])
+        self.assertTrue(ident["ready"])
+        self.assertTrue(ident["token_present"])
+
+    def test_inherited_github_token_is_not_selected_without_a_token_file(self):
+        env = identity_env({"token_file": None}, base_env={"GITHUB_TOKEN": "other-token"})
+        self.assertNotIn("GITHUB_TOKEN", env)
+        self.assertNotIn("GH_TOKEN", env)
+
+    def test_identity_command_reports_configured_but_not_ready(self):
+        ident = {"login": "BotUser", "name": "BotUser", "email": None, "token_file": None,
+                 "token_present": False, "configured": True, "ready": False}
+        with patch("ghflow.resolve_identity", return_value=ident):
+            stdout = io.StringIO()
+            with patch("sys.stdout", stdout):
+                status = main(["identity"])
+        self.assertEqual(status, 1)
+        report = json.loads(stdout.getvalue())
+        self.assertTrue(report["configured"])
+        self.assertFalse(report["ready"])
+
+    def test_selected_git_helper_wins_and_unrelated_config_survives(self):
+        env = identity_env(
+            {"token_file": None},
+            base_env={
+                "GH_TOKEN": "synthetic-token",
+                "GIT_CONFIG_PARAMETERS": "'example.unrelated=preserved' 'credential.https://github.com.helper'='old-helper'",
+            },
+        )
+        unrelated = subprocess.run(
+            ["git", "config", "--get", "example.unrelated"], env=env, text=True, capture_output=True,
+        )
+        helpers = subprocess.run(
+            ["git", "config", "--get-all", "credential.https://github.com.helper"], env=env, text=True, capture_output=True,
+        )
+        self.assertEqual(unrelated.stdout.strip(), "preserved")
+        self.assertEqual(helpers.stdout.strip(), "!gh auth git-credential")
+
+    def test_separately_quoted_git_config_key_and_value_survive(self):
+        parameters = "'url.https://example.com/?ref=main.insteadOf'='example-alias:'"
+        base_env = {
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+            "HOME": "/private/tmp/ghflow22-test-home",
+            "TMPDIR": "/private/tmp",
+            "GH_TOKEN": "synthetic-token",
+            "GIT_CONFIG_PARAMETERS": parameters,
+        }
+        before = subprocess.run(
+            ["git", "config", "--get-regexp", "^url\\."], env=base_env, text=True, capture_output=True,
+        )
+        env = identity_env({"token_file": None}, base_env=base_env)
+        after = subprocess.run(
+            ["git", "config", "--get-regexp", "^url\\."], env=env, text=True, capture_output=True,
+        )
+        self.assertEqual(before.returncode, 0, before.stderr)
+        self.assertEqual(after.returncode, 0, after.stderr)
+        self.assertEqual(after.stdout, before.stdout)
+        self.assertEqual(after.stdout.strip(), "url.https://example.com/?ref=main.insteadof example-alias:")
+
+    def test_identity_export_unsets_inherited_github_token(self):
+        ident = {"login": "FakeBot", "name": "FakeBot", "email": "bot@example.com", "token_file": None}
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "synthetic-inherited-token"}, clear=True), \
+                patch("ghflow.resolve_identity", return_value=ident):
+            stdout = io.StringIO()
+            with patch("sys.stdout", stdout):
+                status = main(["identity", "--export"])
+
+        self.assertEqual(status, 0)
+        helper = "import json, os; print(json.dumps({'present': 'GITHUB_TOKEN' in os.environ}))"
+        completed = subprocess.run(
+            ["/bin/sh", "-c", stdout.getvalue() + f"\nexec python3 -c {shlex.quote(helper)}"],
+            env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "GITHUB_TOKEN": "synthetic-inherited-token"},
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(json.loads(completed.stdout), {"present": False})
+
+    def test_exec_stops_git_commit_without_selected_author_email(self):
+        with patch.dict(os.environ, {}, clear=True), \
+                patch("ghflow.resolve_identity", return_value={"login": "BotUser", "name": "BotUser", "email": None, "token_file": None, "token_present": False, "configured": True, "ready": False}), \
+                patch("ghflow.subprocess.run") as run:
+            stderr = io.StringIO()
+            with patch("sys.stderr", stderr):
+                status = main(["exec", "--", "git", "commit", "-m", "test"])
+        self.assertEqual(status, 1)
+        self.assertIn("author name and email", stderr.getvalue())
+        run.assert_not_called()
+
     def test_identity_command_export(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             marker_path = os.path.join(temp_dir, "shell-expanded")
@@ -715,6 +868,7 @@ class IdentityTests(unittest.TestCase):
                 exported = stdout.getvalue()
                 names = [
                     "GH_TOKEN",
+                    "GITHUB_TOKEN",
                     "GIT_AUTHOR_NAME",
                     "GIT_COMMITTER_NAME",
                     "GIT_AUTHOR_EMAIL",
@@ -735,17 +889,26 @@ class IdentityTests(unittest.TestCase):
                 )
 
                 self.assertEqual(completed.returncode, 0, completed.stderr)
+                exported_env = json.loads(completed.stdout)
                 self.assertEqual(
-                    json.loads(completed.stdout),
+                    {key: value for key, value in exported_env.items() if key != "GIT_CONFIG_PARAMETERS"},
                     {
                         "GH_TOKEN": token,
+                        "GITHUB_TOKEN": None,
                         "GIT_AUTHOR_NAME": name,
                         "GIT_COMMITTER_NAME": name,
                         "GIT_AUTHOR_EMAIL": email,
                         "GIT_COMMITTER_EMAIL": email,
-                        "GIT_CONFIG_PARAMETERS": git_config,
                     },
                 )
+                parameters = shlex.split(exported_env["GIT_CONFIG_PARAMETERS"])
+                self.assertEqual(parameters[-2:], [
+                    "credential.https://github.com.helper=",
+                    "credential.https://github.com.helper=!gh auth git-credential",
+                ])
+                self.assertIn("$value", parameters)
+                self.assertIn("`tick`", parameters)
+                self.assertIn("next", parameters)
                 self.assertFalse(os.path.exists(marker_path), "shell metacharacter executed")
             finally:
                 os.unlink(token_path)
@@ -1128,7 +1291,8 @@ class FakeGhHarness:
 
     def __init__(self, replies=None, board=None):
         self.dir = tempfile.mkdtemp(prefix="fakegh-")
-        self.replies = replies or {}
+        self.replies = {"api:user": {"out": {"login": "FakeBot"}}}
+        self.replies.update(replies or {})
         self.board = board
         self.log_path = os.path.join(self.dir, "calls.log")
         open(self.log_path, "w").close()
@@ -1140,7 +1304,10 @@ class FakeGhHarness:
         return path
 
     def run(self, argv):
-        env = dict(os.environ)
+        env = {key: os.environ[key] for key in ("PATH", "LANG", "TMPDIR") if key in os.environ}
+        env["HOME"] = self.dir
+        env["GHFLOW_IDENTITY_LOGIN"] = "FakeBot"
+        env["GH_TOKEN"] = "synthetic-fake-token"
         env["GHHOW_LOG"] = self.log_path
         if self.replies:
             env["GHHOW_REPLIES"] = self._write("replies.json", self.replies)
@@ -1155,7 +1322,7 @@ class FakeGhHarness:
         env["PATH"] = bin_dir + os.pathsep + env.get("PATH", "")
         result = subprocess.run(
              [sys.executable, self.GHFLOW, *argv],
-             env=env, capture_output=True, text=True,
+             env=env, capture_output=True, text=True, cwd=self.dir,
          )
         with open(self.log_path, encoding="utf-8") as f:
             raw = f.read()
@@ -1497,6 +1664,23 @@ class BoardSetStatusSubprocessTests(unittest.TestCase):
         self.assertTrue(edit_call)
         self.assertIn("--project-id", edit_call[0])
         self.assertIn("P1", edit_call[0])
+
+    def test_board_login_mismatch_stops_before_write(self):
+        h, argv = self._harness("In progress", "In review")
+        h.replies["api:user"] = {"out": {"login": "OtherBot"}}
+        result, out, calls = h.run(argv)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("authenticated login", json.dumps(out["errors"]))
+        self.assertFalse(any(call[:2] in (["project", "item-add"], ["project", "item-edit"]) for call in calls))
+        self.assertIn(["api", "user"], calls)
+
+    def test_board_login_lookup_failure_stops_before_write(self):
+        h, argv = self._harness("In progress", "In review")
+        h.replies["api:user"] = {"code": 1, "err": "synthetic lookup failure"}
+        result, out, calls = h.run(argv)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Could not confirm", json.dumps(out["errors"]))
+        self.assertFalse(any(call[:2] in (["project", "item-add"], ["project", "item-edit"]) for call in calls))
 
     def test_board_backward_move_refused_exit_3(self):
         h, argv = self._harness("Done", "In review")
