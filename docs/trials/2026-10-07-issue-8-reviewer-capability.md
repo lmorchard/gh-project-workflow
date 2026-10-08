@@ -32,11 +32,15 @@ Long successful reads appear as lengths and hashes. The extract omits internal r
 
 All six native Claude Code sessions reported version `2.1.293` and permission mode `dontAsk`. Their startup tool roster was `Bash`, `Edit`, `Glob`, `Grep`, `Read`, `Skill`, and `Write`. They reported no MCP servers. MCP connects external tools to an agent. Neither `Agent` nor `Task` appeared in the roster.
 
-The trial handoff specifies fixture-only Edit/Write permission, file reads, and scoped local Git and test command allowances. It grants no alternate-model CLI launch. The saved startup records show tools and permission mode, but do not preserve the full launch permission configuration. The baseline summaries record selected model `claude-opus-5-5`. The handoff states that the repeats selected the same model.
+The trial handoff specifies fixture-only Edit/Write permission, file reads, and scoped local Git and test command allowances. It grants no alternate-model CLI launch. The saved startup records show tools and permission mode, but do not preserve the full launch permission configuration.
+
+The supplied [launch record](2026-10-07-issue-8-reviewer-capability/launch-record.json) supplies arguments and completion outcomes for all six invocations. The orchestration thread recorded it after the original author inspected the streams. It records working directories, the skill source directory, input prompts, selected model, exact scoped command allowances, and normal `dontAsk` permissions without bypass flags. All six exit codes are 0. The baseline summaries record selected model `claude-opus-5-5`. The launch record supplies this selected model for all six sessions.
+
+The launch record is supplied execution evidence, separate from provider startup metadata. It does not establish provider-confirmed identity or successful delivery. The source manifest records its original size, SHA-256 content hash, and provenance. The orchestration thread supplied this record but authored no product changes.
 
 Every stream returns startup model `claude-opus-5-5`, the same assistant model value, and the same model usage key. This is native session evidence, separate from the selected-model claim. No reviewer model was dispatched. Model examples in final responses do not establish another model's availability or identity.
 
-The author task's native dispatch explicitly selected `gpt-6.1-sol`. This is dispatch evidence, not separately provider-confirmed identity. This author made all repository edits and local commits and did the validation. The orchestrator runtime identity is unknown, and it authored no product changes. A fresh review with explicitly selected `gpt-6-astra` is planned after handoff. That review is not trial evidence or a completed review of this change.
+The original author task's native dispatch explicitly selected `gpt-6.1-sol`. This is dispatch evidence, not separately provider-confirmed identity. The original author made the trial evidence edits, local commit, and validation. A fresh author, also explicitly selected `gpt-6.1-sol`, made only the launch-record correction. The orchestrator runtime identity is unknown, and it authored no product changes. A fresh review with explicitly selected `gpt-6-astra` is planned after handoff. That review is not trial evidence or a completed review of this change.
 
 ## Observed actions and comparison
 
@@ -57,7 +61,7 @@ Ordinary sessions used define-issue without reviewer capability assessment or re
 
 ## Confounds, next action, and scope
 
-The baseline dependent `git -C … status --short --branch` denial was a harness mismatch in command allowances. The handoff states that repeats corrected those exact harmless Git-read patterns. Dependent repeats did not retry that status form. Compound Bash reads still received denials, while file Read succeeded.
+The baseline dependent `git -C … status --short --branch` denial was a harness mismatch in command allowances. The supplied launch record shows that repeat and final invocations added those exact harmless Git-read patterns. Dependent repeats did not retry that status form. Compound Bash reads still received denials, while file Read succeeded.
 
 All dependent finals incorrectly describe Bash as unavailable and say that the first Bash command was denied. Their first Bash commands succeeded. The ordinary baseline and final also overstate shell restrictions. The ordinary repeat demonstrates that a scoped Git/test command succeeds. Denied compound commands do not prove that every constituent operation is unavailable.
 

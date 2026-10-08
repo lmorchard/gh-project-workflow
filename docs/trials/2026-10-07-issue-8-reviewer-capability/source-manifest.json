@@ -116,6 +116,11 @@
     "ordinary-summary.json": {
       "bytes": 2411,
       "sha256": "a14ce9e485eae65a404f55bb06dc6bde6fee108ca516733c8b27a0a051946436"
+    },
+    "launch-record.json": {
+      "bytes": 8324,
+      "sha256": "14d8c5819645e2eba166887325f84d88f4d0573877a5bce67d43daf7f50f68e4",
+      "provenance": "Supplied orchestration invocation and completion record, recorded after the original author inspected the streams. Execution evidence, separate from provider startup metadata and product-source authoring."
     }
   }
 }
