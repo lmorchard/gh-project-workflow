@@ -5,7 +5,7 @@ EMPTY_TREE := $(shell git hash-object -t tree /dev/null)
 
 check: test
 	python3 scripts/check.py
-	git diff --check $(EMPTY_TREE)
+	git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab diff --check $(EMPTY_TREE)
 
 test:
 	python3 -m unittest discover -s cli

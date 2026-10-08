@@ -26,4 +26,3 @@ Permission for one action does not imply the next:
 - Delivery does not authorize deployment or cleanup, such as deleting branches or worktrees.
 
 Never infer a decision or a permission from silence.
-

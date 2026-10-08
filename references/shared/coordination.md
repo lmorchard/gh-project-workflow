@@ -29,4 +29,3 @@ For an authorized review-follow-up endpoint, the parent directly dispatches [add
 If another worker updates the PR branch during follow-up, the parent notifies the responsible follow-up worker with the PR, new head, and available change evidence. The worker independently reads the actual current head and reassesses its evidence under [Evidence](evidence.md). The parent does not replace the worker's CI repair or final verification with its own subject-repository actions.
 
 After follow-up, the parent dispatches any remaining authorized task, including [merge-pr](../tasks/merge-pr.md) only for an authorized merge endpoint. Return the verified endpoint result to a queue or parent-issue coordinator before it credits completion or selects dependent work. Keep merge checks and separate merge permission intact.
-
