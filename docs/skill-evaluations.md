@@ -117,5 +117,5 @@ Link the result file from the trial record or the PR that it supports.
 ## Known gaps
 
 - No index shows which scenarios ran, when, on which commit, and with which grade. Issue #44 proposes an index.
-- Three scenarios, `unpublished-*.md`, list file paths in `skills`. The other scenarios list task names.
+- The `unpublished-*.md` scenarios formerly used file paths in `skills`; they now list task names like the other scenarios.
 - Earlier result files differ from this guide. They record less provenance and use other grade words. This guide does not require changes to those files.

@@ -20,6 +20,19 @@ TASK_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
 SKIPPED_SOURCE_PREFIXES = ("evals/", "docs/trials/")
 SKIPPED_SOURCE_FILES = {"docs/skill-evaluations.md"}
+MAX_DIAGNOSTIC_CHARS = 2000
+SECRET_FIELD = re.compile(r"(?i)(token|api[_ -]?key|secret|password|credential|authorization)")
+SECRET_ASSIGNMENT = re.compile(
+    r"(?i)\b(api[_ -]?key|access[_ -]?token|refresh[_ -]?token|token|secret|password|authorization|credential)"
+    r"(\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"
+)
+BEARER_TOKEN = re.compile(r"(?i)\bBearer\s+[^\s,;]+")
+JWT_TOKEN = re.compile(r"\beyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b")
+PROVIDER_TOKEN = re.compile(
+    r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|"
+    r"github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16})\b"
+)
+URL_CREDENTIAL = re.compile(r"(?i)(https?://)[^/@\s]+:[^/@\s]+@")
 
 
 class ScenarioError(Exception):
@@ -63,8 +76,7 @@ def allowed_source_path(path):
 
 def linked_source_paths(root, commit, skills):
     available = source_paths(root, commit)
-    selected_tasks = {f"references/tasks/{name}.md" for name in skills}
-    pending = list(selected_tasks)
+    pending = [f"references/tasks/{name}.md" for name in skills]
     included = set()
     while pending:
         path = pending.pop()
@@ -88,8 +100,6 @@ def linked_source_paths(root, commit, skills):
                 continue
             resolved = posixpath.normpath(posixpath.join(base, target_path))
             if resolved == ".." or resolved.startswith("../") or resolved.startswith("/"):
-                continue
-            if resolved.startswith("references/tasks/") and resolved not in selected_tasks:
                 continue
             if allowed_source_path(resolved) and resolved in available:
                 pending.append(resolved)
@@ -254,6 +264,53 @@ def cli_version(runner, env):
     return lines[0][:200] if lines else "unavailable"
 
 
+def _secret_values(value):
+    values = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if SECRET_FIELD.search(str(key)) and isinstance(child, str) and child:
+                values.append(child)
+            values.extend(_secret_values(child))
+    elif isinstance(value, list):
+        for child in value:
+            values.extend(_secret_values(child))
+    return values
+
+
+def known_secrets(env):
+    values = [
+        value for key, value in env.items()
+        if SECRET_FIELD.search(key) and isinstance(value, str) and value
+    ]
+    auth_paths = []
+    if env.get("CODEX_HOME"):
+        auth_paths.append(Path(env["CODEX_HOME"]) / "auth.json")
+    if env.get("HOME"):
+        auth_paths.append(Path(env["HOME"]) / ".claude" / ".credentials.json")
+    for path in auth_paths:
+        try:
+            values.extend(_secret_values(json.loads(path.read_text(encoding="utf-8"))))
+        except (OSError, json.JSONDecodeError):
+            continue
+    return sorted(set(values), key=len, reverse=True)
+
+
+def safe_diagnostic(diagnostic, env):
+    if not diagnostic:
+        return ""
+    text = str(diagnostic).replace("\x00", "")
+    for secret in known_secrets(env):
+        text = text.replace(secret, "[REDACTED]")
+    text = JWT_TOKEN.sub("[REDACTED_JWT]", text)
+    text = PROVIDER_TOKEN.sub("[REDACTED_TOKEN]", text)
+    text = URL_CREDENTIAL.sub(r"\1[REDACTED]@", text)
+    text = BEARER_TOKEN.sub("Bearer [REDACTED]", text)
+    text = SECRET_ASSIGNMENT.sub(r"\1\2[REDACTED]", text)
+    if len(text) > MAX_DIAGNOSTIC_CHARS:
+        text = text[:MAX_DIAGNOSTIC_CHARS] + "… [truncated]"
+    return text.strip()
+
+
 def run_codex(prompt, model, snapshot, answer_path, env):
     command = [
         "codex", "exec", "--ephemeral", "--sandbox", "read-only",
@@ -283,9 +340,12 @@ def run_codex(prompt, model, snapshot, answer_path, env):
             session = session or event.get("session_id") or event.get("thread_id")
             reported_model = reported_model or event.get("model")
         answer = answer_path.read_text(encoding="utf-8") if answer_path.exists() else ""
-        return result.returncode, str(session) if session else None, reported_model, answer
-    except OSError:
-        return None, None, None, ""
+        diagnostic = safe_diagnostic(result.stderr, env) if result.returncode else ""
+        if result.returncode and not diagnostic:
+            diagnostic = f"Runner exited with status {result.returncode} and no stderr diagnostic."
+        return result.returncode, str(session) if session else None, reported_model, answer, diagnostic
+    except OSError as error:
+        return None, None, None, "", safe_diagnostic(f"{type(error).__name__}: {error}", env)
 
 
 def run_claude(prompt, model, snapshot, session_cwd, env):
@@ -316,9 +376,12 @@ def run_claude(prompt, model, snapshot, session_cwd, env):
                     if isinstance(block, dict) and block.get("type") == "text":
                         answer_parts.append(block.get("text", ""))
         answer = "\n".join(part for part in answer_parts if part)
-        return result.returncode, str(session) if session else None, reported_model, answer
-    except OSError:
-        return None, None, None, ""
+        diagnostic = safe_diagnostic(result.stderr, env) if result.returncode else ""
+        if result.returncode and not diagnostic:
+            diagnostic = f"Runner exited with status {result.returncode} and no stderr diagnostic."
+        return result.returncode, str(session) if session else None, reported_model, answer, diagnostic
+    except OSError as error:
+        return None, None, None, "", safe_diagnostic(f"{type(error).__name__}: {error}", env)
 
 
 def parser():
@@ -427,11 +490,11 @@ def main(argv=None):
             for index in range(1, args.repeat + 1):
                 answer_path = Path(temp) / f"answer-{index}.txt"
                 if args.runner == "codex":
-                    code, session, runtime_model, answer = run_codex(
+                    code, session, runtime_model, answer, diagnostic = run_codex(
                         prompt, args.model, snapshot, answer_path, env,
                     )
                 else:
-                    code, session, runtime_model, answer = run_claude(
+                    code, session, runtime_model, answer, diagnostic = run_claude(
                         prompt, args.model, snapshot, session_cwd, env,
                     )
                 runs.append({
@@ -440,8 +503,13 @@ def main(argv=None):
                     "exit_code": code,
                     "runner_model": runtime_model,
                     "prompt_sha256": prompt_hash,
+                    "diagnostic": diagnostic or None,
                 })
-                answers.append(f"Scenario: {scenario_name}\nSession ID: {session or 'unreported'}\n\n{answer}\n")
+                diagnostic_text = f"\nRunner diagnostic: {diagnostic}\n" if diagnostic else ""
+                answers.append(
+                    f"Scenario: {scenario_name}\nSession ID: {session or 'unreported'}\n\n"
+                    f"{answer}{diagnostic_text}\n"
+                )
 
             provenance = {
                 "scenario": scenario_name,

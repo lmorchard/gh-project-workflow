@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -36,11 +37,21 @@ class ScenarioRunnerTests(unittest.TestCase):
         (self.repo / "references/tasks/review-changes.md").write_text(
             "Read [Policy](../shared/policy.md).\n", encoding="utf-8",
         )
+        (self.repo / "references/tasks/define-issue.md").write_text(
+            "Before research, read [Research](research.md).\n", encoding="utf-8",
+        )
+        (self.repo / "references/tasks/research.md").write_text(
+            "Research applies [Authorization](../shared/authorization.md).\n",
+            encoding="utf-8",
+        )
         (self.repo / "references/tasks/unselected-task.md").write_text(
             "UNSELECTED TASK MARKER\n", encoding="utf-8",
         )
         (self.repo / "references/shared/policy.md").write_text(
             "Use the stated policy.\n", encoding="utf-8",
+        )
+        (self.repo / "references/shared/authorization.md").write_text(
+            "Use existing authorization.\n", encoding="utf-8",
         )
         (self.repo / "evals/scenarios/runner-case.md").write_text(
             "---\nskills: [review-changes]\nsource: test fixture\n---\n\n"
@@ -74,6 +85,17 @@ from pathlib import Path
 if '--version' in sys.argv:
     print('fake-runner-1')
 else:
+    model = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else ''
+    if model == 'fake-failure':
+        secret = os.environ.get('OPENAI_API_KEY') or os.environ.get('ANTHROPIC_API_KEY')
+        if not secret:
+            try:
+                auth = json.loads((Path(os.environ['CODEX_HOME']) / 'auth.json').read_text())
+                secret = auth.get('access_token', 'synthetic-auth-secret')
+            except (KeyError, OSError, json.JSONDecodeError):
+                secret = 'synthetic-auth-secret'
+        print('provider failed: token=' + secret + ' ' + ('x' * 5000), file=sys.stderr)
+        sys.exit(7)
     cwd = Path.cwd()
     files = sorted(path.relative_to(cwd).as_posix() for path in cwd.rglob('*') if path.is_file())
     source_arg = sys.argv.index('--add-dir') + 1 if '--add-dir' in sys.argv else None
@@ -105,10 +127,13 @@ else:
         path.chmod(path.stat().st_mode | stat.S_IXUSR)
         return path
 
-    def run_fixture(self, runner, output):
+    def run_fixture(self, runner, output, model="fake-model", path=None):
         env = os.environ.copy()
         env.update({
-            "PATH": str(self.bin) + os.pathsep + env.get("PATH", ""),
+            "PATH": (
+                str(path) if path is not None
+                else str(self.bin) + os.pathsep + env.get("PATH", "")
+            ),
             "GH_TOKEN": "synthetic-gh-value",
             "GITHUB_TOKEN": "synthetic-github-value",
             "GHFLOW_IDENTITY_LOGIN": "synthetic-login",
@@ -116,7 +141,7 @@ else:
         })
         result = subprocess.run(
             [sys.executable, str(self.runner_script), "runner-case", "--runner", runner,
-             "--model", "fake-model", "--repeat", "1", "--output-dir", str(output)],
+             "--model", model, "--repeat", "1", "--output-dir", str(output)],
             cwd=self.repo, env=env, capture_output=True, text=True,
         )
         return result
@@ -163,6 +188,20 @@ else:
         ):
             self.assertFalse((snapshot / excluded).exists(), excluded)
 
+    def test_snapshot_recursively_includes_linked_task_and_shared_references(self):
+        commit = run_scenario.git(self.repo, "rev-parse", "HEAD")
+        snapshot = self.temp_path / "linked-source"
+        files = run_scenario.extract_source_snapshot(
+            self.repo, commit, ["define-issue"], snapshot,
+        )
+        self.assertEqual(files, [
+            "references/shared/authorization.md",
+            "references/tasks/define-issue.md",
+            "references/tasks/research.md",
+        ])
+        self.assertFalse((snapshot / "evals/scenarios/runner-case.md").exists())
+        self.assertFalse((snapshot / "evals/results/prior.md").exists())
+
     def test_prompt_contains_situation_and_explicit_limits_only(self):
         text = (self.repo / "evals/scenarios/runner-case.md").read_text()
         skills, situation = run_scenario.scenario_parts(text)
@@ -206,7 +245,9 @@ else:
         (old_codex_home / "config.toml").write_text(
             '[mcp_servers.unrelated]\nurl = "https://example.invalid"\n',
         )
-        (old_codex_home / "auth.json").write_text('{"synthetic_auth": true}')
+        (old_codex_home / "auth.json").write_text(
+            '{"access_token": "synthetic-auth-secret"}',
+        )
         output = self.temp_path / "codex-run"
         with patch.dict(os.environ, {
             "HOME": str(old_home), "CODEX_HOME": str(old_codex_home),
@@ -276,6 +317,59 @@ else:
         provenance = json.loads((output / "provenance.json").read_text())
         self.assertIn("file tools are confined", provenance["isolation"]["source_boundary"])
         self.assertIn("blocked", provenance["isolation"]["commands_and_edits"])
+
+    def test_runner_failure_keeps_bounded_redacted_diagnostic(self):
+        for runner in ("codex", "claude"):
+            with self.subTest(runner=runner):
+                log = self.temp_path / f"{runner}-failure.jsonl"
+                self.install_fake_runner(runner, log)
+                caller_home = self.temp_path / f"{runner}-caller-home"
+                caller_home.mkdir()
+                caller_codex_home = caller_home / ".codex"
+                caller_codex_home.mkdir()
+                (caller_codex_home / "auth.json").write_text(
+                    '{"access_token": "synthetic-auth-secret"}',
+                )
+                output = self.temp_path / f"{runner}-failure-run"
+                with patch.dict(os.environ, {
+                    "HOME": str(caller_home), "CODEX_HOME": str(caller_codex_home),
+                    "OPENAI_API_KEY": "", "ANTHROPIC_API_KEY": "",
+                }, clear=False):
+                    result = self.run_fixture(runner, output, model="fake-failure")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                provenance_text = (output / "provenance.json").read_text()
+                answers = (output / "answers.txt").read_text()
+                diagnostic = json.loads(provenance_text)["runs"][0]["diagnostic"]
+                self.assertIn("provider failed", diagnostic)
+                self.assertIn("[REDACTED]", diagnostic)
+                self.assertIn("truncated", diagnostic)
+                self.assertLessEqual(len(diagnostic), run_scenario.MAX_DIAGNOSTIC_CHARS + 15)
+                self.assertIn("Runner diagnostic:", answers)
+                for output_text in (result.stdout, result.stderr, provenance_text, answers):
+                    self.assertNotIn("synthetic-auth-secret", output_text)
+
+    def test_runner_launch_error_is_recorded_in_answer_and_provenance(self):
+        empty_path = self.temp_path / "no-runners"
+        empty_path.mkdir()
+        (empty_path / "git").symlink_to(shutil.which("git"))
+        for runner in ("codex", "claude"):
+            with self.subTest(runner=runner):
+                output = self.temp_path / f"{runner}-launch-error"
+                caller_home = self.temp_path / f"{runner}-missing-home"
+                (caller_home / ".codex").mkdir(parents=True)
+                with patch.dict(os.environ, {
+                    "HOME": str(caller_home),
+                    "CODEX_HOME": str(caller_home / ".codex"),
+                    "OPENAI_API_KEY": "", "ANTHROPIC_API_KEY": "",
+                }, clear=False):
+                    result = self.run_fixture(runner, output, path=empty_path)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                provenance_text = (output / "provenance.json").read_text()
+                answer_text = (output / "answers.txt").read_text()
+                run = json.loads(provenance_text)["runs"][0]
+                self.assertIsNone(run["exit_code"])
+                self.assertIn("FileNotFoundError", run["diagnostic"])
+                self.assertIn("Runner diagnostic:", answer_text)
 
 
 if __name__ == "__main__":
