@@ -12,7 +12,7 @@ The [GitHub filter reference](https://docs.github.com/en/issues/planning-and-tra
 - A comma between values of one field means OR. For example, `label:bug,support` matches either label.
 - A hyphen before a term negates it. For example, `-status:Done`.
 - `no:FIELD` matches items with no value. `has:FIELD` matches items with a value.
-- `*` is a wildcard in a value. For example, `label:*bug*` matches a label that contains "bug".
+- `*` is a wildcard in a value. For example, `label:*bug*` matches a label that contains "bug". A negated wildcard also works. Les confirmed `-label:triage:*` on board 6 on 2026-10-08, although the reference does not show that form.
 - The reference documents no OR across different fields. It documents no `or` keyword and no parentheses.
 - The reference documents no filter for issue dependencies, such as blocked-by relationships.
 
@@ -34,13 +34,7 @@ This view shows issues that someone can refine now. Use [sweep-needs-input](../r
 
 This view shows backlog issues that have no triage label. Use [triage-issues](../references/tasks/triage-issues.md) on them in batches.
 
-The reference does not show a negated wildcard. If `-label:triage:*` does not work on your board, list each label:
-
-```text
--label:triage:ready,triage:needs-input,triage:needs-definition,triage:blocked,triage:parked,triage:agent-closed status:Backlog -priority:P-null
-```
-
-Update the list each time that the project adds a triage label.
+The term `-label:triage:*` removes every issue with a label that starts with `triage:`. A new triage label therefore needs no change to this filter.
 
 On board 6, `P-null` is a literal Priority value for theme and epic issues. The term `-priority:P-null` removes those issues. It does not remove issues with no Priority value. To remove those issues also, add `-no:priority`.
 
@@ -110,4 +104,4 @@ The first view shows open issues that are marked `Done`. The second view shows c
 
 ## Limits
 
-Nobody has tested the filters on this page on a live board in this exact form. The needs-attention and untriaged views come from views that Les used on board 6 on 2026-10-08. This page rewrites them in the documented syntax. The other filters follow the documented syntax only. If a filter gives unexpected results, compare it with the GitHub filter reference and correct this page.
+Les confirmed the `-label:triage:*` wildcard on board 6 on 2026-10-08. The needs-attention view comes from a view that Les used on the same day, and this page rewrites it with the documented comma syntax. Nobody has tested the other filters on a live board. They follow the documented syntax only. If a filter gives unexpected results, compare it with the GitHub filter reference and correct this page.
