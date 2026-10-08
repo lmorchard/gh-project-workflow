@@ -2,6 +2,8 @@
 
 These scenarios check whether an agent that reads a skill makes the decision the skill intends. Use them after you change a skill, to find rules that the change lost or made unclear. They do not replace trials on real issues.
 
+[Skill evaluations](../docs/skill-evaluations.md) describes when to add a scenario, how to run and grade it, and how to record the results.
+
 ## Scenario format
 
 Each file in `scenarios/` describes one situation. Its frontmatter names the skills under test and the source of the scenario, such as a trial or the commit that added the rule. The body has three sections:

@@ -150,6 +150,7 @@ Read these documents:
 - [Skill sources](docs/skill-sources.md) records the origins and selected adaptations of workflow guidance.
 - [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
 - [Skill scenarios](evals/README.md) checks whether agents make the decisions that the skills intend.
+- [Skill evaluations](docs/skill-evaluations.md) describes how to add, run, grade, and record scenarios, and how they relate to trials.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.
 - [Skill style](docs/skill-style.md) describes how to write and revise skills.
 
