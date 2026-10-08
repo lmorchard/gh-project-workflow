@@ -16,7 +16,7 @@ If a source is unavailable, report the gap and continue the work that does not d
 
 Every test result, check result, and review describes one commit. After a push, earlier results describe the earlier commit. Reassess which results still apply after a push, rebase, or conflict resolution.
 
-The **head** is the latest commit proposed for merge. If the head changes while you inspect it, read the results for the new head.
+The **head** is the latest commit proposed for merge. If the head changes while you inspect it, read the results for the new head. Compare the changes and reassess local checks, hosted CI, and review coverage, including unresolved findings. A branch-update notification is useful input, but it does not replace reading the actual head.
 
 ## Hosted CI
 
@@ -59,3 +59,7 @@ Do not change accounts, credentials, subscriptions, repository settings, or prot
 Report what you did, what you checked, and what remains. State which checks you executed and which you only inspected. Report completed, failed, and uncertain steps separately, with enough information to resume.
 
 A partial result is useful when its limits are explicit. If you are blocked or interrupted, preserve the worktree and report the next useful action.
+
+For a partial PR follow-up report, name the last observed head, pending checks, unread evidence, and remaining actions. State that follow-up is incomplete. Pending required CI is incomplete work, even when local checks passed.
+
+Before a final PR follow-up report, independently read the current PR head, hosted checks, and review feedback again. If the head changed, reassess the evidence for the new head before reporting. Return the final report directly to the parent with the current head, hosted CI state, review coverage and limits, unresolved findings, and concrete blockers. If a read fails, name the last observed head and the blocker to obtaining current evidence instead of claiming completion.

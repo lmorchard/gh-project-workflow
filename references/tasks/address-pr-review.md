@@ -1,12 +1,14 @@
 # Address pull request review
 
-Take an existing PR through one review cycle and CI repair. This skill can follow [submit-pr](submit-pr.md) or start from a PR created elsewhere. It acts on review findings; it does not provide independent review. It stops before merge.
+Take an existing PR through one review cycle and CI repair, and return the final report directly to the parent. This skill can follow [submit-pr](submit-pr.md) or start from a PR created elsewhere. It acts on review findings; it does not provide independent review. It stops before merge.
 
 Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout.
 
 ## Establish the task
 
 Read the issue, PR, project instructions, current branch, and any supplied review report. Confirm the current head.
+
+If the parent reports an external branch update, read the actual PR head and compare the changes before continuing. Reassess checks, review coverage, and unresolved findings under [Evidence](../shared/evidence.md#results-belong-to-a-commit). Preserve the original review deadline and one-cycle limit.
 
 For a local review report, identify the commit it reviewed and its evidence limits. Do not wait for Copilot when local findings are the input. If the report covers an earlier commit, compare it with the current code before you make corrections.
 
@@ -68,14 +70,17 @@ This skill waits for one review cycle. Do not start another 20-minute wait witho
 
 ## Report the result
 
-Return:
+Before reporting, read the current head, checks, and feedback again under [Evidence](../shared/evidence.md#reports). Return directly to the parent:
 
 - The PR URL, current head, corrections, and test results.
 - Each finding as fixed, disputed, deferred, or unanswered, including unresolved human requests even when CI is green.
 - CI state, naming the commit whose hosted checks passed or the concrete blocker.
-- Review state, and whether the wait completed or timed out.
-- The time and commit of any new review request, for the next invocation.
+- Review state, covered commits, coverage limits, and whether the wait completed or timed out.
+- Original and new review request times, requested commits, deadlines, and review identifiers needed for resumption.
+- Remaining actions and concrete blockers, including any failed read of the current head or its evidence.
 
 An earlier clean review does not cover later changes.
+
+If required checks remain pending or current evidence is unread, identify the report as partial and follow-up as incomplete. Continue useful authorized work unless a concrete blocker or interruption prevents it.
 
 Do not merge or enable automatic merge. Do not create a replacement PR because review handling failed.

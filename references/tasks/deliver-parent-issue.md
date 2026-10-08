@@ -34,13 +34,15 @@ When the draft is ready and the flow includes publication, use [file-issue](file
 
 ## Deliver each child
 
-Run [express-issue](express-issue.md) for the selected child with its endpoint, scope, decisions, and authorization. That skill owns implementation, independent review, submission, and review and CI follow-up.
+Run [express-issue](express-issue.md) for the selected child with its endpoint, scope, decisions, and authorization. Its delegated coordinator owns implementation, independent review, and submission. The conversation parent owns direct follow-up dispatch under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership).
+
+If running as a delegated coordinator, relay the submission handoff and remaining child and parent scope to the conversation parent, then stop. Resume from the parent's endpoint result. A submission handoff does not complete a child whose endpoint includes follow-up or merge.
 
 In this flow, a child merges only with both affirmative independent review of its final changes and green hosted CI for its final head. Merge permission does not substitute for the favorable review here, and a pending or timed-out review is not favorable. Keep the exact-head checks and other rules in [merge-pr](merge-pr.md).
 
 A subject agent can define, file, and implement in one dispatch; a nested agent per phase is not required. Independent review still needs a fresh context and a different model. Never replace it with self-review to work around a capacity limit.
 
-After a child returns, verify its actual result through the responsible subagent and credit only delivered behavior. Update the parent's progress and the coverage map, then continue to the next eligible child without another prompt.
+After the parent receives the responsible worker's final result for the chosen child endpoint, verify that result through the responsible subagent and credit only delivered behavior. Update the parent issue's progress and the coverage map, then continue to the next eligible child without another prompt.
 
 If a child is blocked, record its state and dependency, and continue an independent child when useful and authorized. Do not hide the blocker or skip work the parent needs. When no useful authorized progress remains, stop and return a focused question.
 

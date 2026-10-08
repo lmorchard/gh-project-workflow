@@ -5,7 +5,7 @@ source: Les's 2026-10-03 decision on review when Copilot is absent
 
 ## Situation
 
-You are coordinating express-issue for issue #941 through merge, which Les authorized. A different-model local review covered head `5e6f7a8` before submission. The follow-up subagent then fixed a CI failure and pushed head `9b0c1d2`. Its report says that Copilot is unavailable: GitHub recorded no request after `--add-reviewer`, and no review arrived. Hosted CI is green for `9b0c1d2`. No review covers the change from `5e6f7a8` to `9b0c1d2`.
+You are the conversation parent delivering issue #941 through merge, which Les authorized. A different-model local review covered head `5e6f7a8` before submission. Your directly dispatched follow-up worker then fixed a CI failure and pushed head `9b0c1d2`. Its report says that Copilot is unavailable: GitHub recorded no request after `--add-reviewer`, and no review arrived. Hosted CI is green for `9b0c1d2`. No review covers the change from `5e6f7a8` to `9b0c1d2`.
 
 ## Expected
 
