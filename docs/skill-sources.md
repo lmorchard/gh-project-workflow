@@ -75,9 +75,11 @@ Shared authorization, evidence, and delivery callers now apply the selected owne
 The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
 
 The new ownership scenarios are constructed decision checks, not observed deliveries.
-The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) records submission and direct parent dispatch.
-An external branch update and the responsible worker's final report remain pending.
-The initial handoff does not establish completion of the trial or issue #13.
+The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) completed at `c7d7fdc40f1d0fcdc1c16ed2ccb333c34de571a9`, according to parent and worker handoffs.
+It records direct parent dispatch, an external branch update, independent worker reassessment, and the worker's final report directly to the parent.
+Initial and delta local review cover c7, and the worker reported green hosted CI for that head.
+Publication of the completed record needs fresh delta review and final CI and head reassessment, which the parent already owns.
+The c7 evidence does not cover that later documentation commit or authorize merge.
 
 ## Earlier dev-session guidance
 
