@@ -20,7 +20,7 @@ Process issues one at a time or in bounded slices of 2 to 5 issues. For each iss
 
 Use the shared [Decisions](../shared/decisions.md) rule when facts or choices are missing. Return material product decisions to the parent instead of choosing them in the sweep.
 
-If an open issue will change the code or supply a contract, set the native blocked-by relationship and apply `triage:blocked`. Optionally replace the body with an outline. Return the issue to the parent. If only part waits, propose a split.
+If refinement depends on another open issue that will change the code or supply a contract, follow [Blocked issues](../shared/triage-labels.md#blocked-issues). Set the native blocked-by relationship and apply `triage:blocked`. Optionally replace the body with an outline. Return the issue to the parent. If only part waits, propose a split.
 
 If research finds a product or design decision that needs user judgment, stop the definition. Apply `triage:needs-input`, post the focused question, and return it to the parent.
 
