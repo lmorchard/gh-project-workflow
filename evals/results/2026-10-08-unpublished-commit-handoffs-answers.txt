@@ -1,0 +1,11 @@
+unpublished-local-review (gpt-6-luna/high)
+
+Dispatch review-changes now for the unpublished commit. The Review changes rule explicitly covers unpublished heads: the handoff must include the checkout path, publication state, and exact base and head; the reviewer verifies both commits locally before inspecting the diff. Use the supplied gpt-6-luna/high dispatch metadata as the reviewer identity, and confirm it differs from the implementation model before dispatch. The skill requires recording both identities and their sources. The implementation skill ends with a local branch and says not to push or open a PR. After review, the submitter can publish that same branch. The review will cover the published head only if it is still the exact commit reviewed; otherwise, it must be reassessed under Evidence: Results belong to a commit.
+
+unpublished-local-commit-missing (gpt-6-luna/high)
+
+Stop before reviewing. Return the mismatch to the parent: abc123^{commit} is missing from the supplied checkout. The rule is Verifying a local commit in references/cli.md, applied by review-changes.md. Ask for a corrected checkout or head, then verify the head, base, and fix/widget branch pointer before continuing.
+
+unpublished-local-commit-mismatch (gpt-6-luna/high)
+
+The local branch check contradicts the handoff: abc123 resolves as the supplied commit, but fix/widget points to 789def. Stop before reviewing and return that mismatch to the parent. The applicable rule is Verifying a local commit in references/cli.md: compare the reported branch with the expected head, and reject and return a mismatched expected head. review-changes.md also requires verifying the supplied commits before beginning the review.
