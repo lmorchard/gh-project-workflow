@@ -1,6 +1,6 @@
 # Trial records
 
-This index lists trials of the skills on real issues. Each entry states what the trial exercised and its evidence limits. The subject repository is [decafclaw](https://github.com/lmorchard/decafclaw).
+This index lists skill trials on real issues and public synthetic projects. Each entry states what the trial exercised and its evidence limits. Earlier delivery trials use [decafclaw](https://github.com/lmorchard/decafclaw).
 
 ## Record a trial
 
@@ -143,3 +143,11 @@ Existing guidance remained unchanged. Later experiments and the umbrella issue r
 
 [Root-package setup trial, 2026-10-07](2026-10-07-ghflow-root-setup.md) repeats discovery and routing after the repository-root layout change.
 It records the subject-resolution correction and the unresolved OpenCode discovery of ignored nested worktrees.
+
+## 2026-10-07: issue 8 reviewer preparation
+
+The [reviewer preparation record](2026-10-07-issue-8-reviewer-capability.md) summarizes three historical paired trials and preserves pinned sources.
+The shared instruction now establishes the required review path before substantial dependent implementation.
+Four reusable [decision scenarios and results](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
+All five recorded sessions pass after the accepted unknown-author criteria refinement. Evaluated instructions and raw prompts remain unchanged.
+The broader identity and access scope remains open.

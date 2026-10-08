@@ -62,6 +62,25 @@ On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.
 
 The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. The [Trial records](trials/README.md) list the submission and follow-up trials.
 
+## Parent ownership of PR follow-up
+
+[Issue #13](https://github.com/lmorchard/gh-project-workflow/issues/13) records Les's selected direction on 2026-10-07.
+A pull request (PR) proposes changes for review.
+The conversation parent dispatches follow-up directly after submission and receives its final report.
+Submission alone does not satisfy a review-follow-up endpoint.
+
+The issue cites ownership and reporting problems from the [Ready queue trial](trials/README.md#2026-10-05-ready-queue-burndown-on-board-6).
+At `b47c9d5088f471da5d7b35a56ecda6078dee02be`, express still waited for a nested follow-up worker.
+Shared authorization, evidence, and delivery callers now apply the selected ownership.
+The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
+
+The new ownership scenarios are constructed decision checks, not observed deliveries.
+The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) completed at `c7d7fdc40f1d0fcdc1c16ed2ccb333c34de571a9`, according to parent and worker handoffs.
+It records direct parent dispatch, an external branch update, independent worker reassessment, and the worker's final report directly to the parent.
+Initial and delta local review cover c7, and the worker reported green hosted CI for that head.
+Publication of the completed record needs fresh delta review and final CI and head reassessment, which the parent already owns.
+The c7 evidence does not cover that later documentation commit or authorize merge.
+
 ## Earlier dev-session guidance
 
 On 2026-09-30, we also read the local dev-session files under ~/.claude/skills/dev-session. The relevant sources were phases/pr.md and references/pr-body-template.md. These local sources have no pinned repository revision in this record.
@@ -112,3 +131,16 @@ Les then requested a maintained procedure and reusable scenarios, rather than an
 The [maintenance rule](skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
 
 The [scenario results](../evals/results/2026-10-08-resolution.md) assess the revised guidance separately from the earlier action trials. Broader issue #2 experiments remain deferred.
+
+## Required reviewer preparation
+
+[Issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8) supplies the agreed first increment: establish review capabilities before dependent implementation.
+Les requested persistent instructions and reusable evaluations during the PR #21 revision.
+The shared [preparation rule](../references/shared/review.md#prepare-required-review) replaces optional early planning in the delivery coordinators.
+It preserves explicit exceptions, independent preparation, and the existing capacity handoff.
+
+The [historical paired trial](trials/2026-10-07-issue-8-reviewer-capability.md) supplies observations and their limits.
+The [reusable scenario results](../evals/results/2026-10-07-reviewer-preparation.md) assess decisions under constructed capability facts.
+Les accepted recorded fresh author selection before future implementation as a valid resolution of unknown planned identity.
+The unknown-author criteria reflect that interpretation of the existing shared rule. Evaluated instructions and raw prompts remain unchanged.
+Neither source establishes a completed different-model code review or full delivery in the trial environment.

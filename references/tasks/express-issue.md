@@ -1,6 +1,6 @@
 # Take one issue through delivery
 
-Coordinate the existing skills for one selected issue, up to an agreed endpoint. Dispatch each task to a subagent rather than repeating its procedure here. Each operation remains usable without this coordinator.
+Coordinate implementation, independent review, and submission for one selected issue. A delegated coordinator stops after submission and hands the remaining agreed endpoint to the parent. Dispatch tasks rather than repeating their procedures here. Each operation remains usable without this coordinator.
 
 Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout, including the handoff rules.
 
@@ -22,9 +22,9 @@ Changes to the selected issue can stay within the agreed flow. Creating a new ch
 
 ## Implement and review locally
 
-Dispatch [implement-issue](implement-issue.md) when implementation remains, with the issue, confirmed scope, existing work, and authorization.
+Before substantial dependent implementation, apply [Prepare required review](../shared/review.md#prepare-required-review) for this delivery endpoint. Dispatch [implement-issue](implement-issue.md) when implementation remains, with the issue, confirmed scope, existing work, authorization, and established review path or explicit exception.
 
-Plan reviewer selection before implementation when possible. Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. The reviewer must use a different model from the implementer, as [Review](../shared/review.md) describes. If that is not possible, return the review choice to the user and continue independent preparation meanwhile. Do not skip the review silently.
+Before submission, dispatch [review-changes](review-changes.md) in a fresh context for the exact base and head. Give the reviewer the issue and necessary facts, not the author's conversation or desired conclusion. Apply [Review](../shared/review.md) to model evidence and unmet review requirements. Do not skip the review silently.
 
 If dispatching the reviewer fails because of a capacity limit, that is a dispatch problem, not a review choice. Finish your handoff with the commits, checks, and recorded implementation model, and let the parent dispatch the reviewer, as [Authorization](../shared/authorization.md) describes under handoffs. Do not review the changes yourself.
 
@@ -32,21 +32,19 @@ Return actionable local findings to the implementation agent, on the same task b
 
 When resuming with an existing PR, use current independent review evidence if it satisfies the review plan. Do not demand a retroactive pre-submission review just to replay the sequence. Report any unmet review requirement and resolve it explicitly.
 
-## Submit and address feedback
+## Submit and hand off
 
 Dispatch [submit-pr](submit-pr.md) for reviewed local commits that are not yet published. Pass the verified worktree, branch, base, head, checks, review outcome, and authorization.
 
-Pass its PR URL, published head, review request time, and prior review identifiers to [address-pr-review](address-pr-review.md). Preserve the original review deadline on resumption, and do not duplicate review requests at a handoff.
+If you are a delegated coordinator, return the submission result and remaining endpoint to the parent under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership). Include the exact source revisions and existing checks and reviews, with original request times, deadlines, and identifiers. Stop at this handoff instead of dispatching or waiting for a nested [address-pr-review](address-pr-review.md) worker. If resuming an existing PR, hand off its current evidence by the same route. For a direct session, continue as the conversation owner under the shared rule.
 
-Respect that skill's one-cycle review limit. A review requested after corrections can still be pending when this invocation ends. Report a missing or timed-out review separately from passed CI and completed repairs.
+## Continue to the endpoint in the parent
 
-## Finish at the endpoint
+The parent directly dispatches [address-pr-review](address-pr-review.md) and receives its final report. Preserve that task's one-cycle review limit and CI repair. A review requested after corrections can still be pending when it ends. Report a missing or timed-out review separately from passed CI and completed repairs.
 
-For a review endpoint, report current-head CI, review coverage, resolved findings, and outstanding work. Distinguish a completed review from pending or unavailable evidence. Do not merge.
+For a review endpoint, use the responsible worker's final report of current-head CI, review coverage, resolved findings, and outstanding work. Apply [Evidence](../shared/evidence.md#reports) to distinguish a final result from an incomplete handoff. Do not merge.
 
-Wait for the address-pr-review subagent to report before you hand back. Its result is part of this endpoint. If you must hand back first, say that follow-up is still running. Name each pending required check, the head SHA, and the follow-up the parent must still read. Do not report pending CI as an outcome.
-
-For an authorized merge endpoint, dispatch [merge-pr](merge-pr.md) after follow-up, without asking for the same permission again. Authorization for the full flow does not waive its checks.
+For an authorized merge endpoint, the parent dispatches [merge-pr](merge-pr.md) after follow-up, without asking for the same permission again. Authorization for the full flow does not waive its checks.
 
 Read back the final state through the responsible subagent. Report the issue and PR URLs, the current or merged commit, test and review evidence, and remaining limits, including required post-merge checks not yet done.
 
