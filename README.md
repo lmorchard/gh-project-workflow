@@ -83,6 +83,7 @@ The entry skill selects these independently usable operations:
 - [triage-issues](references/tasks/triage-issues.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
 - [sweep-needs-input](references/tasks/sweep-needs-input.md) interactively resolves blocking product and architectural decisions with the user.
 - [sweep-needs-definition](references/tasks/sweep-needs-definition.md) develops accepted issues into bounded, actionable specifications with concrete file targets and test criteria.
+- [sweep-blocked](references/tasks/sweep-blocked.md) returns `triage:blocked` issues to definition when all of their native blockers close.
 - [sweep-audit-closed](references/tasks/sweep-audit-closed.md) reviews and confirms autonomously closed issues with cited evidence.
 - [sweep-prioritize](references/tasks/sweep-prioritize.md) assigns Priority (`P0`–`P3`) and Size (`XS`–`XL`) fields on the project board and re-sweeps deferred items.
 - [curate-ready-queue](references/tasks/curate-ready-queue.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
@@ -152,5 +153,6 @@ Read these documents:
 - [Skill scenarios](evals/README.md) checks whether agents make the decisions that the skills intend.
 - [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.
 - [Skill style](docs/skill-style.md) describes how to write and revise skills.
+- [Project board views](docs/board-views.md) gives filters for board views that show work for a person or a sweep.
 
 The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.
