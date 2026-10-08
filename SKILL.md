@@ -42,6 +42,7 @@ Match the user's explicit request to the operation below. Identify the subject r
 | Assess a requested set of open issues | [triage-issues](references/tasks/triage-issues.md) |
 | Resolve issues needing input | [sweep-needs-input](references/tasks/sweep-needs-input.md) |
 | Define accepted issues | [sweep-needs-definition](references/tasks/sweep-needs-definition.md) |
+| Return unblocked issues to definition | [sweep-blocked](references/tasks/sweep-blocked.md) |
 | Audit closed issues | [sweep-audit-closed](references/tasks/sweep-audit-closed.md) |
 | Prioritize a requested board scope | [sweep-prioritize](references/tasks/sweep-prioritize.md) |
 | Stage issues into the Ready queue | [curate-ready-queue](references/tasks/curate-ready-queue.md) |

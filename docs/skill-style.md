@@ -15,6 +15,7 @@ Use these shared references instead of restating their rules:
 - [GitHub writes](../references/shared/github-writes.md): duplicate prevention, saved-result readback, retries, and intervening changes.
 - [Review](../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
 - [Board status](../references/shared/board-status.md): moving an issue between project-board states.
+- [Triage labels](../references/shared/triage-labels.md): the `triage:*` labels, their meanings, and blocked and parked issues.
 - [Agent identity](../references/shared/identity.md): configuring machine account credentials and running commands under that identity.
 
 Link a reference where its rules apply. Add a one-line summary only when the reader needs it at that point to act correctly. Agents do not reliably open a reference unless the skill says that it applies, so keep the trigger for a decision-critical rule in the skill: name the situation and link the rule. The [pilot run](../evals/results/2026-10-02-pilot.md) showed this. Read the references when you write or review a skill.

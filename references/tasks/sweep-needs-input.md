@@ -2,7 +2,7 @@
 
 Conduct an interactive review of issues marked `triage:needs-input`. Settle the blocking product and design questions with the user, update the issue records, and advance each issue to its next state.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. The parent agent conducts the conversation; subagents execute updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
+Apply [Triage labels](../shared/triage-labels.md), [Authorization](../shared/authorization.md), and [Evidence](../shared/evidence.md) throughout. The parent agent conducts the conversation; subagents execute updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## List pending issues
 
@@ -40,6 +40,8 @@ Once the user provides a direction:
    - **User decided not to proceed**: Close the issue with reason `not planned` (and add `wontfix` if used).
    - **Decision makes the task actionable as-is**: Add `triage:ready`.
    - **Decision settles direction, but technical details or criteria remain open**: Add `triage:needs-definition`.
+   - **Decision makes the issue wait for other open issues**: Set native blocked-by relationships and add `triage:blocked`.
+   - **User decided to keep the issue as a parking lot or a parent tracked by children**: Add `triage:parked`.
 3. If the issue belongs to a parent theme, update the parent issue's rollup comment to reflect the new state.
 4. Report the updated status to the user and proceed to the next issue or cluster.
 

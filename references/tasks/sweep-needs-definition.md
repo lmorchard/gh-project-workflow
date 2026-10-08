@@ -2,7 +2,7 @@
 
 Develop open issues labeled `triage:needs-definition` into concrete, bounded specifications grounded in current target code. Define file boundaries, observable success conditions, and required tests, advancing each issue to `triage:ready`.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. The parent agent coordinates the sweep; subagents execute research and issue updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
+Apply [Triage labels](../shared/triage-labels.md), [Authorization](../shared/authorization.md), and [Evidence](../shared/evidence.md) throughout. The parent agent coordinates the sweep; subagents execute research and issue updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## List pending issues
 
@@ -25,7 +25,8 @@ Process issues one at a time or in bounded slices of 2 to 5 issues. For each iss
    - **Concrete Changes & File Targets**: Specific files, classes, methods, and configurations to modify. Prefer systemic autouse guards in shared test configuration (such as `conftest.py`) over per-test boilerplate when defining test hygiene rules.
    - **Explicit Exclusions & Verification Criteria**: What remains out of scope, exact unit tests to add or run, and passing gate checks. For prompt or eval disambiguation tasks subject to model variance, specify repeat-pass bounds (such as 5 consecutive passes) to prove resolution.
 4. If the scope is too broad for a single implementation task, scope a bounded first slice and recommend child issues or follow-up tasks.
-5. If technical investigation reveals a blocking product or design uncertainty that needs user judgment, stop specification, label the issue `triage:needs-input`, post the specific question, and return it to the parent.
+5. If the specification depends on open issues that will change the code or supply a contract, stop specification. Set native blocked-by relationships, optionally replace the body with an outline as [Triage labels](../shared/triage-labels.md) describes, label the issue `triage:blocked`, and return it to the parent. If only part of the issue waits, propose a split instead.
+6. If technical investigation reveals a blocking product or design uncertainty that needs user judgment, stop specification, label the issue `triage:needs-input`, post the specific question, and return it to the parent.
 
 ## Update the issue record
 
@@ -47,5 +48,5 @@ Return a summary table to the parent:
 
 - Issue number and title.
 - Defined technical boundary (primary files and tests).
-- Updated label (`triage:ready`, or reassigned to `triage:needs-input` if blocked).
+- Updated label (`triage:ready`, `triage:needs-input` for a user decision, or `triage:blocked` for an open dependency).
 - Suggested next step (direct implementation or queue for board scheduling).
