@@ -24,7 +24,7 @@ A clean update from the base adds no change of its own, so it does not need anot
 
 ## Require review evidence or permission
 
-Prefer a completed Copilot review of the current head. Read the review body, inline discussions, and relevant top-level comments, including all result pages.
+Apply the review-source policy in [Review](../shared/review.md). Read the review body, inline discussions, and relevant top-level comments, including all result pages.
 
 Merge only with one of these:
 
