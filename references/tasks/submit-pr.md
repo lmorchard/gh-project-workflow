@@ -1,6 +1,6 @@
 # Submit a pull request
 
-Publish a PR from existing committed work, move the issue to In review, and request a review. Hand off to a follow-up task without waiting for findings. Do not change code to address findings, merge, or enable automatic merge.
+Publish a PR from existing committed work, move the issue to In review, and request a review. Return a submission handoff for parent-owned follow-up without waiting for findings. Do not change code to address findings, merge, or enable automatic merge.
 
 Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout.
 
@@ -48,10 +48,11 @@ If the user requested Copilot and it is unavailable, use a completed different-m
 
 Read the CI and review state for the published head. Return:
 
-- The PR URL, head commit, worktree, and branch.
+- The issue and PR URLs, base and published head commits, worktree, and branch.
+- Exact source revisions used for instructions and tools, and authorization limits for the remaining endpoint.
 - The review source used. For a local review, include its head, findings, and the recorded model identities that show it is different from the implementer. For a Copilot request, include its time, requested reviewer, and existing review identifiers.
-- The observed CI and review state.
+- The observed CI and review state, with checks and reviews tied to their commits. Preserve original review request times, deadlines, and identifiers on resumption.
 - The board transition result, or why it was skipped or failed.
 - Any other incomplete operations.
 
-The parent can run [address-pr-review](address-pr-review.md) next to wait for review, address findings, and repair CI. Pass the existing authorization with the handoff. Each follow-up task can also start from an existing PR without this handoff.
+If the authorized endpoint includes follow-up, mark it incomplete and return the handoff under [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership). The parent directly dispatches [address-pr-review](address-pr-review.md) within the existing authorization. For a submission-only request, stop here. Each follow-up task can also start from an existing PR without this handoff.

@@ -25,7 +25,7 @@ Process one issue at a time:
 
 1. Select the top unblocked issue in `Ready`. When delivering to a review follow-up endpoint (without merge), ensure the selected task is independent of other in-flight PRs so it can branch cleanly from `origin/main`. If a task depends on code in an unmerged PR, either authorize merging the prerequisite PR first or defer the dependent task.
 2. Dispatch a subagent to execute [express-issue](express-issue.md) on that issue, passing the confirmed repository, issue number, authorization, and endpoint.
-3. Once the subagent completes, verify the result:
+3. On its submission handoff, apply [PR follow-up ownership](../shared/authorization.md#pr-follow-up-ownership). The conversation parent directly dispatches follow-up and receives the final report. If you are a delegated queue coordinator, relay the handoff and remaining queue scope to that parent, then stop. Resume from the parent's endpoint result before selecting another issue. After the chosen endpoint finishes, verify the result:
    - Did the task reach the expected endpoint?
    - Is the project board status updated to `In review` or `Done`?
 4. **Hard stop on disruption**:
@@ -34,7 +34,7 @@ Process one issue at a time:
      - Do not advance to the next issue in the queue.
      - Preserve the worktree and branch.
      - Return the blocker, error logs, and proposed remediation to the user.
-5. For a merge endpoint, wait for CI on the base branch's merge commit before you start the next issue. If it fails, treat it as a disruption and halt.
+5. For a merge endpoint, obtain CI on the base branch's merge commit through the responsible worker before you start the next issue. If it fails, treat it as a disruption and halt.
 6. If the issue successfully completes to the authorized endpoint, proceed to the next item in `Ready`.
 
 ## Conclude and hand off

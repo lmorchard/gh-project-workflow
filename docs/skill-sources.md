@@ -62,6 +62,22 @@ On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.
 
 The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. The skills omit unbounded repair loops and merge actions. The [Trial records](trials/README.md) list the submission and follow-up trials.
 
+## Parent ownership of PR follow-up
+
+[Issue #13](https://github.com/lmorchard/gh-project-workflow/issues/13) records Les's selected direction on 2026-10-07.
+A pull request (PR) proposes changes for review.
+The conversation parent dispatches follow-up directly after submission and receives its final report.
+Submission alone does not satisfy a review-follow-up endpoint.
+
+The issue cites ownership and reporting problems from the [Ready queue trial](trials/README.md#2026-10-05-ready-queue-burndown-on-board-6).
+At `b47c9d5088f471da5d7b35a56ecda6078dee02be`, express still waited for a nested follow-up worker.
+Shared authorization, evidence, and delivery callers now apply the selected ownership.
+The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
+
+The new ownership scenarios are constructed decision checks, not observed deliveries.
+The required live trial for issue #13 remains unperformed.
+It must include submission, direct parent dispatch, an external branch update, and the responsible worker's final report.
+
 ## Earlier dev-session guidance
 
 On 2026-09-30, we also read the local dev-session files under ~/.claude/skills/dev-session. The relevant sources were phases/pr.md and references/pr-body-template.md. These local sources have no pinned repository revision in this record.
