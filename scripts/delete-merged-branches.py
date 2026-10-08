@@ -108,6 +108,14 @@ def validate_pulls(items):
     return pulls
 
 
+def open_pull_sources(repo):
+    pulls = validate_pulls(paginated_json(
+        f"repos/{repo}/pulls?state=open&per_page=100", "open pull request inventory"))
+    if any(pull["state"] != "open" or pull["merged"] for pull in pulls):
+        raise EvidenceError("invalid open pull request inventory: response contained a closed pull request")
+    return {(pull["source"], pull["ref"]) for pull in pulls}
+
+
 def current_branch(repo, name):
     escaped = quote(name, safe="")
     data = gh_json([f"repos/{repo}/branches/{escaped}"], f"branch {name} tip")
@@ -152,8 +160,6 @@ def run(argv):
         print(f"error: {error}", file=sys.stderr)
         return 1
 
-    open_sources = {(pull["source"], pull["ref"])
-                    for pull in pulls if pull["state"] == "open"}
     merged_by_head = {}
     for pull in pulls:
         if pull["state"] == "closed" and pull["merged"] and pull["source"] == repo:
@@ -162,13 +168,16 @@ def run(argv):
 
     count = failures = 0
     for name, listed_sha in branches.items():
-        if name == default or (repo, name) in open_sources:
+        if name == default:
             continue
         numbers = merged_by_head.get((name, listed_sha))
         if not numbers:
             continue
         pr = max(numbers)
         try:
+            if (repo, name) in open_pull_sources(repo):
+                print(f"skipped {name}: an open pull request uses this branch")
+                continue
             tip = current_branch(repo, name)
         except EvidenceError as error:
             print(f"failed to verify {name}: {error}", file=sys.stderr)

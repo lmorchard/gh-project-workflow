@@ -46,6 +46,7 @@ class DeleteMergedBranchesTests(unittest.TestCase):
             "pulls": [[pull(12, "feature", MERGED)]],
             "branch_reads": {},
             "branch_reads_response": {},
+            "fresh_open_pulls": None,
             "fail": None,
             "malformed": None,
             "delete_fail": False,
@@ -65,6 +66,7 @@ endpoint = next((arg for arg in args if arg.startswith('repos/')), '')
 kind = ('delete' if '-X' in args and 'DELETE' in args else
         'branch' if '/branches/' in endpoint else
         'branches' if endpoint.endswith('/branches?per_page=100') else
+        'open_pulls' if endpoint.endswith('/pulls?state=open&per_page=100') else
         'pulls' if endpoint.endswith('/pulls?state=all&per_page=100') else
         'repo' if endpoint == 'repos/o/r' else 'unknown')
 if state['fail'] == kind:
@@ -79,6 +81,11 @@ if state['malformed'] == kind:
 if kind == 'repo': value = state['repo']
 elif kind == 'branches': value = state['branches']
 elif kind == 'pulls': value = state['pulls']
+elif kind == 'open_pulls':
+    value = state['fresh_open_pulls']
+    if value is None:
+        value = [[pull for pull in page if pull.get('state') == 'open']
+                 for page in state['pulls']]
 elif kind == 'branch':
     name = endpoint.split('/branches/', 1)[1]
     count = state['branch_reads'].get(name, 0)
@@ -142,17 +149,32 @@ print(json.dumps(value))
 
     def test_open_pr_on_later_page_blocks_deletion(self):
         self.config["pulls"] = [
-            [pull(12, "other", "d" * 40)],
+            [pull(12, "feature", MERGED)],
             [pull(99, "feature", MERGED, merged=False)],
         ]
         self.write_config()
         result = self.invoke("--yes")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.deletes(), [])
-        pulls_call = next(args for args in self.calls_made()
-                          if any("/pulls?state=all" in arg for arg in args))
-        self.assertIn("--paginate", pulls_call)
-        self.assertIn("--slurp", pulls_call)
+        open_call = next(args for args in self.calls_made()
+                         if any("/pulls?state=open" in arg for arg in args))
+        self.assertIn("--paginate", open_call)
+        self.assertIn("--slurp", open_call)
+
+        self.calls.unlink(missing_ok=True)
+        self.config["pulls"][1] = []
+        self.write_config()
+        result = self.invoke("--yes")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(self.deletes()), 1)
+
+    def test_open_pr_added_after_merged_inventory_blocks_deletion(self):
+        self.config["pulls"] = [[pull(12, "feature", MERGED)]]
+        self.config["fresh_open_pulls"] = [[pull(99, "feature", "d" * 40, merged=False)]]
+        self.write_config()
+        result = self.invoke("--yes")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.deletes(), [])
 
     def test_open_pr_from_another_source_repository_does_not_match(self):
         self.config["pulls"] = [
@@ -172,7 +194,7 @@ print(json.dumps(value))
         self.assertEqual(self.deletes(), [])
 
     def test_api_read_error_fails_closed(self):
-        for kind in ("repo", "branches", "pulls"):
+        for kind in ("repo", "branches", "pulls", "open_pulls"):
             with self.subTest(kind=kind):
                 self.config["fail"] = kind
                 self.write_config()
@@ -184,7 +206,7 @@ print(json.dumps(value))
         self.config["fail"] = None
 
     def test_malformed_inventory_fails_closed(self):
-        for kind in ("repo", "branches", "pulls"):
+        for kind in ("repo", "branches", "pulls", "open_pulls"):
             with self.subTest(kind=kind):
                 self.config["malformed"] = kind
                 self.write_config()
