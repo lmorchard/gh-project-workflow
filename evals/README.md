@@ -16,6 +16,22 @@ Write the situation as facts that the agent observes. Do not hint at the answer 
 
 ## Run a scenario
 
+Use `scripts/run_scenario.py` to build and run a prompt from one committed scenario. The runner reads only the Situation section. It resolves `skills` task names to paths in a read-only snapshot of the selected commit. It records the source fingerprint and prompt hash with the raw answers and run details. It does not grade answers.
+
+Preview a prompt without launching a model session:
+
+```sh
+make run-scenario ARGS="SCENARIO --runner codex --model MODEL --dry-run"
+```
+
+Run a scenario and write its answers and provenance into a new output directory:
+
+```sh
+make run-scenario ARGS="SCENARIO --runner codex --model MODEL --repeat 2 --output-dir /tmp/scenario-run"
+```
+
+Use `--runner claude` to select Claude Code. Use `--commit COMMIT` to select a source revision. The default source is `HEAD`. Review and grade the answers separately.
+
 Start a fresh agent with no conversation history. Give it this prompt, with the skill paths and the situation filled in:
 
 ```text

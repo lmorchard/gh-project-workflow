@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+TASK_NAME = NAME
 
 
 def frontmatter(text):
@@ -95,8 +96,55 @@ def check_links(root=ROOT):
     return errors
 
 
+def scenario_skills(text):
+    if not text.startswith("---\n"):
+        return None
+    end = text.find("\n---\n", 4)
+    if end < 0:
+        return None
+    skills = []
+    in_skills = False
+    for line in text[4:end].splitlines():
+        if line.startswith("skills:"):
+            in_skills = True
+            value = line.partition(":")[2].strip()
+            if value:
+                if not (value.startswith("[") and value.endswith("]")):
+                    return None
+                skills.extend(item.strip().strip("'\" ") for item in value[1:-1].split(",")
+                              if item.strip())
+            continue
+        if in_skills and line.lstrip().startswith("-"):
+            skills.append(line.split("-", 1)[1].strip().strip("'\" "))
+            continue
+        if line and not line[0].isspace():
+            in_skills = False
+    return skills
+
+
+def check_scenario_skills(root=ROOT):
+    errors = []
+    tasks = {
+        path.stem for path in (root / "references/tasks").glob("*.md")
+        if path.name != "research.md"
+    }
+    scenarios = root / "evals/scenarios"
+    for path in sorted(scenarios.glob("*.md")):
+        skills = scenario_skills(path.read_text())
+        rel = path.relative_to(root)
+        if skills is None:
+            errors.append(f"{rel}: invalid skills list")
+            continue
+        if not skills:
+            errors.append(f"{rel}: skills list is empty")
+        for name in skills:
+            if not TASK_NAME.fullmatch(name) or name not in tasks:
+                errors.append(f"{rel}: unknown task in skills: {name}")
+    return errors
+
+
 def main():
-    errors = check_skills() + check_links()
+    errors = check_skills() + check_links() + check_scenario_skills()
     for error in errors:
         print(error, file=sys.stderr)
     return 1 if errors else 0

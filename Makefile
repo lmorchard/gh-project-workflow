@@ -1,7 +1,7 @@
 # Diff against the empty tree so whitespace checks cover all tracked files.
 EMPTY_TREE := $(shell git hash-object -t tree /dev/null)
 
-.PHONY: check test
+.PHONY: check test run-scenario
 
 check: test
 	python3 scripts/check.py
@@ -10,3 +10,6 @@ check: test
 test:
 	python3 -m unittest discover -s cli
 	python3 -m unittest discover -s scripts
+
+run-scenario:
+	python3 scripts/run_scenario.py $(ARGS)
