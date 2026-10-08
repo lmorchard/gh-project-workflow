@@ -2,7 +2,7 @@
 
 Take an existing PR through one review cycle and CI repair, and return the final report directly to the parent. This skill can follow [submit-pr](submit-pr.md) or start from a PR created elsewhere. It acts on review findings; it does not provide independent review. It stops before merge.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Establish the task
 
@@ -30,7 +30,7 @@ Continue until CI passes or a concrete blocker prevents useful work. Do not retr
 
 ## Wait for the review
 
-Inspect existing feedback first, using `pr-state` from [Evidence](../shared/evidence.md) for review requests, reviews, and checks on the current head. If the requested review is already complete, go straight to its findings.
+Inspect existing feedback first, using `pr-state` from [CLI results](../cli.md#reading-pr-state) for review requests, reviews, and checks on the current head. If the requested review is already complete, go straight to its findings.
 
 Otherwise, use the request time, requested head, and prior review identifiers from the handoff or GitHub. Set the deadline 20 minutes after the request. If the request time is unknown, record that and wait once, for 20 minutes from now. On resumption, keep the recorded deadline. A push does not reset it.
 

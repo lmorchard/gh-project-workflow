@@ -1,6 +1,10 @@
-# Agent identity: research and trial proposal
+# Agent identity: adoption research and trials
 
-This document records research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1). It is a proposal. Les has not decided to adopt a separate identity.
+Les adopted the machine account identity on 2026-10-03 after a scratch-repository trial and a real delivery trial.
+[Agent identity](../references/shared/identity.md) supplies current runtime rules. [Machine account access](../README.md#machine-account-access) supplies setup instructions.
+
+This document preserves research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1), the original proposal, and the trial results.
+The research and proposal describe the pre-adoption context. GitHub behavior and access claims below describe the recorded date.
 
 A research subagent did the work on 2026-10-03. It read agent-sessions at commit `4379832`, live GitHub data for lmorchard repositories, and current GitHub documentation. The parent examined two of its claims against live data. Labels show the source of each claim:
 
@@ -43,7 +47,7 @@ A GitHub App does not work while the boards are user-owned. A machine user can d
 
 - It needs a classic token with broad scopes.
 - Les must add it to each board.
-- It probably needs a paid Copilot seat. Without one, agent PRs lose Copilot review, which the merge policy prefers.
+- It probably needs a paid Copilot seat. Without one, agent PRs lose Copilot review, which the pre-adoption merge policy preferred.
 
 A separate identity makes board changes attributable and lets Les approve agent PRs. It does not show whether a Copilot request came from automation. The ruleset records the PR author as the actor of its automatic request [AS]. A timing check in `pr-state` must solve that problem separately.
 

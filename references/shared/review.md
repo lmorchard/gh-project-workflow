@@ -4,7 +4,7 @@ These rules apply to every skill that requests, performs, waits for, or relies o
 
 ## Review sources
 
-For an agent pull request, the primary review source is **independent local review**, done with [review-changes](../tasks/review-changes.md) in a fresh context. [Agent identity](identity.md) states this policy.
+For an agent pull request, the primary review source is **independent local review**, done with [review-changes](../tasks/review-changes.md) in a fresh context.
 
 The user may request **Copilot** review manually, in the GitHub web interface or with `gh pr edit PR_URL --add-reviewer "@copilot"`. Copilot is not the default for agent pull requests. Its underlying model is unknown unless something identifies it.
 

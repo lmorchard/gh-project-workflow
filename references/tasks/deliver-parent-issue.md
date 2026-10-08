@@ -2,7 +2,7 @@
 
 Work through the children needed to satisfy one selected parent issue, reusing the existing skills and carrying decisions between them. Continue from child to child without the user restarting the flow. Stop at the parent's boundary.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Establish the boundary
 

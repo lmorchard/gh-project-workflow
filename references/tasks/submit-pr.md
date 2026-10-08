@@ -2,7 +2,7 @@
 
 Publish a PR from existing committed work, move the issue to In review, and request a review. Return a submission handoff for parent-owned follow-up without waiting for findings. Do not change code to address findings, merge, or enable automatic merge.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Prepare the branch and description
 
@@ -38,7 +38,7 @@ When the PR is ready for review, move the issue it implements to In review, foll
 
 For an agent pull request, the primary review source is a different-model local review, as [Review](../shared/review.md) states. A completed independent local review of the published head lets the PR proceed. A review that covers an earlier commit does not qualify. Do not request Copilot by default.
 
-Request Copilot review only when the user asked for it. Read the current requests and reviews with `pr-state`, described in [Evidence](../shared/evidence.md). Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
+Request Copilot review only when the user asked for it. Read the current requests and reviews with `pr-state`, described in [CLI results](../cli.md#reading-pr-state). Follow the request rules in [Review](../shared/review.md): check for an existing request first, including an automatic one.
 
 Record the request time, the requested head, and existing review identifiers. Read back the request or the resulting review.
 

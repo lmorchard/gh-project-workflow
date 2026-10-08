@@ -2,7 +2,7 @@
 
 Coordinate the sequential delivery of issues currently staged in the project board's `Ready` column. Process each issue one at a time up to the agreed endpoint using [express-issue](express-issue.md). Stop immediately if an issue hits an unexpected blocker, check failure, or review objection. This skill is strictly bounded to the existing `Ready` queue and does not select or prioritize work from the backlog.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), [Review](../shared/review.md), [Board status](../shared/board-status.md), and [Agent identity](../shared/identity.md) throughout.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), [Review](../shared/review.md), [Board status](../shared/board-status.md), and [Agent identity](../shared/identity.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Audit the Ready queue
 

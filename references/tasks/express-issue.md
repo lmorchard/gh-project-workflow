@@ -2,7 +2,7 @@
 
 Coordinate implementation, independent review, and submission for one selected issue. A delegated coordinator stops after submission and hands the remaining agreed endpoint to the parent. Dispatch tasks rather than repeating their procedures here. Each operation remains usable without this coordinator.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Review](../shared/review.md) throughout. Apply [Coordination](../shared/coordination.md) to dispatch and handoffs. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Establish the task and endpoint
 

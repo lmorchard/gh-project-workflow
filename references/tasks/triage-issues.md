@@ -2,7 +2,7 @@
 
 Evaluate a batch of open issues to identify completed, obsolete, well-defined, or uncertain work. Post findings comments on the issues and apply triage labels (`triage:agent-closed`, `triage:needs-input`, `triage:needs-definition`, `triage:ready`). Close confirmed completed or obsolete issues with evidence. This skill does not implement changes, submit PRs, or modify project boards.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Agent identity](../shared/identity.md) throughout.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Agent identity](../shared/identity.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Select the issue batch
 

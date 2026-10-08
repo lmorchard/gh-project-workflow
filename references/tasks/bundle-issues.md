@@ -2,7 +2,7 @@
 
 Survey an open issue backlog, cluster related items into thematic initiatives, and organize them under native GitHub parent issues. This groups scattered issues by code boundary and outcome before deep triage or implementation.
 
-Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Agent identity](../shared/identity.md) throughout. The parent agent discusses proposed clusters with the user; subagents execute issue creation and relationship updates in the subject repository.
+Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence.md), and [Agent identity](../shared/identity.md) throughout. The parent agent discusses proposed clusters with the user; subagents execute issue creation and relationship updates in the subject repository. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Survey the backlog
 

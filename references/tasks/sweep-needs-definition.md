@@ -2,7 +2,7 @@
 
 Develop open issues labeled `triage:needs-definition` into concrete, bounded specifications grounded in current target code. Define file boundaries, observable success conditions, and required tests, advancing each issue to `triage:ready`.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. The parent agent coordinates the sweep; subagents execute research and issue updates in the subject repository following [Agent identity](../shared/identity.md).
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. The parent agent coordinates the sweep; subagents execute research and issue updates in the subject repository following [Agent identity](../shared/identity.md). Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## List pending issues
 

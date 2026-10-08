@@ -2,7 +2,7 @@
 
 Produce tested, committed changes for the requested issue, with enough evidence for another agent to prepare a PR. This skill ends with a local branch and a report. Do not push, open a PR, merge, or remove the worktree.
 
-Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout.
+Apply [Authorization](../shared/authorization.md) and [Evidence](../shared/evidence.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Read the issue and current code
 

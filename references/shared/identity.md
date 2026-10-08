@@ -64,17 +64,12 @@ eval "$(python3 "$GHFLOW_CLI" identity --export)"
 
 Do not print, log, or echo raw token content. Do not run `gh auth login`, `gh auth switch`, or `gh auth logout`.
 
-## Code review
-
-A machine account without a paid Copilot seat does not trigger automatic Copilot reviews on pull requests.
-
-Follow [Review](review.md): an independent different-model local review is the primary review source for agent pull requests. The user may manually request a Copilot review in the GitHub web interface if desired.
+## Personal approval
 
 Do not submit a GitHub APPROVED review as the repository owner from an agent. A formal GitHub approval is the user's personal action.
+Follow [Review](review.md) for review sources and requirements.
 
-## Repository and board access
+## Access failures
 
-Before an agent works in a repository or project board, the repository owner must grant access:
-
-- Add the machine user as a repository collaborator with Write access.
-- For user-owned project boards, add the machine user as a writer with `scripts/add-board-writer.sh OWNER PROJECT_NUMBER LOGIN` from the source checkout. Resolve that script from the checkout containing the entry skill, not from the target project.
+The machine account needs repository and project access before a task starts. [Machine account access](../../README.md#machine-account-access) describes setup.
+If access is missing, report the required action. Do not switch accounts or change credentials to bypass the failure.

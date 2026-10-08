@@ -2,7 +2,7 @@
 
 Assess proposed changes against their issue and the current code. Report defects and missing evidence without modifying the implementation. The next task assesses and addresses the findings.
 
-Apply [Evidence](../shared/evidence.md) and [Review](../shared/review.md) throughout.
+Apply [Evidence](../shared/evidence.md) and [Review](../shared/review.md) throughout. Before changing GitHub records, apply [GitHub writes](../shared/github-writes.md).
 
 ## Set up the reviewer
 
