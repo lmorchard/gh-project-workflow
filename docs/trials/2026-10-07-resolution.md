@@ -3,8 +3,8 @@
 Three fresh task sessions used the existing guidance successfully at `b47c9d5088f471da5d7b35a56ecda6078dee02be`.
 The agents resolved a fact and a routine technical choice through observed actions.
 The third agent returned a consequential product choice with evidence, alternatives, and a recommendation.
-No workflow instruction changed.
-This comparison supplies the agreed first increment of [issue #2](https://github.com/lmorchard/gh-project-workflow/issues/2).
+No workflow instruction changed during these action trials.
+This comparison supplies behavioral evidence for the agreed first increment of [issue #2](https://github.com/lmorchard/gh-project-workflow/issues/2).
 The later experiments in that issue remain open.
 
 ## Task inputs and boundaries
@@ -117,3 +117,7 @@ Later issue #2 experiments cover failure diagnosis, discovery reuse, lesson rout
 This comparison does not claim those results or closure of the umbrella issue.
 
 The record applies the available Simple English guidance. Full ASD-STE100 compliance needs review against the official standard and dictionary.
+
+## Maintained follow-up
+
+Les later requested persistent guidance in PR #20. The shared [decision procedure](../../references/shared/authorization.md#questions-for-the-user) and [evidence reuse rule](../../references/shared/evidence.md#sources-and-revisions) now state the boundary explicitly. Five reusable scenarios assess those instructions and the maintenance rule. The [scenario results](../../evals/results/2026-10-08-resolution.md) record fresh samples with separate grading criteria. This historical action comparison remains evidence about `b47c9d5`, not an action trial of the revised text.

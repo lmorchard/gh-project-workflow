@@ -102,3 +102,13 @@ The first layout used a portable launcher to resolve the CLI from the source che
 Les then selected a repository-root skill package for PR #17.
 The root entry now uses the existing CLI directly.
 It supplies the absolute source path and preserves the caller's directory.
+
+## Routine resolution and necessary decisions
+
+The [issue #2 comparison](trials/2026-10-07-resolution.md) observed three fresh agents using the existing guidance successfully at `b47c9d5`. They researched a fact, implemented a routine choice, and returned an unresolved product decision.
+
+Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [authorization rules](../references/shared/authorization.md#questions-for-the-user) now distinguish these three cases at the decision point. The [evidence rules](../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
+
+The [maintenance rule](skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
+
+The [scenario results](../evals/results/2026-10-08-resolution.md) assess the revised guidance separately from the earlier action trials. Broader issue #2 experiments remain deferred.

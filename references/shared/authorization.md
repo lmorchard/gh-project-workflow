@@ -45,8 +45,14 @@ Never infer a decision or a permission from silence.
 
 ## Questions for the user
 
-Ask only about decisions that evidence cannot settle: intent, scope, behavior, cost, compatibility, permissions, and disputed findings. Research facts instead of asking about them.
+Before asking, identify what is missing: a fact, an implementation choice, or a decision about the intended result.
 
-Ask one focused question at a time. Include a recommendation and its tradeoff when the evidence supports one. Use answers that the user already gave.
+Research discoverable facts in current code, tests, documentation, or other relevant sources. Follow [Evidence](evidence.md#sources-and-revisions) when reusing earlier findings. An unread source is an evidence gap, not a user decision.
 
-Return to the user when a material decision or blocker prevents further useful work. Continue independent work that does not depend on the answer.
+Resolve routine, reversible implementation choices from project conventions, current evidence, and confirmed decisions. Act within the existing authorization. Explain the choice when it affects the result or handoff. Reversibility alone does not settle a product decision.
+
+Return an unresolved decision when viable answers change intent, scope, user-visible behavior, compatibility, cost, or permissions. Return disputed findings when current evidence cannot settle a material disagreement. Research can establish the alternatives and their effects. It cannot choose between conflicting user requirements. Do not silently add a requirement or widen authorization.
+
+Ask one focused question at a time. State the evidence, a recommended answer, and its tradeoff when the evidence supports one. Identify uncertainty that affects the recommendation. Use answers that the user already gave.
+
+A subagent returns that question to the parent. Continue independent work that does not depend on the answer. Keep dependent work pending until the decision arrives. If a blocker leaves no useful independent work, report it to the parent or user. Apply the existing authorization and silence limits above.

@@ -42,6 +42,8 @@ Use "Do not" for a specific temptation with a real cost, such as `gh pr create -
 
 Before you add a rule for an incident, look for the general rule that the agent missed. Strengthen or clarify that rule instead of adding a new special case. Record the incident and the commit in [Trial records](trials/README.md).
 
+When an authorized workflow improvement changes a future task decision, update the owning task or shared reference. Add a reusable scenario with separate grading criteria. Keep the observed evidence and its limits in the source or trial record. A passive record alone does not deliver that behavior change. Propose other opportunities separately when authorization does not cover them. This rule does not require changes or a report after every task.
+
 Test each sentence: would an agent act differently without it? If not, remove it. Remove rules when use shows that they add text without changing results.
 
 ## Commands
