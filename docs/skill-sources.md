@@ -167,6 +167,12 @@ Les requested this pass after the authorization split in PR #20.
 [GitHub writes](../references/shared/github-writes.md) owns shared write recovery rules.
 The [burndown retrospective](trials/2026-10-05-ready-queue-burndown.md) preserves the detailed narrative formerly in the trial index.
 
+## Sandboxed GitHub authentication
+
+The [issue #28 submission record](trials/README.md#2026-10-09-issue-28-submission-and-sandboxed-github-access) found that a sandboxed `ghflow exec` failure did not match the host keyring result.
+The shared [agent identity reference](../references/shared/identity.md#sandboxed-github-checks) now requires checking both contexts before reporting a token failure or changing credentials.
+The [submission scenario](../evals/scenarios/submit-pr-sandbox-auth-context.md) records the decision and its grading criteria.
+
 ## User-approved review exceptions
 
 On 2026-10-08, Les approved skipping different-model review for this project's OpenCode setup with local `qwen3.8:latest`.
