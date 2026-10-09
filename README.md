@@ -1,11 +1,7 @@
-# gh-project-workflow
+# ghflow
 
 `ghflow` helps a person and an agent prepare GitHub issues, implement selected work, review changes, and deliver pull requests.
 A pull request (PR) proposes changes for review.
-The project supplies an agent skill, reusable task instructions for Claude Code, Codex, and OpenCode.
-
-Use individual operations or request delivery of a selected issue, parent issue, or Ready queue on a project board.
-Delivery through review follow-up leaves the PR open. Merge requires explicit authorization.
 
 ## Get started
 
@@ -28,8 +24,6 @@ Start a new agent session in the target checkout and try a read-only request:
 ```text
 Use ghflow to reassess https://github.com/lmorchard/gh-project-workflow/issues/23. Return findings only. Do not edit GitHub records or implement changes.
 ```
-
-Issue #23 is closed. A result with no remaining work is valid when current evidence supports it.
 
 ## Find the relevant docs
 
