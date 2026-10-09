@@ -26,7 +26,7 @@ The CLI does not call models, select tasks, schedule work, or infer approval.
 ## Skill package and delivery
 
 The repository root contains the single `ghflow` skill. Task procedures and shared rules live in `references/`.
-Personal symbolic links install the checkout root. [Setup](../README.md#setup) records commands, source access, and the nested-worktree discovery limitation.
+Personal symbolic links install the checkout root. [Setup](setup.md) records commands, source access, and the nested-worktree discovery limitation.
 
 Individual tasks remain usable directly. Delivery coordinators combine tasks within an explicitly selected issue, parent, or Ready queue.
 Coordination follows [roles and handoffs](../references/shared/coordination.md). It requires available subagent dispatch.
