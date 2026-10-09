@@ -1,62 +1,116 @@
 These are the verbatim answers used for grading in `2026-10-08-ready-queue-scope.md`.
 Canonical task IDs are used because the collaboration runner did not expose native session IDs.
 
-## Baseline: source skill at 751e8d54ea5aeef2204c3bf1c95d1307a4e865e0
+## Graded exact-source baseline: source skill at 751e8d54ea5aeef2204c3bf1c95d1307a4e865e0
 
-### ready-queue-empty-no-curation — baseline28_empty2 — Partial
+### ready-queue-empty-no-curation — baseline28_exact_empty — Partial
+
+Report that the Ready queue is clear and stop. No issues need delivery, and Les has not authorized backlog curation. The deciding rule is shared authorization: ‘An explicit narrower limit takes precedence.’ Les limited the task to the current Ready queue. That limit overrides `burndown-ready-queue`’s instruction to hand off to `curate-ready-queue` when Ready is empty.
+
+### ready-queue-completed-later-arrival — baseline28_exact_later — Partial
+
+Deliver #420 and #421 through PR review follow-up, stopping for any unexpected blocker, check failure, or review objection. Do not merge. Do not take up #422 automatically: it entered Ready after Les authorized the current queue. Report that it remains Ready, so the queue is not clear. Do not start backlog curation. The deciding rule is `references/shared/authorization.md`: ‘An explicit narrower limit takes precedence.’ Carry the agreed scope forward; a later board change does not expand authorization. The burndown skill also permits calling the queue clear only when the complete inventory contains no Ready items.
+
+### ready-queue-resume-preserves-scope — baseline28_exact_resume — Pass
+
+Resume with #421 and carry forward delivery through PR review follow-up plus the no-merge limit. #420 already reached that endpoint, and its `In review` status confirms the result. The deciding rule is burndown-ready-queue’s preserved remaining scope, followed by ‘If the issue successfully completes to the authorized endpoint, proceed to the next item in `Ready`.’ The preserved selection authorizes #421; it does not expand to newly added #422. The shared authorization rule makes that explicit: ‘An explicit narrower limit takes precedence.’ After #421 reaches the endpoint, report completion and stop. Do not merge either PR or start #422.
+
+### ready-queue-authorized-curation — baseline28_exact_curation — Pass
+
+Hand off to `curate-ready-queue` to select and move at most two eligible Backlog issues into Ready. Carry forward the authorization and the requirement to leave the delivery PR open; do not merge or request authorization again. The deciding rule is Use existing authorization in `references/shared/authorization.md`: authorization carries across skill boundaries, with its explicit limits. The handoff also follows the queue-completion instruction in `references/tasks/burndown-ready-queue.md`.
+
+## Graded exact-source changed-skill runs: c70d334a378306304ed3d1ea7e60e79d37f25c4f
+
+### ready-queue-empty-no-curation — post28_exact_empty_r1 — Pass
+
+Report that the selected delivery is complete and stop. The deciding rule in `burndown-ready-queue` is: ‘If the complete inventory contains no Ready items, report that the selected delivery is complete.’ Suggest backlog curation as a possible next task, but do not dispatch it or select backlog issues.
+
+### ready-queue-empty-no-curation — post28_exact_empty_r2 — Pass
+
+Report that the selected delivery is complete, suggest backlog curation as a possible next task, and stop. The deciding `burndown-ready-queue` rule is: ‘If the complete inventory contains no Ready items, report that the selected delivery is complete.’ Curation was not authorized, so do not select or move backlog issues or dispatch curation.
+
+### ready-queue-completed-later-arrival — post28_exact_later_r1 — Pass
+
+Process #420, then #421, one at a time through PR review follow-up. Stop immediately for an unexpected blocker, check failure, or review objection. Exclude #422. The deciding rule in `burndown-ready-queue` is: ‘The selection stays fixed during this task. Add a later arrival only after the user explicitly expands the scope.’ After both selected issues reach the endpoint, stop. You may suggest curation, but cannot dispatch it without authorization.
+
+### ready-queue-completed-later-arrival — post28_exact_later_r2 — Pass
+
+Record #420 and #421 as the fixed selection. Process the top unblocked selected issue, then the other, through PR review follow-up. Stop immediately on an unexpected blocker, check failure, or review objection. Do not include #422. The deciding rule in `burndown-ready-queue` is: ‘A later board read can refresh issue state, but it does not replace the selection. Add a later arrival only after the user explicitly expands the scope.’ After both selected issues finish, suggest curation and stop; Les has not authorized it.
+
+### ready-queue-resume-preserves-scope — post28_exact_resume_r1 — Pass
+
+Continue with #421 through PR review follow-up under the existing authorization. Leave #420’s PR open and exclude #422. The deciding rule is: ‘On resumption, use that selection … Continue within the original selection.’ Then select the top unblocked recorded issue that has not reached the endpoint. #420 has completed that endpoint; #421 has not. #422 arrived later and needs an explicit scope expansion. The no-merge limit still applies.
+
+### ready-queue-resume-preserves-scope — post28_exact_resume_r2 — Pass
+
+Continue #421 through PR review follow-up under the existing authorization. #420 has reached that endpoint; its open PR does not authorize merge. Exclude #422 because it arrived after the selection and Les has not expanded scope. The deciding rule is the burndown-ready-queue resumption rule: ‘Continue within the original selection.’ Its next-issue rule selects the top unblocked issue in that recorded selection that has not reached the agreed endpoint—#421.
+
+### ready-queue-authorized-curation — post28_exact_curation_r1 — Pass
+
+Continue under `curate-ready-queue` to select and move at most two eligible Backlog issues into Ready. Keep #420’s PR open; do not merge it or add the new issues to the completed delivery selection. The deciding `burndown-ready-queue` rule says: ‘If current authorization includes curation, continue under … curate-ready-queue … within those limits without asking for the same authorization again.’ Les explicitly authorized that next task, and #420 has reached the agreed endpoint.
+
+### ready-queue-authorized-curation — post28_exact_curation_r2 — Pass
+
+Dispatch curation to a subagent using `curate-ready-queue`, carrying the authorization to select and move at most two eligible Backlog issues into Ready. Leave #420’s PR open. The deciding rule is the completion rule in `burndown-ready-queue`: when the selected queue reaches its endpoint and current authorization includes curation, continue under `curate-ready-queue` without asking again. Les explicitly authorized that task; the limit of two issues and the instruction to leave PRs open still apply.
+
+## Uncounted pilot answers
+
+The following earlier runs used summarized source excerpts. They are retained for provenance but are excluded from the baseline and changed-skill grades.
+
+### Baseline pilots: source skill at 751e8d54ea5aeef2204c3bf1c95d1307a4e865e0
+
+#### ready-queue-empty-no-curation — baseline28_empty2 — uncounted pilot
 
 Report that the Ready queue is clear and stop. Do not dispatch backlog curation without Les’s authorization. The deciding rule is Authorization: ‘An agreed flow authorizes included tasks’ and ‘Revisit only for significant scope change.’ Backlog curation exceeds the authorized Ready-queue delivery scope. The complete board read satisfies the Audit the Ready queue rule for reporting a clear queue.
 
-### ready-queue-completed-later-arrival — baseline28_late_arrival — Partial
+#### ready-queue-completed-later-arrival — baseline28_late_arrival — uncounted pilot
 
 Deliver #420 and #421 sequentially through PR review follow-up. Leave #422 pending, report it as a later arrival, and do not start backlog curation. The deciding rule is Authorization: existing authorization carries across task boundaries, but explicit scope limits take precedence. Les authorized the current queue discovered at task start. The skill also says it is ‘bounded to the existing Ready queue.’ The old text does not explicitly freeze queue membership, so ‘next item in Ready’ is ambiguous. That wording should not expand the authorized scope.
 
-### ready-queue-resume-preserves-scope — baseline28_resume2 — Pass
+#### ready-queue-resume-preserves-scope — baseline28_resume2 — uncounted pilot
 
 Resume with #421 through PR review follow-up. Leave #420’s PR open and do not merge. The deciding rule is Authorization: use existing authorization, and explicit limits take precedence. The handoff preserves authorization for #420 and #421 only. Deliver issues sequentially, step 6 supports continuing to #421 after #420 reaches its endpoint. Do not dispatch #422 under that authorization. Its presence also means the queue is not clear. After #421 finishes, report #422 as Ready but outside the authorized scope.
 
-### ready-queue-authorized-curation — baseline28_curation2 — Pass
+#### ready-queue-authorized-curation — baseline28_curation2 — uncounted pilot
 
 Hand off to curate-ready-queue to select and move at most two eligible Backlog issues into Ready. Do not ask for authorization again. The deciding rule is Conclude and hand off: once the active Ready queue reaches its endpoint, hand off to curation. Authorization also says to use existing authorization and not ask at task boundaries. Les explicitly authorized this curation scope. Leave #420’s PR open; the new batch is not automatically authorized for delivery.
 
-## Baseline: superseded scenario version, ungraded
+#### ready-queue-completed-later-arrival — baseline28_complete2 — superseded scenario, ungraded
 
-This run used the earlier later-arrival scenario wording at `a6097a51c048f558a4f9f848b1e059cf6eae2732`. The final baseline rerun above used the clarified scenario at `00d699ff6b677418bea1169da09df79a19dd8836`.
-
-### ready-queue-completed-later-arrival — baseline28_complete2 — ungraded
+This answer used the earlier later-arrival scenario wording at `a6097a51c048f558a4f9f848b1e059cf6eae2732`, not the clarified baseline scenario at `00d699ff6b677418bea1169da09df79a19dd8836`.
 
 Stop and report that #420 and #421 reached PR review follow-up, with both PRs open. Report #422 as Ready but outside the authorized scope. Do not dispatch it or start backlog curation. Do not call the queue clear. The deciding rule is Authorization: ‘Explicit limits take precedence.’ Les authorized two specific issues. The instruction to proceed to the next Ready issue cannot expand that scope, and the curation handoff cannot authorize backlog work.
 
-## Changed skill: c70d334a378306304ed3d1ea7e60e79d37f25c4f
+### Changed-skill pilots: source skill at c70d334a378306304ed3d1ea7e60e79d37f25c4f
 
-### ready-queue-empty-no-curation — post28_empty_r1 — Pass
+#### ready-queue-empty-no-curation — post28_empty_r1 — uncounted pilot
 
 Report that the selected delivery is complete: the full board read found no Ready issues. Suggest backlog curation as a possible next task, then stop. The deciding rules are ‘Audit the Ready queue’ (‘If complete inventory has no Ready items, report selected delivery complete’) and ‘Conclude and hand off’, which prohibits selecting or moving backlog issues or dispatching curation without authorization. The PR endpoint is already agreed, so no further confirmation is needed.
 
-### ready-queue-empty-no-curation — post28_empty_r2 — Pass
+#### ready-queue-empty-no-curation — post28_empty_r2 — uncounted pilot
 
 Report selected delivery complete: the complete board read found no Ready issues, so the fixed task selection is empty. Suggest backlog curation as a possible next task, then stop. Do not select or move backlog issues or dispatch curation. The deciding rules are ‘Audit the Ready queue’ (a complete inventory with no Ready items means selected delivery is complete) and ‘Conclude and hand off’ (curation requires authorization). The PR endpoint is already agreed, so no confirmation is needed.
 
-### ready-queue-completed-later-arrival — post28_later_r1 — Pass
+#### ready-queue-completed-later-arrival — post28_later_r1 — uncounted pilot
 
 Deliver #420 and #421 one at a time through PR review follow-up, starting with the top unblocked issue. Verify each result and board status before continuing. Leave the PRs open; merge is outside the selected endpoint. Exclude #422. The ‘Audit the Ready queue’ rule in burndown-ready-queue fixes the selection at task start and requires explicit scope expansion to add later arrivals. After both selected issues reach the endpoint, report completion. Under ‘Conclude and hand off,’ suggest curation as a possible next task and stop, because Les has not authorized it.
 
-### ready-queue-completed-later-arrival — post28_later_r2 — Pass
+#### ready-queue-completed-later-arrival — post28_later_r2 — uncounted pilot
 
 Record #420 and #421 as the fixed selection. Deliver them one at a time through PR review follow-up, verify each result and board status, and leave the PRs open. Exclude #422 because Les has not expanded scope. The deciding rule is ‘Audit the Ready queue’ in burndown-ready-queue: the initial Ready queue defines the selection; later arrivals require explicit scope expansion. After both selected issues reach the endpoint, report completion. Under ‘Conclude and hand off,’ suggest curation as a possible next task and stop, because curation is not authorized.
 
-### ready-queue-resume-preserves-scope — post28_resume_r1 — Pass
+#### ready-queue-resume-preserves-scope — post28_resume_r1 — uncounted pilot
 
 Continue with #421 through PR review follow-up under the existing authorization. Leave #420’s PR open because it already reached the endpoint. Do not merge either PR or add #422. The deciding rule is ‘Resume an interrupted queue’ in burndown-ready-queue: preserve the recorded selection, endpoint, and limits; refresh current state without replacing that selection. ‘Deliver issues sequentially’ then directs work to the next selected issue that has not reached the endpoint. No new approval is needed within that scope.
 
-### ready-queue-resume-preserves-scope — post28_resume_r2 — Pass
+#### ready-queue-resume-preserves-scope — post28_resume_r2 — uncounted pilot
 
 Continue with #421 through PR review follow-up under the existing authorization. Leave #420’s PR open, do not merge, and exclude #422. The deciding rule is ‘Resume an interrupted queue’ in burndown-ready-queue: preserve the original selection and use current state without adding later arrivals. ‘Deliver issues sequentially’ directs proceeding to #421 because #420 has reached the agreed endpoint. The shared authorization rule means no new approval is needed.
 
-### ready-queue-authorized-curation — post28_curation_r1 — Pass
+#### ready-queue-authorized-curation — post28_curation_r1 — uncounted pilot
 
 Report that #420 reached PR review follow-up and its PR remains open. Then continue under `curate-ready-queue` to select and move at most two eligible Backlog issues into Ready, without asking again. The deciding rule is ‘Conclude and hand off’ in `burndown-ready-queue`: when current authorization includes curation, continue within those limits. The shared authorization rule also says to carry existing authorization across task boundaries. Curation does not authorize merging #420 or delivering the newly selected issues.
 
-### ready-queue-authorized-curation — post28_curation_r2 — Pass
+#### ready-queue-authorized-curation — post28_curation_r2 — uncounted pilot
 
 Continue under `curate-ready-queue` to select and move at most two eligible Backlog issues into Ready. Leave #420’s PR open. The deciding rule is ‘Conclude and hand off’ in `burndown-ready-queue`: when delivery finishes and authorization includes curation, continue within those limits without asking again. The shared authorization rule also says to carry existing authorization across task boundaries.
