@@ -25,4 +25,4 @@ These decision samples do not test real GitHub access or prove that credentials 
 
 ## Checks
 
-`make check` passed on the final source commit. It ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check.
+After all result files were staged, `make check` passed before the commit. The commit contains the checked files. The command ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check.
