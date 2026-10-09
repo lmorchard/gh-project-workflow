@@ -108,7 +108,7 @@ Follow [Review](review.md) for review sources and requirements.
 
 ## Access failures
 
-The machine account needs repository and project access before a task starts. [Machine account access](../../README.md#machine-account-access) describes setup.
+The machine account needs repository and project access before a task starts. [Machine account access](../../docs/setup.md#machine-account-access) describes setup.
 If access is missing, report the required action. Do not switch accounts or change credentials to bypass the failure.
 
 ### Sandboxed GitHub checks

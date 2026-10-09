@@ -1,181 +1,46 @@
 # gh-project-workflow
 
-Use `ghflow` for Git and GitHub tasks in Claude Code, Codex, and OpenCode. An agent skill supplies reusable task instructions. This collection registers one skill and keeps each operation in a task reference.
+`ghflow` helps a person and an agent prepare GitHub issues, implement selected work, review changes, and deliver pull requests.
+A pull request (PR) proposes changes for review.
+The project supplies an agent skill, reusable task instructions for Claude Code, Codex, and OpenCode.
 
-## Setup
+Use individual operations or request delivery of a selected issue, parent issue, or Ready queue on a project board.
+Delivery through review follow-up leaves the PR open. Merge requires explicit authorization.
 
-Keep a full checkout of this repository. Install personal symbolic links with:
+## Get started
+
+Install Git, Python 3, and GitHub CLI (`gh`) in the agent environment.
+Keep local checkouts of this repository and the target project.
+From this repository, install the skill for Claude Code and Codex:
 
 ```sh
 python3 scripts/install-skill.py claude codex
 ```
 
-A symbolic link points to the source checkout root. Source edits appear through the links without another installation.
-The installer preserves correct links and refuses existing conflicting entries before it creates links.
-It creates `~/.claude/skills/ghflow` and `~/.agents/skills/ghflow`.
-OpenCode also discovers these compatible directories. See the [root-package setup trial](docs/trials/2026-10-07-ghflow-root-setup.md) for tested discovery and limits.
-If you use only OpenCode, run `python3 scripts/install-skill.py opencode` for its native personal directory.
-Do not add a native OpenCode link when compatible links already expose `ghflow`.
+The installer creates symbolic links, paths that point to this source checkout.
+Keep the checkout available so the agent can read the skill and its references.
+OpenCode also discovers these compatible directories.
 
-For one target project, use `--project TARGET_PATH` with the agent names.
-For an isolated personal installation trial, use `--home TEMP_HOME`.
-These options change the link destinations, not agent authentication or configuration.
-The installer does not remove older generic skill installations. Remove those links separately after you inspect their sources.
-If you move the source checkout, replace its stale links manually. The installer refuses to overwrite them.
+Read [Setup](docs/setup.md) for OpenCode installation, project installation, source permissions, machine account access, and discovery limits.
 
-### Try a read-only task
-
-After you install `ghflow`, start an agent session in a local checkout of the target repository. The agent needs the installed skill, access to its source checkout, and permission to read the target issue and related GitHub records.
-
-Copy this request:
+Start a new agent session in the target checkout and try a read-only request:
 
 ```text
 Use ghflow to reassess https://github.com/lmorchard/gh-project-workflow/issues/23. Return findings only. Do not edit GitHub records or implement changes.
 ```
 
-The [reconsider-issue task](references/tasks/reconsider-issue.md) returns current evidence, remaining work, and unresolved decisions. The request forbids repository and GitHub writes. Issue #23 is closed. If current evidence shows that it is resolved, reporting no remaining work is a correct result.
+Issue #23 is closed. A result with no remaining work is valid when current evidence supports it.
 
-OpenCode can discover nested `SKILL.md` files inside the linked checkout, including Git-ignored worktrees.
-Repository checks ignore worktrees, but native discovery does not.
-The selected policy documents this limitation and permits root checkout links without an installer guard.
-Inspect the installed source's worktrees for nested skill files.
-Maintain worktrees through authorized cleanup, and preserve worktrees with uncommitted changes or an open PR.
-If additional skills are unwanted, use a separate source checkout without nested skill packages.
-The [root-package trial](docs/trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records the evidence and decision.
+## Find the relevant docs
 
-Start a new agent session in the target project. Request an operation explicitly:
+- [Setup](docs/setup.md): Installation, requirements, and access.
+- [Operations](docs/operations.md): Tasks for issues, PRs, delivery, and project boards.
+- [Documentation index](docs/README.md): Guides, project direction, research, and trial records.
+- [Entry skill](SKILL.md): Routing from a request to the relevant task instructions.
+- [CLI reference](references/cli.md): Results from commands that inspect PRs and commits.
 
-> Use ghflow to define issue #123. Produce a draft only. Do not publish or implement.
+## Develop the workflow
 
-> Use ghflow to deliver issue #123 through review follow-up.
-
-> Use ghflow to review PR #456.
-
-Read [ghflow](SKILL.md) for routing and dependency access.
-The entry skill resolves the source checkout root and uses its absolute `cli/ghflow.py` path.
-Commands preserve the target project's current directory.
-It does not require the workflow checkout to be the current directory.
-
-## Source access permissions
-
-The agent needs access to the resolved source checkout, including `references/`, `docs/writing.md`, and `cli/ghflow.py`.
-If the agent requests external directory access, permit that source checkout for this task.
-A link does not grant tool permissions.
-For Claude Code, `--add-dir SOURCE_CHECKOUT` includes that checkout in the session's allowed directories.
-Codex's read-only sandbox allowed these dependency reads in the setup trial.
-
-OpenCode prompts for external directory access by default.
-For unattended sessions, merge this narrowly scoped rule into the target project's `opencode.json` after you inspect its existing rules:
-
-```json
-{
-  "permission": {
-    "external_directory": {
-      "/ABSOLUTE/SOURCE_CHECKOUT/*": "allow"
-    },
-    "edit": {
-      "/ABSOLUTE/SOURCE_CHECKOUT/*": "deny"
-    }
-  }
-}
-```
-
-Replace both paths with the resolved source checkout.
-This permits source access and blocks file-tool edits to it. Other tool permissions still apply.
-The installer does not change agent permissions or write this configuration.
-See [OpenCode permissions](https://opencode.ai/docs/permissions/#external-directories) for directory and tool rules.
-
-## Operations
-
-The entry skill selects these independently usable operations:
-
-### Backlog Triage & Project Board Management
-
-- [bundle-issues](references/tasks/bundle-issues.md) groups related issues into thematic initiatives under native GitHub parent issues labeled `theme`.
-- [triage-issues](references/tasks/triage-issues.md) evaluates open issues against code and git history, applying triage labels and closing completed or obsolete items.
-- [sweep-needs-input](references/tasks/sweep-needs-input.md) interactively resolves blocking product and architectural decisions with the user.
-- [sweep-needs-definition](references/tasks/sweep-needs-definition.md) develops accepted issues into bounded, actionable specifications with concrete file targets and test criteria.
-- [sweep-blocked](references/tasks/sweep-blocked.md) returns `triage:blocked` issues to definition when all of their native blockers close.
-- [sweep-audit-closed](references/tasks/sweep-audit-closed.md) reviews and confirms autonomously closed issues with cited evidence.
-- [sweep-prioritize](references/tasks/sweep-prioritize.md) assigns Priority (`P0`–`P3`) and Size (`XS`–`XL`) fields on the project board and re-sweeps deferred items.
-- [curate-ready-queue](references/tasks/curate-ready-queue.md) audits board WIP limits and stages high-priority Backlog items into the `Ready` column.
-
-### Single Issue Specification & Implementation
-
-- [reconsider-issue](references/tasks/reconsider-issue.md) reassesses an existing issue against current project evidence.
-- [decompose-parent-issue](references/tasks/decompose-parent-issue.md) maps a broad issue into bounded children and a parent completion condition.
-- [define-issue](references/tasks/define-issue.md) prepares and reviews an issue draft.
-- [interview-issue](references/tasks/interview-issue.md) resolves decisions with the user.
-- [file-issue](references/tasks/file-issue.md) publishes a reviewed draft and confirms the requested GitHub changes.
-- [implement-issue](references/tasks/implement-issue.md) produces tested, committed changes for PR preparation.
-- [review-changes](references/tasks/review-changes.md) assesses changes in a fresh reviewer context without editing them.
-- [submit-pr](references/tasks/submit-pr.md) publishes committed work and requests a review; for an agent pull request, independent local review is the primary source and the user may request Copilot review.
-- [address-pr-review](references/tasks/address-pr-review.md) waits for requested review, addresses findings, and repairs failing CI on an existing PR.
-- [merge-pr](references/tasks/merge-pr.md) confirms CI and review findings, merges authorized changes, and confirms the result.
-
-### Workflow Coordinators
-
-- [express-issue](references/tasks/express-issue.md) coordinates one selected issue through delivery to an agreed endpoint.
-- [deliver-parent-issue](references/tasks/deliver-parent-issue.md) coordinates a bounded parent through child delivery and completion checks.
-- [burndown-ready-queue](references/tasks/burndown-ready-queue.md) coordinates the sequential delivery of issues staged in the project board's `Ready` column.
-
-Each operation accepts an ordinary issue or PR. References share [authorization](references/shared/authorization.md), [coordination](references/shared/coordination.md), [decisions](references/shared/decisions.md), and [evidence](references/shared/evidence.md).
-Delivery through review follow-up leaves the PR open. Merge requires explicit authorization and the existing review policy.
-
-## Merged branch cleanup
-
-Run `scripts/delete-merged-branches.sh OWNER/REPO` to list remote branches whose current tip matches the head of a merged pull request from that same repository. The command reads all branch and pull request pages, checks the default branch, refreshes open pull requests for each candidate, and reads each candidate branch tip again before it reports or deletes it. Add `--yes` to request deletion; without it, the command only prints the plan. A new open pull request or a push can still race after the latest reads and before GitHub processes the delete request. The command cannot remove that race.
-
-## Requirements
-
-Install Git, Python 3, and GitHub CLI (`gh`) in the agent environment.
-Keep a local checkout of the target project for code investigation.
-The standard-library CLI in [cli/ghflow.py](cli/ghflow.py) handles repeatable operations.
-It uses existing Git and `gh` commands for other work.
-
-Observed on 2026-10-09 while running `make check`: Python 3.14.7 and GitHub CLI 2.101.0.
-These are observed versions, not minimum supported versions.
-
-### Operation requirements
-
-- Reading: [reconsider-issue](references/tasks/reconsider-issue.md) needs a target checkout, source access, and permitted GitHub reads.
-- Implementation: [implement-issue](references/tasks/implement-issue.md) makes local commits. Subagents use the configured [machine identity](references/shared/identity.md) and need target repository access for Git and GitHub commands.
-- Coordinated delivery: [express-issue](references/tasks/express-issue.md) needs [subagent dispatch](references/shared/coordination.md#handoffs). Review follow-up leaves the PR open.
-- Independent review: [review-changes](references/tasks/review-changes.md) uses a fresh context and, by default, a different model recorded from runtime or dispatch metadata. See [Review](references/shared/review.md).
-- Board work: when a task uses a project board, select that board, use its actual Status options, and make sure the machine identity has writer access. See [Board status](references/shared/board-status.md) and [Machine account access](#machine-account-access).
-- Merge: [merge-pr](references/tasks/merge-pr.md) needs separate, explicit authorization under [Authorization](references/shared/authorization.md#limits).
-
-Apply any [user-approved review exception](references/shared/review.md#user-approved-exceptions) within its recorded scope. Report unavailable dispatch or model information. Self-review does not replace independent review. Direct operations remain usable without a coordinator, subject to their own requirements.
-
-## Machine account access
-
-The repository owner grants access before an agent works in the repository or project board:
-
-- Add the machine user as a repository collaborator with Write access.
-- For a user-owned project board, add the machine user as a writer with `scripts/add-board-writer.sh OWNER PROJECT_NUMBER LOGIN`.
-
-Resolve the script from the source checkout containing the entry skill. Do not resolve it from the target project.
-The [identity reference](references/shared/identity.md) supplies runtime configuration and credential handling.
-The [identity research and trials](docs/agent-identity.md) records the adoption evidence and historical limits.
-
-## Checks
-
-Run `make check` before you commit. It validates skill frontmatter, local Markdown links, and whitespace. It does not assess skill quality.
-
-## Project documents
-
-Read these documents:
-
-- [Project direction](docs/direction.md) states current direction and links to decision history.
-- [Findings from agent-sessions](docs/findings.md) records lessons and their sources.
-- [First experiment](docs/first-experiment.md) describes the issue-definition trial.
-- [Issue interviews](docs/issue-interview.md) explains how review questions return to the user conversation.
-- [Skill sources](docs/skill-sources.md) records the origins and selected adaptations of workflow guidance.
-- [Trial records](docs/trials/README.md) lists the trials of the skills on real issues.
-- [Skill scenarios](evals/README.md) checks whether agents make the decisions that the skills intend.
-- [Skill evaluations](docs/skill-evaluations.md) describes how to add, run, grade, and record scenarios, and how they relate to trials.
-- [Writing rules](docs/writing.md) describes the ASD-STE100 trial for documents and issues.
-- [Skill style](docs/skill-style.md) describes how to write and revise skills.
-- [Project board views](docs/board-views.md) gives filters for board views that show work for a person or a sweep.
-
-The separate agent-sessions repository remains a reference. We will bring useful ideas into this project one at a time.
+Read [Project direction](docs/direction.md) and [Agent instructions](AGENTS.md) before changing the project.
+Use [Skill style](docs/skill-style.md) for skills and [Writing rules](docs/writing.md) for documents.
+Run `make check` before you commit. [Repository maintenance](docs/maintenance.md) explains checks and branch cleanup.

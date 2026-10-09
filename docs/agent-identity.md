@@ -1,7 +1,7 @@
 # Agent identity: adoption research and trials
 
 Les adopted the machine account identity on 2026-10-03 after a scratch-repository trial and a real delivery trial.
-[Agent identity](../references/shared/identity.md) supplies current runtime rules. [Machine account access](../README.md#machine-account-access) supplies setup instructions.
+[Agent identity](../references/shared/identity.md) supplies current runtime rules. [Machine account access](setup.md#machine-account-access) supplies setup instructions.
 
 This document preserves research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1), the original proposal, and the trial results.
 The research and proposal describe the pre-adoption context. GitHub behavior and access claims below describe the recorded date.
