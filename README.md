@@ -110,6 +110,10 @@ The entry skill selects these independently usable operations:
 Each operation accepts an ordinary issue or PR. References share [authorization](references/shared/authorization.md), [coordination](references/shared/coordination.md), [decisions](references/shared/decisions.md), and [evidence](references/shared/evidence.md).
 Delivery through review follow-up leaves the PR open. Merge requires explicit authorization and the existing review policy.
 
+## Merged branch cleanup
+
+Run `scripts/delete-merged-branches.sh OWNER/REPO` to list remote branches whose current tip matches the head of a merged pull request from that same repository. The command reads all branch and pull request pages, checks the default branch, refreshes open pull requests for each candidate, and reads each candidate branch tip again before it reports or deletes it. Add `--yes` to request deletion; without it, the command only prints the plan. A new open pull request or a push can still race after the latest reads and before GitHub processes the delete request. The command cannot remove that race.
+
 ## Requirements
 
 Install Git, Python 3, and GitHub CLI (`gh`) in the agent environment.
