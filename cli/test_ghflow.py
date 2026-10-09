@@ -635,6 +635,199 @@ class BoardSetStatusTests(unittest.TestCase):
 
 
 class IdentityTests(unittest.TestCase):
+    def init_repository(self, path):
+        os.makedirs(path, exist_ok=True)
+        subprocess.run(["git", "init", "-q", path], check=True)
+
+    def write_identity(self, directory, login):
+        config_dir = os.path.join(directory, ".ghflow")
+        os.makedirs(config_dir, exist_ok=True)
+        config_path = os.path.join(config_dir, "identity.json")
+        with open(config_path, "w", encoding="utf-8") as config:
+            json.dump({"login": login}, config)
+        return os.path.realpath(config_path)
+
+    def resolve_in(self, path, env=None, home=None):
+        old_cwd = os.getcwd()
+        try:
+            test_home = home or os.path.dirname(os.path.abspath(path))
+            with patch.dict(os.environ, {"HOME": test_home}):
+                os.chdir(path)
+                return resolve_identity(env={} if env is None else env)
+        finally:
+            os.chdir(old_cwd)
+
+    def test_project_identity_is_stable_from_root_and_subdirectory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "repo")
+            self.init_repository(repo)
+            source = self.write_identity(repo, "ProjectBot")
+            subdirectory = os.path.join(repo, "src", "nested")
+            os.makedirs(subdirectory)
+
+            root_identity = self.resolve_in(repo)
+            nested_identity = self.resolve_in(subdirectory)
+
+            self.assertEqual(root_identity["login"], "ProjectBot")
+            self.assertEqual(nested_identity["login"], "ProjectBot")
+            self.assertEqual(root_identity["source"], source)
+            self.assertEqual(nested_identity["source"], source)
+
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(subdirectory)
+                with patch.dict(os.environ, {"HOME": temp_dir}):
+                    stdout = io.StringIO()
+                    with patch("sys.stdout", stdout):
+                        self.assertEqual(main(["identity"]), 1)
+                report = json.loads(stdout.getvalue())
+            finally:
+                os.chdir(old_cwd)
+            self.assertEqual(report["source"], source)
+
+    def test_project_identity_preserves_trailing_space_in_checkout_path(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "checkout ")
+            self.init_repository(repo)
+            source = self.write_identity(repo, "SpaceBot")
+
+            identity = self.resolve_in(repo)
+
+            self.assertEqual(identity["login"], "SpaceBot")
+            self.assertEqual(identity["source"], source)
+
+    def test_linked_worktree_finds_primary_config_when_checkout_path_has_newline(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            primary = os.path.join(temp_dir, "primary\ncheckout")
+            linked = os.path.join(temp_dir, "linked")
+            self.init_repository(primary)
+            primary_source = self.write_identity(primary, "NewlineBot")
+            subprocess.run(["git", "-C", primary, "worktree", "add", "-q", "-b", "linked", linked], check=True)
+
+            identity = self.resolve_in(linked)
+
+            self.assertEqual(identity["login"], "NewlineBot")
+            self.assertEqual(identity["source"], primary_source)
+
+    def test_linked_worktree_finds_primary_config_when_checkout_path_has_carriage_return(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            primary = os.path.join(temp_dir, "primary\rcheckout")
+            linked = os.path.join(temp_dir, "linked\rworktree")
+            self.init_repository(primary)
+            primary_source = self.write_identity(primary, "CarriageReturnBot")
+            subprocess.run(["git", "-C", primary, "worktree", "add", "-q", "-b", "linked", linked], check=True)
+
+            identity = self.resolve_in(linked)
+
+            self.assertEqual(identity["login"], "CarriageReturnBot")
+            self.assertEqual(identity["source"], primary_source)
+
+    def test_nested_repository_uses_its_own_project_identity(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outer = os.path.join(temp_dir, "outer")
+            inner = os.path.join(outer, "nested", "inner")
+            self.init_repository(outer)
+            self.init_repository(inner)
+            self.write_identity(outer, "OuterBot")
+            inner_source = self.write_identity(inner, "InnerBot")
+
+            identity = self.resolve_in(inner)
+
+            self.assertEqual(identity["login"], "InnerBot")
+            self.assertEqual(identity["source"], inner_source)
+
+    def test_linked_worktree_uses_primary_config_unless_local_config_exists(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            primary = os.path.join(temp_dir, "primary")
+            linked = os.path.join(temp_dir, "linked")
+            self.init_repository(primary)
+            primary_source = self.write_identity(primary, "PrimaryBot")
+            subprocess.run(["git", "-C", primary, "worktree", "add", "-q", "-b", "linked", linked], check=True)
+
+            inherited = self.resolve_in(linked)
+            self.assertEqual(inherited["login"], "PrimaryBot")
+            self.assertEqual(inherited["source"], primary_source)
+
+            local_source = self.write_identity(linked, "WorktreeBot")
+            local = self.resolve_in(linked)
+            self.assertEqual(local["login"], "WorktreeBot")
+            self.assertEqual(local["source"], local_source)
+
+    def test_explicit_environment_identity_overrides_project_config(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "repo")
+            self.init_repository(repo)
+            self.write_identity(repo, "ProjectBot")
+
+            identity = self.resolve_in(repo, {"GHFLOW_IDENTITY_LOGIN": "EnvBot"})
+
+            self.assertEqual(identity["login"], "EnvBot")
+            self.assertEqual(identity["source"], "environment")
+
+    def test_invalid_selected_project_config_errors_without_home_fallback(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "repo")
+            home = os.path.join(temp_dir, "home")
+            self.init_repository(repo)
+            os.makedirs(os.path.join(repo, ".ghflow"))
+            selected = os.path.join(repo, ".ghflow", "identity.json")
+            with open(selected, "w", encoding="utf-8") as config:
+                config.write("{")
+            home_config = os.path.join(home, ".config", "ghflow", "identity.json")
+            os.makedirs(os.path.dirname(home_config), exist_ok=True)
+            with open(home_config, "w", encoding="utf-8") as config:
+                json.dump({"login": "HomeBot"}, config)
+
+            with patch.dict(os.environ, {"HOME": home}):
+                old_cwd = os.getcwd()
+                try:
+                    os.chdir(repo)
+                    with self.assertRaisesRegex(GhError, "Invalid identity configuration") as error:
+                        resolve_identity(env={})
+                finally:
+                    os.chdir(old_cwd)
+            self.assertIn(selected, str(error.exception))
+
+    def test_identity_command_reports_selected_config_error(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "repo")
+            self.init_repository(repo)
+            os.makedirs(os.path.join(repo, ".ghflow"))
+            with open(os.path.join(repo, ".ghflow", "identity.json"), "w", encoding="utf-8") as config:
+                config.write("{")
+
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(repo)
+                with patch.dict(os.environ, {"HOME": temp_dir}), \
+                        patch("sys.stdout", io.StringIO()), patch("sys.stderr", io.StringIO()) as stderr:
+                    status = main(["identity"])
+            finally:
+                os.chdir(old_cwd)
+
+            self.assertEqual(status, 1)
+            self.assertIn("Invalid identity configuration", stderr.getvalue())
+
+    def test_outside_git_uses_current_directory_then_home_config(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cwd = os.path.join(temp_dir, "outside")
+            home = os.path.join(temp_dir, "home")
+            os.makedirs(cwd)
+            home_config = os.path.join(home, ".config", "ghflow", "identity.json")
+            os.makedirs(os.path.dirname(home_config))
+            with open(home_config, "w", encoding="utf-8") as config:
+                json.dump({"login": "HomeBot"}, config)
+
+            with patch.dict(os.environ, {"HOME": home}):
+                home_identity = self.resolve_in(cwd, home=home)
+                current_source = self.write_identity(cwd, "CurrentBot")
+                current_identity = self.resolve_in(cwd, home=home)
+
+            self.assertEqual(home_identity["login"], "HomeBot")
+            self.assertEqual(home_identity["source"], os.path.realpath(home_config))
+            self.assertEqual(current_identity["login"], "CurrentBot")
+            self.assertEqual(current_identity["source"], current_source)
+
     def test_identity_unconfigured_when_no_env_and_no_config(self):
         ident = resolve_identity(env={}, config_paths=[])
         self.assertFalse(ident["configured"])
