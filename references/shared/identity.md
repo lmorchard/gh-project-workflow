@@ -19,7 +19,19 @@ Configure the agent identity using environment variables or a configuration file
 
 ### Configuration file
 
-If environment variables are not set, `ghflow` reads `./.ghflow/identity.json` or `~/.config/ghflow/identity.json`:
+Explicit `GHFLOW_*` values take precedence over configuration-file values. In a Git repository, `ghflow` checks these files in order:
+
+1. `.ghflow/identity.json` at the current worktree root.
+2. `.ghflow/identity.json` at the primary checkout root, when the current directory is in a linked worktree.
+3. `~/.config/ghflow/identity.json`.
+
+Git discovers the repository roots, so running `ghflow` from a subdirectory uses the same project configuration as the repository root. A nested repository uses its own configuration. Outside a Git repository, `ghflow` checks `.ghflow/identity.json` in the current directory, then the home configuration file.
+
+The `identity` result includes `source`: `environment` when an explicit `GHFLOW_*` value is selected, otherwise the absolute path of the selected configuration file, or `null` when no configuration file is selected. This field does not include secret values. If a selected configuration file cannot be read or does not contain a JSON object, identity resolution reports an error and does not fall through to a lower-priority file.
+
+Configuration discovery uses local Git metadata and file paths. It does not confirm a GitHub account. The separate `ghflow exec` and board-write paths load credentials and perform any required account confirmation.
+
+Configuration files use this shape:
 
 ```json
 {
@@ -31,7 +43,6 @@ If environment variables are not set, `ghflow` reads `./.ghflow/identity.json` o
 ```
 
 The token file must have mode 600 permissions. The token needs `public_repo`, `project`, and `read:org` scopes.
-Explicit `GHFLOW_*` values take precedence over configuration-file values.
 The selected token file takes precedence over inherited `GH_TOKEN` and `GITHUB_TOKEN` values.
 If the selected file is missing, unreadable, or empty, `ghflow exec` stops before it starts the child command.
 Without a selected token file, `GH_TOKEN` can supply the token.

@@ -739,26 +739,64 @@ def board_set_status(repo, number, owner, project, status, allow_backward=False,
     return result, 2
 
 
+def identity_config_paths(cwd=None):
+    """Return identity config paths in project, primary-checkout, then home order."""
+    current = Path.cwd() if cwd is None else Path(cwd)
+    current = current.resolve()
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"], cwd=current,
+        text=True, capture_output=True, check=False,
+    )
+    if result.returncode != 0:
+        return [current / ".ghflow" / "identity.json", Path.home() / ".config" / "ghflow" / "identity.json"]
+
+    worktree_root = Path(result.stdout.strip()).resolve()
+    primary_root = worktree_root
+    worktrees = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"], cwd=worktree_root,
+        text=True, capture_output=True, check=False,
+    )
+    if worktrees.returncode == 0:
+        for block in worktrees.stdout.split("\n\n"):
+            lines = block.splitlines()
+            worktree_line = next((line for line in lines if line.startswith("worktree ")), None)
+            if worktree_line and "bare" not in lines:
+                primary_root = Path(worktree_line.removeprefix("worktree ")).resolve()
+                break
+
+    paths = [worktree_root / ".ghflow" / "identity.json"]
+    primary_config = primary_root / ".ghflow" / "identity.json"
+    if primary_config != paths[0]:
+        paths.append(primary_config)
+    paths.append(Path.home() / ".config" / "ghflow" / "identity.json")
+    return paths
+
+
 def resolve_identity(env=None, config_paths=None):
-    """Resolve agent identity from environment variables and config files."""
+    """Resolve agent identity from explicit environment values and the selected config."""
     if env is None:
         env = os.environ
     if config_paths is None:
-        config_paths = [
-            Path(".ghflow/identity.json"),
-            Path.home() / ".config" / "ghflow" / "identity.json",
-        ]
+        config_paths = identity_config_paths()
 
     config_data = {}
+    config_source = None
     for p in config_paths:
+        expanded = Path(p).expanduser()
+        config_source = str(expanded.resolve())
         try:
-            expanded = Path(p).expanduser()
-            if expanded.is_file():
-                with open(expanded, "r", encoding="utf-8") as f:
-                    config_data = json.load(f)
-                break
-        except (OSError, json.JSONDecodeError):
+            with open(expanded, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+        except FileNotFoundError:
+            config_source = None
             continue
+        except (OSError, UnicodeError) as error:
+            raise IdentityError(f"Cannot read identity configuration at {config_source}: {error}") from None
+        except json.JSONDecodeError as error:
+            raise IdentityError(f"Invalid identity configuration at {config_source}: {error}") from None
+        if not isinstance(config_data, dict):
+            raise IdentityError(f"Invalid identity configuration at {config_source}: expected a JSON object.")
+        break
 
     login = env.get("GHFLOW_IDENTITY_LOGIN") or env.get("GHFLOW_LOGIN") or config_data.get("login")
     name = env.get("GHFLOW_IDENTITY_NAME") or env.get("GHFLOW_NAME") or config_data.get("name") or login
@@ -776,6 +814,11 @@ def resolve_identity(env=None, config_paths=None):
     elif "GH_TOKEN" in env:
         token_present = bool(env["GH_TOKEN"].strip())
 
+    environment_source = any(env.get(key) for key in (
+        "GHFLOW_IDENTITY_LOGIN", "GHFLOW_LOGIN", "GHFLOW_IDENTITY_NAME", "GHFLOW_NAME",
+        "GHFLOW_IDENTITY_EMAIL", "GHFLOW_EMAIL", "GHFLOW_TOKEN_FILE",
+        "GHFLOW_IDENTITY_TOKEN_FILE",
+    ))
     configured = bool(login or token_path or "GH_TOKEN" in env)
     return {
         "login": login,
@@ -785,6 +828,7 @@ def resolve_identity(env=None, config_paths=None):
         "token_present": token_present,
         "configured": configured,
         "ready": bool(login and token_present),
+        "source": "environment" if environment_source else config_source,
     }
 
 
@@ -872,7 +916,11 @@ def main(argv=None):
         repo, number = parse_issue(args.issue, args.repo)
         result, status = board_set_status(repo, number, args.owner, args.project, args.status, args.allow_backward)
     elif args.command == "identity":
-        identity = resolve_identity()
+        try:
+            identity = resolve_identity()
+        except GhError as error:
+            sys.stderr.write(f"{error}\n")
+            return 1
         if args.export:
             try:
                 env = identity_env(identity)
@@ -904,8 +952,8 @@ def main(argv=None):
         if not cmd_args:
             sys.stderr.write("Give a command to run with exec.\n")
             return 1
-        identity = resolve_identity()
         try:
+            identity = resolve_identity()
             env = identity_env(identity)
         except GhError as error:
             sys.stderr.write(f"{error}\n")
