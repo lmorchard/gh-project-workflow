@@ -33,7 +33,7 @@ Copy this request:
 Use ghflow to reassess https://github.com/lmorchard/gh-project-workflow/issues/23. Return findings only. Do not edit GitHub records or implement changes.
 ```
 
-The [reconsider-issue task](references/tasks/reconsider-issue.md) returns current evidence, remaining work, and unresolved decisions. The request forbids repository and GitHub writes. Issue #23 is closed. A fresh assessment can check whether any work remains.
+The [reconsider-issue task](references/tasks/reconsider-issue.md) returns current evidence, remaining work, and unresolved decisions. The request forbids repository and GitHub writes. Issue #23 is closed. If current evidence shows that it is resolved, reporting no remaining work is a correct result.
 
 OpenCode can discover nested `SKILL.md` files inside the linked checkout, including Git-ignored worktrees.
 Repository checks ignore worktrees, but native discovery does not.
