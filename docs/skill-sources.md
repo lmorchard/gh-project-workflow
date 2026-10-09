@@ -159,6 +159,10 @@ A controlled local fixture showed `gh` requesting a second page with the first r
 When the fixture failed on page two, `gh` returned an error with earlier page output still present.
 These checks demonstrate cursor traversal and error reporting. They do not establish atomic snapshots or behavior when a live board changes.
 
+## Ready queue task scope
+
+Issue #28 records Les's 2026-10-08 decision to fix the Ready issue selection at task start, admit later arrivals only after explicit scope expansion, and preserve the selected issues, endpoint, and authorization limits across resumption. The [burndown skill](../references/tasks/burndown-ready-queue.md) refreshes current issue and board state before resumed work. It suggests curation as a next task unless current authorization includes it. The [empty-queue](../evals/scenarios/ready-queue-empty-no-curation.md), [completed-queue](../evals/scenarios/ready-queue-completed-later-arrival.md), [resumption](../evals/scenarios/ready-queue-resume-preserves-scope.md), and [authorized-curation](../evals/scenarios/ready-queue-authorized-curation.md) scenarios cover the selected behavior. Their evaluation results belong in `evals/results/`.
+
 ## Document focus
 
 Les requested this pass after the authorization split in PR #20.
