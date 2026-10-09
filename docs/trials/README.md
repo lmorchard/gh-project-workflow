@@ -129,7 +129,8 @@ It records the subject-resolution correction and the unresolved OpenCode discove
 [Issue #32 unpublished handoff trial, 2026-10-08](2026-10-08-issue-32-unpublished-handoff.md) records an implementation commit passed to a fresh, different-model local reviewer without publication.
 
 [Issue #32 conflicting identity trial, 2026-10-09](2026-10-09-issue-32-conflicting-identity.md) records a real local commit and a simulated board write with conflicting inherited identity values.
-The configured identity reached both write boundaries. Live GitHub authentication and exact runtime model identity remain unconfirmed.
+The configured identity reached both write boundaries. Live GitHub authentication remains unconfirmed.
+Later local session metadata identified the actor as `gpt-6.1-sol`; provider runtime attestation remains unavailable.
 The Ready-page and interrupted-publication cases remain pending.
 
 ## 2026-10-07: issue 8 reviewer preparation

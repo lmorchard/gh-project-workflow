@@ -31,9 +31,10 @@ It excluded push, live GitHub writes, PR creation, merge, credential changes, so
 The actor received no grading criteria or expected account result.
 
 The actor ran in a fresh native subagent context, `/root/identity_trial_actor`, with no model override.
-The system description supplied GPT-6 family evidence, but no exact runtime model identifier.
-The actor reported its exact implementation model as `unknown`.
-The [returned report and clarification](2026-10-09-issue-32-identity/actor-result.md) preserve that limit.
+The actor initially reported its exact implementation model as `unknown`.
+During PR preparation, the parent located the local session records for itself and the actor.
+Their `turn_context` entries identify `gpt-6.1-sol` with `medium` reasoning effort.
+The [returned report and later model evidence](2026-10-09-issue-32-identity/actor-result.md) preserve both stages.
 
 ## Observed execution
 
@@ -85,7 +86,8 @@ The simulated account response establishes synthetic token selection, not accept
 The trial observes the configured helper string without exercising an HTTPS credential exchange.
 It does not assess missing-token failures, account mismatch refusal, arbitrary hidden writes, or conflicting explicit `GHFLOW_*` values.
 The launcher controls subprocess inputs but does not enforce a general security boundary for other tools.
-Exact model identity remains unavailable, and no independent or different-model review occurred.
+Session metadata establishes the recorded model selection, not provider runtime attestation.
+The fixture implementation received no independent or different-model review during this identity trial.
 
 Baseline `make check` passed at the source revision: 144 CLI tests, 34 script tests, structure and link checks, and whitespace checks.
 The parent also ran `make check` for the completed trial artifacts before committing them.

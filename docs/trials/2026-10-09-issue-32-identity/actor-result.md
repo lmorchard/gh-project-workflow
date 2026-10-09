@@ -52,3 +52,11 @@ The system description identified an agent based on GPT-6.
 The actor reported its exact implementation model as `unknown`.
 Neither the dispatch result nor available environment metadata supplied an exact runtime model identifier.
 This trial makes no different-model review claim.
+
+During later PR preparation, the parent located the local session records.
+The actor's `session_meta` entry names `/root/identity_trial_actor` and the parent thread identifier.
+The actor's `turn_context` entries identify `gpt-6.1-sol` with `medium` reasoning effort.
+The parent session records the same model and reasoning effort.
+The [filtered metadata](model-evidence.json) preserves those identifiers, source paths, line numbers, and timestamps.
+This later evidence resolves the selected-model gap without changing the actor's original report.
+It does not attest to provider runtime identity.
