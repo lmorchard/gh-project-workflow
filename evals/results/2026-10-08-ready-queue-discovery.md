@@ -35,3 +35,14 @@ The fixture used synthetic data and does not test an atomic board snapshot. Boar
 ## Checks
 
 `make check` passed on the committed source tree before this result record was added: 134 CLI tests, 10 script tests, `scripts/check.py`, and whitespace checks. The result and raw-answer files do not change the evaluated skill or scenarios.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "ready-queue-beyond-default-limit", "date": null, "skill_commit": "3c011eac6e56e0524b36a5b009343a35b79550a9", "runner": "collaboration.spawn_agent", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "sample", "note": "Dispatch selection, no runtime model attestation. Run date not stated; filename alone does not establish chronology.", "order": null},
+  {"scenario": "ready-queue-later-page-failure", "date": null, "skill_commit": "3c011eac6e56e0524b36a5b009343a35b79550a9", "runner": "collaboration.spawn_agent", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "sample", "note": "Dispatch selection, no runtime model attestation. Run date not stated; filename alone does not establish chronology.", "order": null}
+]
+```

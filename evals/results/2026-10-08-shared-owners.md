@@ -82,3 +82,18 @@ Skill Creator validation passed in the existing temporary Python environment.
 After the final heading and question-framing edits, affected structure, links, and whitespace checks passed.
 Active root and reference anchors resolved, and source snapshot hashes matched the exact evaluated commit.
 The evidence record and capacity consolidation received affected documentation and whitespace checks without another broad suite run.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "flow-continues-after-draft", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Selected model only; snapshot matched committed bytes.", "order": null},
+  {"scenario": "parent-external-head-update", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Selected model only; snapshot matched committed bytes.", "order": null},
+  {"scenario": "resolve-routine-choice", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Selected model only; snapshot matched committed bytes.", "order": null},
+  {"scenario": "submission-parent-followup", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Selected model only; snapshot matched committed bytes.", "order": null},
+  {"scenario": "subagent-has-question", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Partial: recommendation omitted", "phase": "sample", "note": "Selected model only.", "order": null},
+  {"scenario": "capacity-limit", "date": "2026-10-08", "skill_commit": "f3f3a9b307327c9b00473b1e4107bfdaa5fba891", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Evaluated reviewer-capacity-handoff, later consolidated into capacity-limit with enriched criteria; no rerun of current canonical case.", "order": null}
+]
+```

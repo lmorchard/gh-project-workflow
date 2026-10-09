@@ -112,10 +112,15 @@ Name the result file `evals/results/YYYY-MM-DD-TOPIC.md`. Use these sections:
 
 Link the scenario criteria at the evaluated commit. Keep the raw answers in `evals/results/YYYY-MM-DD-TOPIC-answers.txt`, with a scenario name and a session ID before each answer. Keep other raw logs outside the repository, and record where they are.
 
+Add coverage records using the [record convention](../evals/README.md#coverage-index-and-records).
+Use `make scenario-index` to update the [coverage index](../evals/INDEX.md).
+`make check` makes sure that the index matches the records.
+
 Link the result file from the trial record or the PR that it supports.
 
 ## Known gaps
 
-- No index shows which scenarios ran, when, on which commit, and with which grade. Issue #44 proposes an index.
+- Historical coverage records retain unknown values when reports do not establish source, runner, model, or date.
+- Same-day assessments from separate reports can have unknown order. The index retains these results together.
 - The `unpublished-*.md` scenarios formerly used file paths in `skills`; they now list task names like the other scenarios.
 - Earlier result files differ from this guide. They record less provenance and use other grade words. This guide does not require changes to those files.

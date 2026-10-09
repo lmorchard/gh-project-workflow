@@ -103,3 +103,16 @@ These decision samples do not establish actual different-model review dispatch, 
 Explicit review exceptions and later capacity handoffs remain in the shared rule, but were not separately exercised here.
 Standalone implement-only and read-only boundaries remain in the instruction; only the ordinary draft boundary received a scenario sample.
 Broader identity, authentication, repository and board access, and project-check preparation remain open under issue #8.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "reviewer-dispatch-unavailable", "date": "2026-10-07", "skill_commit": "05859e1de3d8eba77e7221499bdbdb30c0215b46", "runner": "Claude Code CLI 2.1.293", "model": "claude-opus-5-5", "grade": "Pass", "phase": "sample", "note": "Uncommitted instruction hashes matched this later commit; accepted criteria refinement, not a rerun.", "order": null},
+  {"scenario": "reviewer-recorded-models", "date": "2026-10-07", "skill_commit": "05859e1de3d8eba77e7221499bdbdb30c0215b46", "runner": "Claude Code CLI 2.1.293", "model": "claude-opus-5-5", "grade": "Pass", "phase": "sample", "note": "Uncommitted instruction hashes matched this later commit; accepted criteria refinement, not a rerun.", "order": null},
+  {"scenario": "reviewer-unneeded-draft", "date": "2026-10-07", "skill_commit": "05859e1de3d8eba77e7221499bdbdb30c0215b46", "runner": "Claude Code CLI 2.1.293", "model": "claude-opus-5-5", "grade": "Pass", "phase": "sample", "note": "Uncommitted instruction hashes matched this later commit; accepted criteria refinement, not a rerun.", "order": null},
+  {"scenario": "reviewer-author-identity-unknown", "date": "2026-10-07", "skill_commit": "05859e1de3d8eba77e7221499bdbdb30c0215b46", "runner": "Claude Code CLI 2.1.293", "model": "claude-opus-5-5", "grade": "Pass (2 samples)", "phase": "sample", "note": "Criteria refined after original samples; instruction hashes matched later commit.", "order": null}
+]
+```

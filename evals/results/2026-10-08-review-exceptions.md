@@ -25,3 +25,15 @@ Each scenario has one sample. These answers support the decision clarity of the 
 ## Checks
 
 An independent reviewer ran isolated `make check` on commit `311a79fb71e6e43289dea2afd7127a6a677c6e67`: 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check passed. This result covers the unchanged code and policy files; the current correction changes only this record and its raw-answer file. Documentation and whitespace checks for this correction are recorded with its commit.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "review-exception-local-model", "date": "2026-10-08", "skill_commit": null, "runner": "collaboration.spawn_agent", "model": "gpt-6-luna", "grade": "Pass", "phase": "sample", "note": "Mutable source after 6e932ec; only review.md fingerprint captured. No evaluated commit asserted; dispatch selection only.", "order": null},
+  {"scenario": "review-exception-not-approved", "date": "2026-10-08", "skill_commit": null, "runner": "collaboration.spawn_agent", "model": "gpt-6-luna", "grade": "Pass", "phase": "sample", "note": "Mutable source after 6e932ec; only review.md fingerprint captured. No evaluated commit asserted; dispatch selection only.", "order": null},
+  {"scenario": "review-exception-outside-scope", "date": "2026-10-08", "skill_commit": null, "runner": "collaboration.spawn_agent", "model": "gpt-6-luna", "grade": "Pass", "phase": "sample", "note": "Mutable source after 6e932ec; only review.md fingerprint captured. No evaluated commit asserted; dispatch selection only.", "order": null}
+]
+```

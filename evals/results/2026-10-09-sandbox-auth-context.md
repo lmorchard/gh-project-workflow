@@ -26,3 +26,14 @@ These decision samples do not test real GitHub access or prove that credentials 
 ## Checks
 
 After a one-line correction to this record, `make check` passed on the staged content committed as `548608e924ccdc1ab176384608fad7407c062c4f`. That commit contains the corrected record. The command ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "submit-pr-sandbox-auth-context", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial", "phase": "baseline", "note": "Dispatch selection only; criteria clarification did not change answer. Run date not stated; filename alone does not establish chronology.", "order": 1},
+  {"scenario": "submit-pr-sandbox-auth-context", "date": null, "skill_commit": "fa2ca6e1bb9f03d0ed4084a4188743edc0dc10e1", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Dispatch selection only. Run date not stated; filename alone does not establish chronology.", "order": 2}
+]
+```

@@ -22,3 +22,14 @@ The PR for issue #31 has not been opened. Link this result from that PR when it 
 ## Checks
 
 `make check` passed on the final result commit reported in the handoff. It ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the repository whitespace check. Tests ran with an allowlisted environment, isolated `HOME`, and an empty `GH_CONFIG_DIR`. The test process did not use `ghflow exec` or live GitHub credentials.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "sweep-small-definition", "date": null, "skill_commit": "3373adb41d4b370af72d59fbd1078bccd4a456b0", "runner": "collaboration.spawn_agent", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "sample", "note": "Dispatch selection, no runtime model attestation. Run date not stated; filename alone does not establish chronology.", "order": null},
+  {"scenario": "sweep-material-choice", "date": null, "skill_commit": "3373adb41d4b370af72d59fbd1078bccd4a456b0", "runner": "collaboration.spawn_agent", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "sample", "note": "Dispatch selection, no runtime model attestation. Run date not stated; filename alone does not establish chronology.", "order": null}
+]
+```
