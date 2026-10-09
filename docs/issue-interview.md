@@ -20,4 +20,4 @@ Editing unclear prose does not require a user interview. The reviewing agent mak
 
 ## Status
 
-The first define-issue trial demonstrated a question returned to the parent and a revision after a confirmed scope decision. Later trials used conversation as the default review path. The [Trial records](trials/README.md) list them.
+The first define-issue trial demonstrated a question returned to the parent and a revision after a confirmed scope decision. Later trials used conversation as the default review path. The [Trial records](research/trials/README.md) list them.

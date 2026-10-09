@@ -44,7 +44,7 @@ deliver-parent-issue delivered children #875 through #884 of [issue 843](https:/
 
 Final checks passed on merged main: 4,237 Python tests with two skips, and 395 JavaScript tests. No deployment or final manual smoke test occurred. The ten children took about 11 hours, and later Python CI jobs took about 20 minutes each.
 
-The [delivery retrospective](2026-10-02-parent-843-delivery.md) records the lessons, completion evidence, scope decisions, and recovery facts. Its scenario checks and the resulting skill changes are in [Retrospective scenarios](../../evals/results/2026-10-02-retro.md).
+The [delivery retrospective](2026-10-02-parent-843-delivery.md) records the lessons, completion evidence, scope decisions, and recovery facts. Its scenario checks and the resulting skill changes are in [Retrospective scenarios](../../../evals/results/2026-10-02-retro.md).
 
 ## 2026-10-02: express delivery of issue 894
 
@@ -52,7 +52,7 @@ The parent coordinated express-issue for [issue 894](https://github.com/lmorchar
 
 The first commit split one long browser test into 21 isolated scenarios. It also exposed two failures that the old test had hidden: invalid canvas test data, and an intended 404 after a folder is pruned. The first local review found the coverage preserved but measured a large slowdown on two cores. Les then replaced the wall-clock success condition with a structural one: one client build per run, one Chromium launch per worker, and one context and at most one server per scenario, enforced by the tests. A second commit met it, and a second local review found no defects.
 
-Copilot reviewed both heads with no findings. Its headline changed from "Approval recommended" at `142af1b` to "Needs a closer look" at `783ea99`, which asks for human review. Les later decided that this headline is not affirmative review. The current skill text already produced that decision in scenario runs ([results](../../evals/results/2026-10-02-copilot-headline.md)).
+Copilot reviewed both heads with no findings. Its headline changed from "Approval recommended" at `142af1b` to "Needs a closer look" at `783ea99`, which asks for human review. Les later decided that this headline is not affirmative review. The current skill text already produced that decision in scenario runs ([results](../../../evals/results/2026-10-02-copilot-headline.md)).
 
 Hosted `lint-and-test` took 1106 s at the base, 948 s at `142af1b`, and 1151 s at `783ea99`, one run each. PR #896 took 1161 s with a similar test count. Run-to-run variance appears as large as any effect, so these numbers do not establish a change. Local pinned runs showed the rework faster at every worker count.
 
@@ -112,7 +112,7 @@ The parent submitted [PR #53](https://github.com/lmorchard/gh-project-workflow/p
 Inside the sandbox, `ghflow exec -- gh auth status` reported that the `GH_TOKEN` token was invalid. Les's terminal showed `MokaGnome` active with `repo`, `project`, and `read:org` scopes. An approved read-only check outside the sandbox confirmed the same host login.
 The subagent submitted PR #53 as `MokaGnome`. Hosted CI passed, and follow-up found no reviews or comments. No board transition was possible because issue #28 had no project membership.
 Copying the CLI token into the configured token file did not make the sandbox check pass. This task did not establish whether the configured token file works outside the sandbox. The identity reference now distinguishes sandbox failures from invalid credentials.
-The [decision scenario results](../../evals/results/2026-10-09-sandbox-auth-context.md) assess the revised rule separately from the live submission.
+The [decision scenario results](../../../evals/results/2026-10-09-sandbox-auth-context.md) assess the revised rule separately from the live submission.
 
 ## ghflow installation
 
@@ -137,7 +137,7 @@ The Ready-page and interrupted-publication cases remain pending.
 
 The [reviewer preparation record](2026-10-07-issue-8-reviewer-capability.md) summarizes three historical paired trials and preserves pinned sources.
 The shared instruction now establishes the required review path before substantial dependent implementation.
-Four reusable [decision scenarios and results](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
+Four reusable [decision scenarios and results](../../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
 All five recorded sessions pass after the accepted unknown-author criteria refinement. Evaluated instructions and raw prompts remain unchanged.
 The broader identity and access scope remains open.
 
@@ -145,4 +145,4 @@ The broader identity and access scope remains open.
 
 The parent ran triage-issues, interview-issue, sweep-needs-input, and sweep-needs-definition on about 60 decafclaw issues at skills `9e64bd5`. Subagents performed subject-repository writes as `MokaGnome`.
 The definition sweep left 15 issues on `triage:needs-definition` that could not be specified: 12 waited on open issues and 2 were a parking lot and a parent. Les's needs-attention board view could not tell them from actionable work.
-This led to [Triage labels](../../references/shared/triage-labels.md), `triage:blocked`, `triage:parked`, and [sweep-blocked](../../references/tasks/sweep-blocked.md), with two new scenarios. Four fresh sessions passed them at `c96332a`, as the [results](../../evals/results/2026-10-08-blocked-parked-labels.md) record.
+This led to [Triage labels](../../../references/shared/triage-labels.md), `triage:blocked`, `triage:parked`, and [sweep-blocked](../../../references/tasks/sweep-blocked.md), with two new scenarios. Four fresh sessions passed them at `c96332a`, as the [results](../../../evals/results/2026-10-08-blocked-parked-labels.md) record.

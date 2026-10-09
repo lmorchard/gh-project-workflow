@@ -30,7 +30,8 @@ class ScenarioRunnerTests(unittest.TestCase):
         (self.repo / "references/shared").mkdir(parents=True)
         (self.repo / "evals/scenarios").mkdir(parents=True)
         (self.repo / "evals/results").mkdir(parents=True)
-        (self.repo / "docs/trials").mkdir(parents=True)
+        (self.repo / "docs/research/trials").mkdir(parents=True)
+        (self.repo / "docs/dev").mkdir(parents=True)
         (self.repo / "scripts/run_scenario.py").write_bytes(
             (ROOT / "scripts/run_scenario.py").read_bytes(),
         )
@@ -61,8 +62,8 @@ class ScenarioRunnerTests(unittest.TestCase):
             encoding="utf-8",
         )
         (self.repo / "evals/results/prior.md").write_text("PRIOR RESULT MARKER\n")
-        (self.repo / "docs/trials/prior.md").write_text("PRIOR TRIAL MARKER\n")
-        (self.repo / "docs/skill-evaluations.md").write_text("EVALUATION GUIDANCE MARKER\n")
+        (self.repo / "docs/research/trials/prior.md").write_text("PRIOR TRIAL MARKER\n")
+        (self.repo / "docs/dev/skill-evaluations.md").write_text("EVALUATION GUIDANCE MARKER\n")
         subprocess.run(["git", "init", "-q", str(self.repo)], check=True)
         subprocess.run(["git", "-C", str(self.repo), "config", "user.name", "Test"], check=True)
         subprocess.run(["git", "-C", str(self.repo), "config", "user.email", "test@example.invalid"], check=True)
@@ -183,7 +184,7 @@ else:
         ])
         for excluded in (
             "evals/scenarios/runner-case.md", "evals/results/prior.md",
-            "docs/trials/prior.md", "docs/skill-evaluations.md",
+            "docs/research/trials/prior.md", "docs/dev/skill-evaluations.md",
             "references/tasks/unselected-task.md",
         ):
             self.assertFalse((snapshot / excluded).exists(), excluded)

@@ -18,8 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TASK_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
-SKIPPED_SOURCE_PREFIXES = ("evals/", "docs/trials/")
-SKIPPED_SOURCE_FILES = {"docs/skill-evaluations.md"}
+SKIPPED_SOURCE_PREFIXES = ("evals/", "docs/research/trials/")
+SKIPPED_SOURCE_FILES = {"docs/dev/skill-evaluations.md"}
 MAX_DIAGNOSTIC_CHARS = 2000
 SECRET_FIELD = re.compile(r"(?i)(token|api[_ -]?key|secret|password|credential|authorization)")
 SECRET_ASSIGNMENT = re.compile(

@@ -2,7 +2,7 @@
 
 On 2026-09-30, Les requested a trial of ASD-STE100 for documents and specifications. ASD-STE100 is a standard for simplified technical English. The trial uses the strict mode of the simple-english skill.
 
-On 2026-10-02, Les limited strict mode to documents, specifications, and issue text. Skills follow the plainer [Skill style](skill-style.md). In skills, the strict rules repeated term definitions and split related conditions into separate sentences.
+On 2026-10-02, Les limited strict mode to documents, specifications, and issue text. Skills follow the plainer [Skill style](dev/skill-style.md). In skills, the strict rules repeated term definitions and split related conditions into separate sentences.
 
 The skill does not contain the full official dictionary. No tool guarantees compliance. These documents apply the available guidance, but they do not claim full compliance.
 

@@ -78,7 +78,7 @@ They are local provenance, not independent authentication of the model service.
 The repeat received the identical fact prompt, so its input hash is the same.
 
 The fact case has two final samples. Each other case has one sample from the same selected model. These answers do not establish general reliability or actual task execution.
-The [earlier action trials](../../docs/trials/2026-10-07-resolution.md) complement these cases at their recorded source revision.
+The [earlier action trials](../../docs/research/trials/2026-10-07-resolution.md) complement these cases at their recorded source revision.
 The maintenance and reuse cases are proposed regressions, not reproduced failures from those trials.
 Broader issue #2 experiments about failure diagnosis, discovery reuse, lesson routing, and live handoffs remain open.
 

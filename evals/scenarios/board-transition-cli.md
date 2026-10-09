@@ -1,6 +1,6 @@
 ---
 skills: [submit-pr]
-source: docs/direction.md CLI decision, board status transition
+source: docs/dev/direction.md CLI decision, board status transition
 ---
 
 ## Situation

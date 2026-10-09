@@ -72,7 +72,7 @@ These hashes identify the complete prompts, including their source paths and ord
 
 Each case is one sample from one selected model. This evidence assesses instruction loading and proposed decisions, not task execution or general reliability.
 The [earlier boundary grades](2026-10-08-resolution.md) remain tied to `0f2bed8`, with their original answers, hashes, and partial outcomes.
-The [earlier action trials](../../docs/trials/2026-10-07-resolution.md) concern older instructions at their recorded revision.
+The [earlier action trials](../../docs/research/trials/2026-10-07-resolution.md) concern older instructions at their recorded revision.
 No new live delivery, GitHub write, hosted CI run, or merge was part of these evaluations.
 
 ## Checks

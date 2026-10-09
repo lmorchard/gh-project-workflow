@@ -72,6 +72,6 @@ The findings record file lists and status descriptions that became incorrect aft
 
 Keep reasons and historical evidence in documents. Keep operating instructions in the skill. Keep current task status in the system that records it.
 
-Date historical observations and link to their evidence. Do not copy the old instructions as the rules for this project. Use the [Writing rules](writing.md) for the ASD-STE100 trial.
+Date historical observations and link to their evidence. Do not copy the old instructions as the rules for this project. Use the [Writing rules](../writing.md) for the ASD-STE100 trial.
 
 Source: [documentation and skill-authoring conventions](https://github.com/lmorchard/agent-sessions/blob/4379832/CLAUDE.md).

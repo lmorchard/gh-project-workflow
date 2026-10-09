@@ -38,7 +38,7 @@ python3 scripts/install-skill.py claude codex
 A symbolic link points to the source checkout root. Source edits appear through the links without another installation.
 The installer preserves correct links and refuses existing conflicting entries before it creates links.
 It creates `~/.claude/skills/ghflow` and `~/.agents/skills/ghflow`.
-OpenCode also discovers these compatible directories. See the [root-package setup trial](trials/2026-10-07-ghflow-root-setup.md) for tested discovery and limits.
+OpenCode also discovers these compatible directories. See the [root-package setup trial](research/trials/2026-10-07-ghflow-root-setup.md) for tested discovery and limits.
 If you use only OpenCode, run `python3 scripts/install-skill.py opencode` for its native personal directory.
 Do not add a native OpenCode link when compatible links already expose `ghflow`.
 
@@ -72,7 +72,7 @@ The selected policy documents this limitation and permits root checkout links wi
 Inspect the installed source's worktrees for nested skill files.
 Maintain worktrees through authorized cleanup, and preserve worktrees with uncommitted changes or an open PR.
 If additional skills are unwanted, use a separate source checkout without nested skill packages.
-The [root-package trial](trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records the evidence and decision.
+The [root-package trial](research/trials/2026-10-07-ghflow-root-setup.md#nested-worktree-discovery) records the evidence and decision.
 
 ## Request another operation
 
@@ -127,4 +127,4 @@ The repository owner grants access before an agent works in the repository or pr
 
 Resolve the script from the source checkout containing the entry skill. Do not resolve it from the target project.
 The [identity reference](../references/shared/identity.md) supplies runtime configuration and credential handling.
-The [identity research and trials](agent-identity.md) document records the adoption evidence and historical limits.
+The [identity research and trials](research/agent-identity.md) document records the adoption evidence and historical limits.

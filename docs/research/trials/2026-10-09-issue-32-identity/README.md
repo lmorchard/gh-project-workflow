@@ -12,7 +12,7 @@ Use a new temporary directory for each setup.
 The setup refuses to overwrite an existing directory.
 
 ```sh
-python3 docs/trials/2026-10-09-issue-32-identity/setup.py \
+python3 docs/research/trials/2026-10-09-issue-32-identity/setup.py \
   /Users/lmorchard/devel/mine/gh-project-workflow/.claude/worktrees/issue-32-identity-trial \
   /private/tmp/ghflow-issue32-identity-20261009
 ```

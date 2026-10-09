@@ -98,7 +98,7 @@ The orchestration host's original model is unknown and it authored no product co
 A fresh independent native `gpt-6-astra` source review remains planned, not completed.
 The evaluation sessions independently produced decisions, but did not review this PR's source change.
 
-The [historical paired trial](../../docs/trials/2026-10-07-issue-8-reviewer-capability.md) supplies separate observations and pinned original artifacts.
+The [historical paired trial](../../docs/research/trials/2026-10-07-issue-8-reviewer-capability.md) supplies separate observations and pinned original artifacts.
 These decision samples do not establish actual different-model review dispatch, recovery, publication, hosted CI, or full delivery.
 Explicit review exceptions and later capacity handoffs remain in the shared rule, but were not separately exercised here.
 Standalone implement-only and read-only boundaries remain in the instruction; only the ordinary draft boundary received a scenario sample.

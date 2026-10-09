@@ -1,6 +1,6 @@
 # Skill evaluations
 
-This document describes how the project checks that the skills work. It records the practice that the results in `evals/results/` show, and it selects one method where that practice varied. The [scenario format](../evals/README.md) gives the file format and the run prompt.
+This document describes how the project checks that the skills work. It records the practice that the results in `evals/results/` show, and it selects one method where that practice varied. The [scenario format](../../evals/README.md) gives the file format and the run prompt.
 
 ## Kinds of assessment
 
@@ -8,7 +8,7 @@ The project uses two kinds of assessment.
 
 A **decision scenario** gives a fresh agent a constructed situation and the skill text. The agent states what it would do and names the rule that decides it. It runs no commands. A scenario tests whether the skill text leads to the intended decision. Scenarios are in `evals/scenarios/`, and their results are in `evals/results/`.
 
-A **trial** gives an agent a real issue or a synthetic fixture and observes its actions. A trial can find failures that a scenario cannot find, such as a wrong command or a wrong account. Trials are in [Trial records](trials/README.md).
+A **trial** gives an agent a real issue or a synthetic fixture and observes its actions. A trial can find failures that a scenario cannot find, such as a wrong command or a wrong account. Trials are in [Trial records](../research/trials/README.md).
 
 Neither kind replaces the other. A trial or a retrospective often supplies the cases for new scenarios. A scenario result is not evidence about the commands that an agent runs. Issue #32 proposes focused execution trials for that purpose.
 
@@ -33,7 +33,7 @@ Use two frontmatter keys:
 - `skills` lists the task names under test, such as `[merge-pr]`. Use task names, not file paths.
 - `source` names where the case came from. Use a commit, a dated trial, an issue, a reference path with its section, or a decision by Les. `scripts/check.py` makes sure that a reference path in `source` exists.
 
-Write three sections: Situation, Expected, and Not acceptable. The [scenario format](../evals/README.md) describes them. Put only observable facts in the Situation. Do not hint at the answer or name the rule. Keep Expected to what the current skill text requires.
+Write three sections: Situation, Expected, and Not acceptable. The [scenario format](../../evals/README.md) describes them. Put only observable facts in the Situation. Do not hint at the answer or name the rule. Keep Expected to what the current skill text requires.
 
 ## Choose a run pattern
 
@@ -52,7 +52,7 @@ Select the pattern that answers the question.
 Give the agent under test only what a real agent would have. Make sure that the session meets these conditions:
 
 - It has no conversation history.
-- Its prompt is the template in the [scenario format](../evals/README.md), with the Situation and the skill paths filled in.
+- Its prompt is the template in the [scenario format](../../evals/README.md), with the Situation and the skill paths filled in.
 - It cannot see Expected, Not acceptable, earlier answers, earlier grades, or the author's conversation.
 - It runs no task commands, makes no edits, uses no network, dispatches no agents, and asks the user no questions.
 - It reads only skill source at the evaluated commit.
@@ -112,8 +112,8 @@ Name the result file `evals/results/YYYY-MM-DD-TOPIC.md`. Use these sections:
 
 Link the scenario criteria at the evaluated commit. Keep the raw answers in `evals/results/YYYY-MM-DD-TOPIC-answers.txt`, with a scenario name and a session ID before each answer. Keep other raw logs outside the repository, and record where they are.
 
-Add coverage records using the [record convention](../evals/README.md#coverage-index-and-records).
-Use `make scenario-index` to update the [coverage index](../evals/INDEX.md).
+Add coverage records using the [record convention](../../evals/README.md#coverage-index-and-records).
+Use `make scenario-index` to update the [coverage index](../../evals/INDEX.md).
 `make check` makes sure that the index matches the records.
 
 Link the result file from the trial record or the PR that it supports.

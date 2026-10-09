@@ -1,9 +1,9 @@
 # Issue 8 reviewer preparation, 2026-10-07
 
 Delivery now establishes an available independent review path before substantial dependent implementation.
-The shared [review preparation rule](../../references/shared/review.md#prepare-required-review) owns this instruction.
+The shared [review preparation rule](../../../references/shared/review.md#prepare-required-review) owns this instruction.
 The three delivery coordinators link to it.
-Four reusable [decision scenarios](../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
+Four reusable [decision scenarios](../../../evals/results/2026-10-07-reviewer-preparation.md) assess the revised instruction.
 This is the first increment for [issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8), which remains open.
 
 ## Historical paired trial

@@ -1,6 +1,6 @@
 ---
 skills: [submit-pr]
-source: ../../docs/trials/README.md#2026-10-09-issue-28-submission-and-sandboxed-github-access
+source: ../../docs/research/trials/README.md#2026-10-09-issue-28-submission-and-sandboxed-github-access
 ---
 
 ## Situation

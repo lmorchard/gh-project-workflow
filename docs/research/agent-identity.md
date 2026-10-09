@@ -1,7 +1,7 @@
 # Agent identity: adoption research and trials
 
 Les adopted the machine account identity on 2026-10-03 after a scratch-repository trial and a real delivery trial.
-[Agent identity](../references/shared/identity.md) supplies current runtime rules. [Machine account access](setup.md#machine-account-access) supplies setup instructions.
+[Agent identity](../../references/shared/identity.md) supplies current runtime rules. [Machine account access](../setup.md#machine-account-access) supplies setup instructions.
 
 This document preserves research for [issue 1](https://github.com/lmorchard/gh-project-workflow/issues/1), the original proposal, and the trial results.
 The research and proposal describe the pre-adoption context. GitHub behavior and access claims below describe the recorded date.
@@ -127,6 +127,6 @@ The parent coordinated `express-issue` for [issue 897](https://github.com/lmorch
 
 On 2026-10-03, Les adopted the machine account identity for agents in this workflow.
 
-- **Configurable identity:** The identity configuration supports environment variables and config files. The shared reference [Agent identity](../references/shared/identity.md) defines the rules.
+- **Configurable identity:** The identity configuration supports environment variables and config files. The shared reference [Agent identity](../../references/shared/identity.md) defines the rules.
 - **Review source:** Independent local review is the primary review source for agent pull requests. Les can request a Copilot review manually when desired.
 - **Merge authority:** Agents can merge authorized pull requests as the machine account when green CI and affirmative review exist.

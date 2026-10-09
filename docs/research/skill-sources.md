@@ -8,7 +8,7 @@ Linked task and shared references own current instructions. Linked trial records
 
 The [documentarian prompt](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/documentarian-prompt.md) separates descriptions of current code from proposed changes. It requests file and line references, neutral questions, existing tests, and other callers of shared code.
 
-The new [research guide](../references/tasks/research.md) retains those ideas. It removes the fixed question count and mandatory research file. It also distinguishes a limited search from proof that a feature does not exist.
+The new [research guide](../../references/tasks/research.md) retains those ideas. It removes the fixed question count and mandatory research file. It also distinguishes a limited search from proof that a feature does not exist.
 
 ## Issue content and readiness
 
@@ -28,7 +28,7 @@ The old findings contain evidence about some instructions in their original cont
 
 ## Filing procedure
 
-The [file-issue skill](../references/tasks/file-issue.md) comes from the [issue 861 filing trial](trials/2026-09-30-issue-843/filing.md). That trial created the issue, established its parent, added project membership, and changed its status. Read-back commands established the saved results.
+The [file-issue skill](../../references/tasks/file-issue.md) comes from the [issue 861 filing trial](trials/2026-09-30-issue-843/filing.md). That trial created the issue, established its parent, added project membership, and changed its status. Read-back commands established the saved results.
 
 The skill adds recovery guidance for failed or uncertain writes. The trial did not exercise those failures. This guidance is a design precaution, not a measured guarantee of safe retries.
 
@@ -36,7 +36,7 @@ The skill uses installed command help instead of a fixed command template. The t
 
 ## Implementation procedure
 
-The [implement-issue skill](../references/tasks/implement-issue.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
+The [implement-issue skill](../../references/tasks/implement-issue.md) adapts selected guidance from agent-sessions at commit `4379832`. Its sources are [plan](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/plan.md), [execute](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/phases/execute.md), and [session setup](https://github.com/lmorchard/agent-sessions/blob/4379832/skills/agent-session/references/session-setup.md).
 
 The implementation adaptation retains planning against current code, isolated worktrees, baseline results, requirement-specific checks, and small changes. It also retains explicit reports of blocked work and enough information for another session to resume. Project rules determine the required tests and record format.
 
@@ -62,7 +62,7 @@ The old workflow separated an author from a reviewer. The adopted local review p
 
 On 2026-09-30, installed gh help and [GitHub documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=cli) supported requesting review with gh pr edit and @copilot. A request and a completed review are different states. Later pushes can require another request.
 
-The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. Submission and review follow-up do not merge. Current CI repair rules live in [address-pr-review](../references/tasks/address-pr-review.md). The [Trial records](trials/README.md) list the submission and follow-up trials.
+The new skills omit frozen checks, machine-readable verdict blocks, automatic rebasing, and driver write manifests. The separate address-pr-review skill owns one requested wait-and-correction cycle. Submission and review follow-up do not merge. Current CI repair rules live in [address-pr-review](../../references/tasks/address-pr-review.md). The [Trial records](trials/README.md) list the submission and follow-up trials.
 
 ## Parent ownership of PR follow-up
 
@@ -73,11 +73,11 @@ Submission alone does not satisfy a review-follow-up endpoint.
 
 The issue cites ownership and reporting problems from the [Ready queue trial](trials/README.md#2026-10-05-ready-queue-burndown-on-board-6).
 At `b47c9d5088f471da5d7b35a56ecda6078dee02be`, express still waited for a nested follow-up worker.
-Shared [coordination](../references/shared/coordination.md#pr-follow-up-ownership), evidence, and delivery callers apply the selected ownership.
+Shared [coordination](../../references/shared/coordination.md#pr-follow-up-ownership), evidence, and delivery callers apply the selected ownership.
 The follow-up worker reads the actual current commit before its final report and reassesses changed evidence.
 
 The [own-PR live trial](trials/2026-10-08-issue-13-own-pr.md) records direct parent dispatch and reassessment after an external branch update.
-It owns the trial revisions, review and CI evidence, and limits. The [parent-dispatch scenario](../evals/scenarios/submission-parent-followup.md) supplies a reusable decision check, not a live delivery.
+It owns the trial revisions, review and CI evidence, and limits. The [parent-dispatch scenario](../../evals/scenarios/submission-parent-followup.md) supplies a reusable decision check, not a live delivery.
 
 ## Earlier dev-session guidance
 
@@ -124,58 +124,58 @@ It supplies the absolute source path and preserves the caller's directory.
 
 The [issue #2 comparison](trials/2026-10-07-resolution.md) observed three fresh agents using the existing guidance successfully at `b47c9d5`. They researched a fact, implemented a routine choice, and returned an unresolved product decision.
 
-Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [decision rules](../references/shared/decisions.md) now distinguish these three cases at the decision point. The [evidence rules](../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
+Les then requested a maintained procedure and reusable scenarios, rather than an evidence-only record. The [decision rules](../../references/shared/decisions.md) now distinguish these three cases at the decision point. The [evidence rules](../../references/shared/evidence.md#sources-and-revisions) clarify reuse when sources and assumptions still apply. These are explicit clarifications, not corrections of a reproduced failure. The reuse scenario is a proposed regression case, not an observed task from the comparison.
 
-The [maintenance rule](skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
+The [maintenance rule](../dev/skill-style.md#rules-and-prohibitions) addresses Les's request for a persistent change. It routes authorized decision changes into the owning reference and a reusable scenario. It does not require automatic lesson discovery or an update after every task.
 
-The [resolution scenario results](../evals/results/2026-10-08-resolution.md) assess the revised guidance separately from the earlier action trials.
+The [resolution scenario results](../../evals/results/2026-10-08-resolution.md) assess the revised guidance separately from the earlier action trials.
 The records own revisions, grades, and evidence limits. Broader issue #2 experiments remain deferred.
 
 ## Required reviewer preparation
 
 [Issue #8](https://github.com/lmorchard/gh-project-workflow/issues/8) supplies the agreed first increment: establish review capabilities before dependent implementation.
 Les requested persistent instructions and reusable evaluations during the PR #21 revision.
-The shared [preparation rule](../references/shared/review.md#prepare-required-review) replaces optional early planning in the delivery coordinators.
+The shared [preparation rule](../../references/shared/review.md#prepare-required-review) replaces optional early planning in the delivery coordinators.
 It preserves explicit exceptions, independent preparation, and the existing capacity handoff.
 
 The [historical paired trial](trials/2026-10-07-issue-8-reviewer-capability.md) supplies observations and their limits.
-The [reviewer preparation scenario results](../evals/results/2026-10-07-reviewer-preparation.md) record the evaluated interpretation and constructed capability facts.
+The [reviewer preparation scenario results](../../evals/results/2026-10-07-reviewer-preparation.md) record the evaluated interpretation and constructed capability facts.
 These sources do not establish completed different-model review or full delivery in the trial environment.
 
 ## Shared reference responsibilities
 
-After merging PR #21, Les requested focused documents rather than the combined authorization reference. The restructure moves roles and handoffs into [Coordination](../references/shared/coordination.md). It moves factual resolution and question framing into [Decisions](../references/shared/decisions.md). [Authorization](../references/shared/authorization.md) retains permission and scope. Evidence and the interview task retain their existing responsibilities.
+After merging PR #21, Les requested focused documents rather than the combined authorization reference. The restructure moves roles and handoffs into [Coordination](../../references/shared/coordination.md). It moves factual resolution and question framing into [Decisions](../../references/shared/decisions.md). [Authorization](../../references/shared/authorization.md) retains permission and scope. Evidence and the interview task retain their existing responsibilities.
 
 The move preserves merged review preparation and parent-owned PR follow-up. Active callers use the new owners. Earlier trial hashes, answers, and grades describe their pinned instructions and remain historical evidence.
 
-The [bounded routing results](../evals/results/2026-10-08-shared-owners.md) concern the focused owners at `f3f3a9b`.
+The [bounded routing results](../../evals/results/2026-10-08-shared-owners.md) concern the focused owners at `f3f3a9b`.
 They assess proposed decisions and source loading, not a new task-execution trial.
 
 ## Ready queue discovery
 
 Issue #27 selected complete pagination of the project item inventory with `gh api graphql --paginate --slurp`.
-The [Ready queue skill](../references/tasks/burndown-ready-queue.md#audit-the-ready-queue) follows the installed [`gh api` pagination contract](https://cli.github.com/manual/gh_api).
+The [Ready queue skill](../../references/tasks/burndown-ready-queue.md#audit-the-ready-queue) follows the installed [`gh api` pagination contract](https://cli.github.com/manual/gh_api).
 A controlled local fixture showed `gh` requesting a second page with the first response's cursor and returning the final page.
 When the fixture failed on page two, `gh` returned an error with earlier page output still present.
 These checks demonstrate cursor traversal and error reporting. They do not establish atomic snapshots or behavior when a live board changes.
 
 ## Ready queue task scope
 
-Issue #28 records Les's 2026-10-08 decision to fix the Ready issue selection at task start, admit later arrivals only after explicit scope expansion, and preserve the selected issues, endpoint, and authorization limits across resumption. A resumed task checks selected issue endpoints even when the Ready queue is empty. The [burndown skill](../references/tasks/burndown-ready-queue.md) refreshes current issue and board state before resumed work. It suggests curation as a next task unless current authorization includes it. The [empty-queue](../evals/scenarios/ready-queue-empty-no-curation.md), [completed-queue](../evals/scenarios/ready-queue-completed-later-arrival.md), [resumption](../evals/scenarios/ready-queue-resume-preserves-scope.md), [empty-Ready resumption](../evals/scenarios/ready-queue-resume-empty-ready-incomplete.md), and [authorized-curation](../evals/scenarios/ready-queue-authorized-curation.md) scenarios cover the selected behavior. Their evaluation results belong in `evals/results/`.
+Issue #28 records Les's 2026-10-08 decision to fix the Ready issue selection at task start, admit later arrivals only after explicit scope expansion, and preserve the selected issues, endpoint, and authorization limits across resumption. A resumed task checks selected issue endpoints even when the Ready queue is empty. The [burndown skill](../../references/tasks/burndown-ready-queue.md) refreshes current issue and board state before resumed work. It suggests curation as a next task unless current authorization includes it. The [empty-queue](../../evals/scenarios/ready-queue-empty-no-curation.md), [completed-queue](../../evals/scenarios/ready-queue-completed-later-arrival.md), [resumption](../../evals/scenarios/ready-queue-resume-preserves-scope.md), [empty-Ready resumption](../../evals/scenarios/ready-queue-resume-empty-ready-incomplete.md), and [authorized-curation](../../evals/scenarios/ready-queue-authorized-curation.md) scenarios cover the selected behavior. Their evaluation results belong in `evals/results/`.
 
 ## Document focus
 
 Les requested this pass after the authorization split in PR #20.
-[Project direction](direction.md) owns current direction. [Direction history](direction-history.md) preserves the earlier discussion.
-[Evidence](../references/shared/evidence.md) owns claim validity. [CLI results](../references/cli.md) owns PR and commit command contracts.
-[GitHub writes](../references/shared/github-writes.md) owns shared write recovery rules.
+[Project direction](../dev/direction.md) owns current direction. [Direction history](direction-history.md) preserves the earlier discussion.
+[Evidence](../../references/shared/evidence.md) owns claim validity. [CLI results](../../references/cli.md) owns PR and commit command contracts.
+[GitHub writes](../../references/shared/github-writes.md) owns shared write recovery rules.
 The [burndown retrospective](trials/2026-10-05-ready-queue-burndown.md) preserves the detailed narrative formerly in the trial index.
 
 ## Sandboxed GitHub authentication
 
 The [issue #28 submission record](trials/README.md#2026-10-09-issue-28-submission-and-sandboxed-github-access) found that a sandboxed `ghflow exec` failure did not match the host keyring result.
-The shared [agent identity reference](../references/shared/identity.md#sandboxed-github-checks) now requires checking both contexts before reporting a token failure or changing credentials.
-The [submission scenario](../evals/scenarios/submit-pr-sandbox-auth-context.md) records the decision and its grading criteria.
+The shared [agent identity reference](../../references/shared/identity.md#sandboxed-github-checks) now requires checking both contexts before reporting a token failure or changing credentials.
+The [submission scenario](../../evals/scenarios/submit-pr-sandbox-auth-context.md) records the decision and its grading criteria.
 
 ## User-approved review exceptions
 
@@ -183,7 +183,7 @@ On 2026-10-08, Les approved skipping different-model review for this project's O
 The laptop could not effectively run two local models. A same-model second opinion remained optional.
 Les then requested an explicit shared rule for exceptions that the user approves.
 
-[Review](../references/shared/review.md#user-approved-exceptions) owns the approval, scope, handoff, and reporting rules.
+[Review](../../references/shared/review.md#user-approved-exceptions) owns the approval, scope, handoff, and reporting rules.
 Task references apply that rule before selecting reviewers or arranging fallbacks.
 The default review requirement, tests, CI, and separate merge authorization remain in effect outside the approved exception.
-[Scenario results](../evals/results/2026-10-08-review-exceptions.md) record three fresh decision samples and their limits.
+[Scenario results](../../evals/results/2026-10-08-review-exceptions.md) record three fresh decision samples and their limits.

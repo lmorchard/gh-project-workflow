@@ -1,6 +1,6 @@
 ---
 skills: [implement-issue]
-source: issue #2 persistent guidance request; docs/skill-style.md; references/shared/decisions.md; docs/trials/2026-10-07-resolution.md
+source: issue #2 persistent guidance request; docs/dev/skill-style.md; references/shared/decisions.md; docs/research/trials/2026-10-07-resolution.md
 ---
 
 ## Situation
