@@ -33,7 +33,7 @@ These records summarize the evidence in this report. Null values identify inform
 
 ```scenario-results
 [
-  {"scenario": "submit-pr-sandbox-auth-context", "date": "2026-10-09", "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial", "phase": "baseline", "note": "Dispatch selection only; criteria clarification did not change answer.", "order": 1},
-  {"scenario": "submit-pr-sandbox-auth-context", "date": "2026-10-09", "skill_commit": "fa2ca6e1bb9f03d0ed4084a4188743edc0dc10e1", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Dispatch selection only.", "order": 2}
+  {"scenario": "submit-pr-sandbox-auth-context", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial", "phase": "baseline", "note": "Dispatch selection only; criteria clarification did not change answer. Run date not stated; filename alone does not establish chronology.", "order": 1},
+  {"scenario": "submit-pr-sandbox-auth-context", "date": null, "skill_commit": "fa2ca6e1bb9f03d0ed4084a4188743edc0dc10e1", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Dispatch selection only. Run date not stated; filename alone does not establish chronology.", "order": 2}
 ]
 ```
