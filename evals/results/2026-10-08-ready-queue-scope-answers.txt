@@ -29,7 +29,7 @@ Report that the selected delivery is complete and stop. The deciding rule in `bu
 
 Report that the selected delivery is complete, suggest backlog curation as a possible next task, and stop. The deciding `burndown-ready-queue` rule is: ‘If the complete inventory contains no Ready items, report that the selected delivery is complete.’ Curation was not authorized, so do not select or move backlog issues or dispatch curation.
 
-### ready-queue-completed-later-arrival — post28_exact_later_r1 — Pass
+### ready-queue-completed-later-arrival — post28_exact_later_r1 — Partial
 
 Process #420, then #421, one at a time through PR review follow-up. Stop immediately for an unexpected blocker, check failure, or review objection. Exclude #422. The deciding rule in `burndown-ready-queue` is: ‘The selection stays fixed during this task. Add a later arrival only after the user explicitly expands the scope.’ After both selected issues reach the endpoint, stop. You may suggest curation, but cannot dispatch it without authorization.
 

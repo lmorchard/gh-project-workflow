@@ -6,7 +6,7 @@ Apply [Authorization](../shared/authorization.md), [Evidence](../shared/evidence
 
 ## Resume an interrupted queue
 
-When interrupted or handing off, carry the selected issue IDs, endpoint, and authorization limits in the conversation. On resumption, use that selection and read the current state of the selected issues and board before acting. Continue within the original selection. Do not treat the current Ready queue as a new selection or add later arrivals unless the user explicitly expands the scope.
+When interrupted or handing off, carry the selected issue IDs, endpoint, and authorization limits in the conversation. On resumption, use that selection and read the current state of the selected issues and board before acting. Check whether every selected issue has reached the agreed endpoint. Continue work on any selected issue that has not reached it, even if no issues are currently in `Ready`. Report completion only when every selected issue has reached the endpoint. Do not treat the current Ready queue as a new selection or add later arrivals unless the user explicitly expands the scope.
 
 ## Audit the Ready queue
 
@@ -59,10 +59,10 @@ Treat a command failure, missing project, malformed page, or failed validation a
 Discard all output after a command failure, because earlier pages can still appear in that output.
 Do not use partial output to report a clear queue or dispatch work.
 
-After the full traversal succeeds, identify every item whose named `Status` value is `Ready`. Record the issue IDs in that initial Ready queue as this task's selection. A later board read can refresh issue state, but it does not replace the selection. Add a later arrival only after the user explicitly expands the scope.
+For a new task, after the full traversal succeeds, identify every item whose named `Status` value is `Ready`. Record the issue IDs in that initial Ready queue as this task's selection. A later board read can refresh issue state, but it does not replace the selection. Add a later arrival only after the user explicitly expands the scope. On resumption, use the recorded selection and the procedure in [Resume an interrupted queue](#resume-an-interrupted-queue); do not create a new selection.
 If a Ready item has no actionable issue URL and repository identity, report it as unresolved and do not report the queue as empty.
 Sort actionable Ready issues by priority (`P0` before `P1`).
-If the complete inventory contains no Ready items, report that the selected delivery is complete.
+For a new task only, if the complete inventory contains no Ready items, report that the initial selection is empty and the selected delivery is complete.
 This traversal is not an atomic snapshot. Report that limit if the board could change during retrieval.
 
 Use the delivery endpoint the user already selected. If none is set, confirm it with the user:
