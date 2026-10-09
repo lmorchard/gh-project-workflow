@@ -114,3 +114,25 @@ Report that #420 reached PR review follow-up and its PR remains open. Then conti
 #### ready-queue-authorized-curation — post28_curation_r2 — uncounted pilot
 
 Continue under `curate-ready-queue` to select and move at most two eligible Backlog issues into Ready. Leave #420’s PR open. The deciding rule is ‘Conclude and hand off’ in `burndown-ready-queue`: when delivery finishes and authorization includes curation, continue within those limits without asking again. The shared authorization rule also says to carry existing authorization across task boundaries.
+
+## Additional exact-source runs for empty-Ready resumption
+
+### ready-queue-resume-empty-ready-incomplete — baseline28_exact_resume_empty_ready — Fail
+
+With no Ready items, report the Ready queue clear and hand off to curate-ready-queue. Do not claim that both selected issues reached their endpoint… excerpt does not authorize continuing #421…
+
+### ready-queue-resume-empty-ready-incomplete — post28_exact_resume_empty_ready_r1 — Pass
+
+Refresh the selected issues and board state, retaining #420 and #421 as the selection. Continue #421’s pending review follow-up; do not curate or select new issues.
+
+Do not report completion yet. Report completion only after both issues reach the agreed endpoint. Leave both PRs open and do not merge.
+
+The Resume rule requires continuing unfinished selected issues even when Ready is empty. The empty-selection completion rule applies only to a new task.
+
+### ready-queue-resume-empty-ready-incomplete — post28_exact_resume_empty_ready_r2 — Pass
+
+Refresh the selected issues and board state. Keep #420 and #421 as the selection. #420 has reached the endpoint; continue #421’s pending review follow-up. Do not curate or select other issues.
+
+Do not report completion yet. Report it only after both selected issues reach the agreed endpoint. Leave both PRs open and do not merge.
+
+The Resume rule requires continuing unfinished selected issues even when Ready is empty. The empty-selection completion rule applies only to a new task.
