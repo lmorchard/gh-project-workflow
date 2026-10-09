@@ -1,8 +1,5 @@
 ---
-skills:
-  - references/tasks/implement-issue.md
-  - references/tasks/review-changes.md
-  - references/tasks/submit-pr.md
+skills: [implement-issue, review-changes, submit-pr]
 source: issue #24
 ---
 

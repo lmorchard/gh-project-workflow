@@ -68,25 +68,17 @@ Use a model that is different from the model that wrote the skill change, when o
 
 Give the agent paths to the skill files at the evaluated commit. The agent then follows links as a real agent does, so the run tests link discovery. If you paste the text into the prompt, the run does not test link discovery. Say so in the result file.
 
-Use a worktree or a source snapshot at the evaluated commit. A snapshot gives stronger provenance. To fingerprint a snapshot, sort lines of relative path, a zero byte, the file SHA256, and a newline. Hash the result with SHA256. `evals/results/2026-10-08-shared-owners.md` uses this method.
+Use `scripts/run_scenario.py` to create a snapshot at the evaluated commit. The snapshot contains only the selected task files and their linked Markdown references. It excludes scenario criteria, results, trial records, and this evaluation guide. The runner fingerprints the files that it supplies: sort lines of relative path, a zero byte, the file SHA256, and a newline, then hash the result with SHA256.
 
-### Runner recipes
+### Runner limits
 
-These commands come from recorded runs. Check the installed help, because versions differ.
+The runner checks the installed CLI version and records its isolation controls and limits in `provenance.json`. Review that record with each run. Do not assume a CLI option is available on a different version.
 
-Codex CLI, from `evals/results/2026-10-08-shared-owners.md`:
+Claude Code runs with restricted file tools, a strict empty MCP configuration, and the selected source snapshot as its only additional file directory. It does not enable command, code, web, or agent tools. It retains normal Claude authentication so it can call the model provider.
 
-```text
-codex exec --ephemeral --sandbox read-only --skip-git-repo-check --json --model MODEL --output-last-message ANSWER_FILE - < PROMPT_FILE
-```
+Codex runs with an isolated configuration and authentication directory, a read-only sandbox, and integrations disabled. The installed Codex CLI has no tool allowlist. It may run shell commands if it chooses to; the prompt forbids commands, and provenance records this as prompt-only. The read-only sandbox blocks edits and network access, but it does not confine reads to the source snapshot. The prompt and provenance state this source limit.
 
-Claude Code CLI, from `evals/results/2026-10-07-reviewer-preparation.md`:
-
-```text
-claude --print --model MODEL --permission-mode dontAsk --tools Read,Glob,Grep,Skill --allowedTools Read Glob Grep Skill --add-dir SOURCE_DIR --strict-mcp-config --setting-sources project --no-session-persistence --output-format stream-json --verbose < PROMPT_FILE
-```
-
-A Claude Code subagent is the weakest option. It cannot enforce read limits, and it may not report its model. Use it only for a quick sample, and state these limits.
+Both runners call their model provider over the network. Neither receives identity or GitHub credentials. The prompt forbids user questions and agent dispatch; provenance identifies whether a control is enforced by the CLI or only by the prompt.
 
 ## Grade the answers
 
@@ -124,7 +116,6 @@ Link the result file from the trial record or the PR that it supports.
 
 ## Known gaps
 
-- No committed script runs scenarios. Each run repeats the same manual steps. Issue #43 proposes a runner.
 - No index shows which scenarios ran, when, on which commit, and with which grade. Issue #44 proposes an index.
-- Three scenarios, `unpublished-*.md`, list file paths in `skills`. The other scenarios list task names.
+- The `unpublished-*.md` scenarios formerly used file paths in `skills`; they now list task names like the other scenarios.
 - Earlier result files differ from this guide. They record less provenance and use other grade words. This guide does not require changes to those files.

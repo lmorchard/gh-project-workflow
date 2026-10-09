@@ -1,6 +1,5 @@
 ---
-skills:
-  - references/tasks/review-changes.md
+skills: [review-changes]
 source: issue #24
 ---
 
