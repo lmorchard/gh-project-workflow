@@ -33,3 +33,15 @@ After adding this result record, `make check` passed all 119 CLI tests, all 10 s
 ## Limits
 
 Each scenario has one sample from the same selected model. These answers assess proposed decisions, not task execution or general reliability. No scenario was repeated. The real implementation-and-review trial remains out of scope for issue #24.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "unpublished-local-commit-missing", "date": "2026-10-08", "skill_commit": "2340bd70386020fa7bab70f7285e727a50ddf320", "runner": null, "model": "gpt-6-luna", "grade": "Pass", "phase": "sample", "note": "Parent dispatch selection only. Runner tool not named in the report.", "order": null},
+  {"scenario": "unpublished-local-commit-mismatch", "date": "2026-10-08", "skill_commit": "2340bd70386020fa7bab70f7285e727a50ddf320", "runner": null, "model": "gpt-6-luna", "grade": "Pass", "phase": "sample", "note": "Parent dispatch selection only. Runner tool not named in the report.", "order": null},
+  {"scenario": "unpublished-local-review", "date": "2026-10-08", "skill_commit": "2340bd70386020fa7bab70f7285e727a50ddf320", "runner": null, "model": "gpt-6-luna", "grade": "Partial", "phase": "sample", "note": "Parent dispatch selection only; branch-pointer and remote-verification omissions. Runner tool not named in the report.", "order": null}
+]
+```

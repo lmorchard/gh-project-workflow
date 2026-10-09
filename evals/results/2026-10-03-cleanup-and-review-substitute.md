@@ -19,3 +19,18 @@ merge-pr's cleanup paragraph now compares the local and remote tips with the mer
 - **commented-review-no-findings** (regression) passed 1 of 1. The agent noted that the new exclusion does not apply to a review that reports no findings without asking for human review.
 
 No change was made for the merge-pr already-merged path. The agent that asked whether it expects `pr-state` or `verify-commit` still acted correctly.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "cleanup-squash-merged", "date": "2026-10-03", "skill_commit": "d3e2e19", "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "baseline", "note": "Pass on decision with stated reasoning/criteria limits; read original report.", "order": 1},
+  {"scenario": "cleanup-local-commit-ahead", "date": "2026-10-03", "skill_commit": "d3e2e19", "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "baseline", "note": "Pass on decision with stated reasoning/criteria limits; read original report.", "order": 1},
+  {"scenario": "cleanup-squash-merged", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Evaluated commit after change not stated.", "order": 2},
+  {"scenario": "cleanup-local-commit-ahead", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Evaluated commit after change not stated.", "order": 2},
+  {"scenario": "copilot-needs-closer-look", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Evaluated commit after change not stated.", "order": 2},
+  {"scenario": "commented-review-no-findings", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "regression", "note": "Evaluated commit after change not stated.", "order": null}
+]
+```

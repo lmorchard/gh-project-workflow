@@ -87,3 +87,17 @@ Broader issue #2 experiments about failure diagnosis, discovery reuse, lesson ro
 After the scoped instruction, scenario, and record edits, `make check` passed all 103 repository tests, structure, links, and tracked whitespace.
 Skill Creator validation passed with the existing `/private/tmp/ghflow-issue13-validator/bin/python` environment.
 The default Python interpreter first failed to import PyYAML. No project dependency or configuration changed.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "maintain-decision-guidance", "date": "2026-10-08", "skill_commit": "0f2bed8fc5cae129902521dbde4b42b5fc8f746f", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Partial: caller links omitted", "phase": "sample", "note": "Corrected human grade; uncommitted evaluated bytes preserved at this later commit; selected model only.", "order": null},
+  {"scenario": "resolve-discoverable-fact", "date": "2026-10-08", "skill_commit": "0f2bed8fc5cae129902521dbde4b42b5fc8f746f", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Partial (2 samples): revision omitted", "phase": "sample", "note": "Exact-prompt repeat belongs to this scenario, not a separate -repeat scenario; selected model only.", "order": null},
+  {"scenario": "resolve-routine-choice", "date": "2026-10-08", "skill_commit": "0f2bed8fc5cae129902521dbde4b42b5fc8f746f", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Evaluated bytes preserved at this later commit; selected model only.", "order": null},
+  {"scenario": "return-material-decision", "date": "2026-10-08", "skill_commit": "0f2bed8fc5cae129902521dbde4b42b5fc8f746f", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Evaluated bytes preserved at this later commit; selected model only.", "order": null},
+  {"scenario": "reuse-revision-evidence", "date": "2026-10-08", "skill_commit": "0f2bed8fc5cae129902521dbde4b42b5fc8f746f", "runner": "Codex CLI 0.161.0", "model": "gpt-6-astra", "grade": "Pass", "phase": "sample", "note": "Evaluated bytes preserved at this later commit; selected model only.", "order": null}
+]
+```

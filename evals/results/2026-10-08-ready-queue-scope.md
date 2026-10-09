@@ -45,3 +45,23 @@ Each of the five baseline scenarios has one exact-source sample. Each of the fiv
 ## Checks
 
 After editing these result files, `make check` passed: 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check. The check ran on the exact file contents committed with this result record.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "ready-queue-empty-no-curation", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial", "phase": "baseline", "note": "Exact-source sample; run date not stated. Filename date is not run chronology.", "order": 1},
+  {"scenario": "ready-queue-completed-later-arrival", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial", "phase": "baseline", "note": "Exact-source sample; run date not stated. Filename date is not run chronology.", "order": 1},
+  {"scenario": "ready-queue-resume-preserves-scope", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "baseline", "note": "Exact-source sample; run date not stated. Filename date is not run chronology.", "order": 1},
+  {"scenario": "ready-queue-authorized-curation", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "baseline", "note": "Exact-source sample; run date not stated. Filename date is not run chronology.", "order": 1},
+  {"scenario": "ready-queue-resume-empty-ready-incomplete", "date": null, "skill_commit": "751e8d54ea5aeef2204c3bf1c95d1307a4e865e0", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Fail", "phase": "baseline", "note": "Exact-source sample; run date not stated. Filename date is not run chronology.", "order": 1},
+  {"scenario": "ready-queue-empty-no-curation", "date": null, "skill_commit": "c70d334a378306304ed3d1ea7e60e79d37f25c4f", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2},
+  {"scenario": "ready-queue-completed-later-arrival", "date": null, "skill_commit": "c70d334a378306304ed3d1ea7e60e79d37f25c4f", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Partial: curation suggestion omitted", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2},
+  {"scenario": "ready-queue-completed-later-arrival", "date": null, "skill_commit": "c70d334a378306304ed3d1ea7e60e79d37f25c4f", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2},
+  {"scenario": "ready-queue-resume-preserves-scope", "date": null, "skill_commit": "c70d334a378306304ed3d1ea7e60e79d37f25c4f", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2},
+  {"scenario": "ready-queue-authorized-curation", "date": null, "skill_commit": "c70d334a378306304ed3d1ea7e60e79d37f25c4f", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2},
+  {"scenario": "ready-queue-resume-empty-ready-incomplete", "date": null, "skill_commit": "2a2fed38c6cf5de6ed04c276be8e4a4a92acc123", "runner": "collaboration agents", "model": "gpt-6.1-sol", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Exact-source samples; uncounted pilots remain in raw answers; run date not stated.", "order": 2}
+]
+```

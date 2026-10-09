@@ -18,3 +18,18 @@ review.md now says that a request command can exit 0 without a recorded request,
 - **review-timeout** passed 2 of 2 after its expected decision changed with Les's timeout decision. The agents reported the timeout as an incomplete review, not as unavailability, and handed off a local review without a question.
 - **copilot-automatic-request** (regression) passed 1 of 1. A recorded automatic request is still pending, not unavailable.
 - An ad hoc regression, with a request 6 minutes old and a local review that covered the head, passed 1 of 1. The agent kept waiting until the deadline and kept the local review as the fallback.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "copilot-request-silent-local-covers", "date": "2026-10-03", "skill_commit": "33463e6", "runner": null, "model": "Claude Sonnet", "grade": "Fail", "phase": "baseline", "note": null, "order": 1},
+  {"scenario": "copilot-unavailable-head-changed", "date": "2026-10-03", "skill_commit": "33463e6", "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "baseline", "note": null, "order": 1},
+  {"scenario": "copilot-request-silent-local-covers", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Evaluated commit after change not stated.", "order": 2},
+  {"scenario": "review-timeout", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass (2/2)", "phase": "changed skill", "note": "Evaluated commit after change not stated.", "order": 2},
+  {"scenario": "copilot-unavailable-head-changed", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "changed skill", "note": "Evaluated commit after change not stated; ad hoc unnamed regression is not a scenario record.", "order": 2},
+  {"scenario": "copilot-automatic-request", "date": "2026-10-03", "skill_commit": null, "runner": null, "model": "Claude Sonnet", "grade": "Pass", "phase": "changed skill", "note": "Evaluated commit after change not stated; ad hoc unnamed regression is not a scenario record.", "order": 2}
+]
+```

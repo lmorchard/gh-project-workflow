@@ -40,3 +40,14 @@ Both answers also said to leave the issue on its label if the relationships cann
 ## Limits
 
 Two runs of each scenario are samples, not proof. The runs used one model family, and the skill author graded them. The scenarios test decisions only. They do not test GitHub writes, such as setting a blocked-by relationship with the installed `gh`.
+
+## Coverage records
+
+These records summarize the evidence in this report. Null values identify information that the report does not establish.
+
+```scenario-results
+[
+  {"scenario": "blocked-partial-blockers", "date": "2026-10-08", "skill_commit": "c96332a", "runner": "Claude Code general-purpose subagent", "model": null, "grade": "Pass (2/2)", "phase": "sample", "note": "Actor model unreported; report only guesses inheritance from parent.", "order": null},
+  {"scenario": "definition-hits-dependency", "date": "2026-10-08", "skill_commit": "c96332a", "runner": "Claude Code general-purpose subagent", "model": null, "grade": "Pass (2/2)", "phase": "sample", "note": "Actor model unreported; report only guesses inheritance from parent.", "order": null}
+]
+```
