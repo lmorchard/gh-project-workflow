@@ -1,7 +1,7 @@
 # Direction history
 
 This record preserves the earlier discussion, including proposals and superseded policies.
-Read [Project direction](direction.md) for current guidance. The sections below describe their original context.
+Read [Project direction](../dev/direction.md) for current guidance. The sections below describe their original context.
 
 This document records the discussion with Les on 2026-09-30. The project will help a person and an agent take an idea through code review and merge. A merge adds approved changes to a target branch.
 
@@ -68,7 +68,7 @@ We propose separate decisions about task readiness, evidence, and permission. Pl
 
 We selected issue definition for the first skill trial. The [First experiment](first-experiment.md) describes the task and evaluation. The [CLI decision](#cli-decision) selects the first CLI operations. The CLI language, package format, and command names remain open.
 
-Automatic scheduling, background polling, custom session storage, attempt labels, and a special merge-result format remain outside the initial effort. Les also requested an ASD-STE100 trial. The [Writing rules](writing.md) describe that trial and its limits.
+Automatic scheduling, background polling, custom session storage, attempt labels, and a special merge-result format remain outside the initial effort. Les also requested an ASD-STE100 trial. The [Writing rules](../writing.md) describe that trial and its limits.
 
 ## CLI decision
 
@@ -96,7 +96,7 @@ Draft files support the conversation but are not required reading for approval. 
 
 ## Review approach
 
-Superseded by the 2026-10-03 machine-account policy (see [Future agent identity](#future-agent-identity) and [Review](../references/shared/review.md)). Under that policy, independent local review is the primary review source for an agent pull request, and the user requests Copilot review manually. The text below keeps the earlier discussion.
+Superseded by the 2026-10-03 machine-account policy (see [Future agent identity](#future-agent-identity) and [Review](../../references/shared/review.md)). Under that policy, independent local review is the primary review source for an agent pull request, and the user requests Copilot review manually. The text below keeps the earlier discussion.
 
 PR submission will request Copilot review when available. If access is unavailable, the parent can dispatch a local reviewer in a fresh context. The local reviewer must use a different model from the implementer for this fallback.
 
@@ -118,7 +118,7 @@ Green CI alone does not permit an autonomous merge. The agent also needs affirma
 
 A favorable review can come from a person, Copilot, or an independent local reviewer. A COMMENTED review can qualify if its text recommends approval or clearly reports a completed review with no findings. Silence, an empty comment list, and a review timeout do not qualify.
 
-On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. On 2026-10-03, Les also decided that a different-model local review does not answer that request; the merge decision goes to him. review.md states both ([scenario results](../evals/results/2026-10-03-cleanup-and-review-substitute.md)).
+On 2026-10-02, Les decided that a Copilot review headed "Needs a closer look" is not affirmative review, even with "Findings: None". Its text asks for human review. On 2026-10-03, Les also decided that a different-model local review does not answer that request; the merge decision goes to him. review.md states both ([scenario results](../../evals/results/2026-10-03-cleanup-and-review-substitute.md)).
 
 On 2026-10-03, Les also decided that when Copilot is unavailable, a different-model local review is the review source without a question to him. This includes a request that GitHub does not record, as in the [identity trial](agent-identity.md#trial-results), and a Copilot review that times out.
 

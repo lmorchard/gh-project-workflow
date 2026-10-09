@@ -1,6 +1,6 @@
 ---
 skills: [merge-pr]
-source: docs/direction.md merge policy
+source: docs/dev/direction.md merge policy
 ---
 
 ## Situation

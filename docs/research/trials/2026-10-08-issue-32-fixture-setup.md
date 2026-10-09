@@ -8,7 +8,7 @@ Set `SOURCE_ROOT` to this workflow checkout. Set `FIXTURE_ROOT` to a new path th
 export SOURCE_ROOT=/Users/lmorchard/devel/mine/gh-project-workflow/.claude/worktrees/issue-32-unpublished-handoff-trial
 export FIXTURE_ROOT=/private/tmp/ghflow-issue32-reconstructed
 mkdir -p "$FIXTURE_ROOT/repo" "$FIXTURE_ROOT/home"
-cp "$SOURCE_ROOT/docs/trials/2026-10-08-issue-32-fixture/ISSUE.md" "$FIXTURE_ROOT/repo/ISSUE.md"
+cp "$SOURCE_ROOT/docs/research/trials/2026-10-08-issue-32-fixture/ISSUE.md" "$FIXTURE_ROOT/repo/ISSUE.md"
 cat > "$FIXTURE_ROOT/repo/labels.py" <<'EOF'
 def format_item_count(count):
     return f"{count} items"
@@ -17,8 +17,8 @@ env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_N
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null git -C "$FIXTURE_ROOT/repo" -c user.name='Trial Fixture' -c user.email='trial-fixture@example.invalid' add ISSUE.md labels.py
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_AUTHOR_DATE='2026-10-08T10:00:00-07:00' GIT_COMMITTER_DATE='2026-10-08T10:00:00-07:00' git -C "$FIXTURE_ROOT/repo" -c user.name='Trial Fixture' -c user.email='trial-fixture@example.invalid' -c commit.gpgsign=false commit -m 'Add item count formatter fixture'
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null git -C "$FIXTURE_ROOT/repo" branch -m trial/item-count-singular
-cp "$SOURCE_ROOT/docs/trials/2026-10-08-issue-32-fixture/labels.py" "$FIXTURE_ROOT/repo/labels.py"
-cp "$SOURCE_ROOT/docs/trials/2026-10-08-issue-32-fixture/test_labels.py" "$FIXTURE_ROOT/repo/test_labels.py"
+cp "$SOURCE_ROOT/docs/research/trials/2026-10-08-issue-32-fixture/labels.py" "$FIXTURE_ROOT/repo/labels.py"
+cp "$SOURCE_ROOT/docs/research/trials/2026-10-08-issue-32-fixture/test_labels.py" "$FIXTURE_ROOT/repo/test_labels.py"
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null git -C "$FIXTURE_ROOT/repo" add labels.py test_labels.py
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_AUTHOR_DATE='2026-10-08T10:01:00-07:00' GIT_COMMITTER_DATE='2026-10-08T10:01:00-07:00' git -C "$FIXTURE_ROOT/repo" -c user.name='Trial Fixture' -c user.email='trial-fixture@example.invalid' -c commit.gpgsign=false commit -m 'Use singular item label for count one'
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$FIXTURE_ROOT/home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null git -C "$FIXTURE_ROOT/repo" rev-parse HEAD^ HEAD

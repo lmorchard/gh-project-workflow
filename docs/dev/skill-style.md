@@ -1,6 +1,6 @@
 # Skill style
 
-This is the house style for `SKILL.md` files and the shared references in `references/shared/`. Agents read skills to act, so write for an agent that is doing the task now. The strict [Writing rules](writing.md) apply to documents, specifications, and issue text, not to skills.
+This is the house style for `SKILL.md` files and the shared references in `references/shared/`. Agents read skills to act, so write for an agent that is doing the task now. The strict [Writing rules](../writing.md) apply to documents, specifications, and issue text, not to skills.
 
 ## What a skill contains
 
@@ -8,19 +8,19 @@ A task reference owns one operation: the judgment and procedure that are specifi
 
 Use these shared references instead of restating their rules:
 
-- [Authorization](../references/shared/authorization.md): permission, scope, and how authorization carries between tasks.
-- [Coordination](../references/shared/coordination.md): parent and subagent roles, dispatch, handoffs, and PR follow-up ownership.
-- [Decisions](../references/shared/decisions.md): factual research, routine choices, and questions that need user judgment.
-- [Evidence](../references/shared/evidence.md): source revisions, check states, hosted CI, and honest reports.
-- [GitHub writes](../references/shared/github-writes.md): duplicate prevention, saved-result readback, retries, and intervening changes.
-- [Review](../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
-- [Board status](../references/shared/board-status.md): moving an issue between project-board states.
-- [Triage labels](../references/shared/triage-labels.md): the `triage:*` labels, their meanings, and blocked and parked issues.
-- [Agent identity](../references/shared/identity.md): configuring machine account credentials and running commands under that identity.
+- [Authorization](../../references/shared/authorization.md): permission, scope, and how authorization carries between tasks.
+- [Coordination](../../references/shared/coordination.md): parent and subagent roles, dispatch, handoffs, and PR follow-up ownership.
+- [Decisions](../../references/shared/decisions.md): factual research, routine choices, and questions that need user judgment.
+- [Evidence](../../references/shared/evidence.md): source revisions, check states, hosted CI, and honest reports.
+- [GitHub writes](../../references/shared/github-writes.md): duplicate prevention, saved-result readback, retries, and intervening changes.
+- [Review](../../references/shared/review.md): review sources, model identity, Copilot request state, and what counts as affirmative review.
+- [Board status](../../references/shared/board-status.md): moving an issue between project-board states.
+- [Triage labels](../../references/shared/triage-labels.md): the `triage:*` labels, their meanings, and blocked and parked issues.
+- [Agent identity](../../references/shared/identity.md): configuring machine account credentials and running commands under that identity.
 
-Link a reference where its rules apply. Add a one-line summary only when the reader needs it at that point to act correctly. Agents do not reliably open a reference unless the skill says that it applies, so keep the trigger for a decision-critical rule in the skill: name the situation and link the rule. The [pilot run](../evals/results/2026-10-02-pilot.md) showed this. Read the references when you write or review a skill.
+Link a reference where its rules apply. Add a one-line summary only when the reader needs it at that point to act correctly. Agents do not reliably open a reference unless the skill says that it applies, so keep the trigger for a decision-critical rule in the skill: name the situation and link the rule. The [pilot run](../../evals/results/2026-10-02-pilot.md) showed this. Read the references when you write or review a skill.
 
-Keep history out of skills. Old reasons and incidents mislead agents when the behavior changes. Record sources in [Skill sources](skill-sources.md) and results in [Trial records](trials/README.md).
+Keep history out of skills. Old reasons and incidents mislead agents when the behavior changes. Record sources in [Skill sources](../research/skill-sources.md) and results in [Trial records](../research/trials/README.md).
 
 ## Structure
 
@@ -44,7 +44,7 @@ State the rule positively when you can. "Read checks for the current head" cover
 
 Use "Do not" for a specific temptation with a real cost, such as `gh pr create --dry-run` pushing changes. Keep concrete pitfalls like that one when they are not obvious and an error is expensive.
 
-Before you add a rule for an incident, look for the general rule that the agent missed. Strengthen or clarify that rule instead of adding a new special case. Record the incident and the commit in [Trial records](trials/README.md).
+Before you add a rule for an incident, look for the general rule that the agent missed. Strengthen or clarify that rule instead of adding a new special case. Record the incident and the commit in [Trial records](../research/trials/README.md).
 
 When an authorized workflow improvement changes a future task decision, update the owning task or shared reference. Add a reusable scenario with separate grading criteria. Keep the observed evidence and its limits in the source or trial record. A passive record alone does not deliver that behavior change. Propose other opportunities separately when authorization does not cover them. This rule does not require changes or a report after every task.
 

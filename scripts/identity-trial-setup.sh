@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Set up the scratch repository and board for the agent identity trial.
-# See docs/agent-identity.md, "Trial proposal". Safe to run again: each step
+# See docs/research/agent-identity.md, "Trial proposal". Safe to run again: each step
 # skips work that already exists.
 #
 # Runs as the current gh login (Les), except accepting the repository
