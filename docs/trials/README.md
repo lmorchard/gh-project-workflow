@@ -112,6 +112,7 @@ The parent submitted [PR #53](https://github.com/lmorchard/gh-project-workflow/p
 Inside the sandbox, `ghflow exec -- gh auth status` reported that the `GH_TOKEN` token was invalid. Les's terminal showed `MokaGnome` active with `repo`, `project`, and `read:org` scopes. An approved read-only check outside the sandbox confirmed the same host login.
 The subagent submitted PR #53 as `MokaGnome`. Hosted CI passed, and follow-up found no reviews or comments. No board transition was possible because issue #28 had no project membership.
 Copying the CLI token into the configured token file did not make the sandbox check pass. This task did not establish whether the configured token file works outside the sandbox. The identity reference now distinguishes sandbox failures from invalid credentials.
+The [decision scenario results](../../evals/results/2026-10-09-sandbox-auth-context.md) assess the revised rule separately from the live submission.
 
 ## ghflow installation
 
