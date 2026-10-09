@@ -25,4 +25,4 @@ These decision samples do not test real GitHub access or prove that credentials 
 
 ## Checks
 
-After all result files were staged, `make check` passed before the commit. The commit contains the checked files. The command ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check.
+After a one-line correction to this record, `make check` passed on the staged content committed as `548608e924ccdc1ab176384608fad7407c062c4f`. That commit contains the corrected record. The command ran 134 CLI tests, 10 script tests, `scripts/check.py`, and the whitespace check.
