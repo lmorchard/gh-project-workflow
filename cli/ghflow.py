@@ -750,18 +750,18 @@ def identity_config_paths(cwd=None):
     if result.returncode != 0:
         return [current / ".ghflow" / "identity.json", Path.home() / ".config" / "ghflow" / "identity.json"]
 
-    worktree_root = Path(result.stdout.strip()).resolve()
+    worktree_root = Path(result.stdout.removesuffix("\n")).resolve()
     primary_root = worktree_root
     worktrees = subprocess.run(
-        ["git", "worktree", "list", "--porcelain"], cwd=worktree_root,
+        ["git", "worktree", "list", "--porcelain", "-z"], cwd=worktree_root,
         text=True, capture_output=True, check=False,
     )
     if worktrees.returncode == 0:
-        for block in worktrees.stdout.split("\n\n"):
-            lines = block.splitlines()
-            worktree_line = next((line for line in lines if line.startswith("worktree ")), None)
-            if worktree_line and "bare" not in lines:
-                primary_root = Path(worktree_line.removeprefix("worktree ")).resolve()
+        for block in worktrees.stdout.split("\0\0"):
+            fields = block.split("\0")
+            worktree_field = next((field for field in fields if field.startswith("worktree ")), None)
+            if worktree_field and "bare" not in fields:
+                primary_root = Path(worktree_field.removeprefix("worktree ")).resolve()
                 break
 
     paths = [worktree_root / ".ghflow" / "identity.json"]

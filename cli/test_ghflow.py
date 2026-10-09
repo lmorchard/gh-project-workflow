@@ -685,6 +685,30 @@ class IdentityTests(unittest.TestCase):
                 os.chdir(old_cwd)
             self.assertEqual(report["source"], source)
 
+    def test_project_identity_preserves_trailing_space_in_checkout_path(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = os.path.join(temp_dir, "checkout ")
+            self.init_repository(repo)
+            source = self.write_identity(repo, "SpaceBot")
+
+            identity = self.resolve_in(repo)
+
+            self.assertEqual(identity["login"], "SpaceBot")
+            self.assertEqual(identity["source"], source)
+
+    def test_linked_worktree_finds_primary_config_when_checkout_path_has_newline(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            primary = os.path.join(temp_dir, "primary\ncheckout")
+            linked = os.path.join(temp_dir, "linked")
+            self.init_repository(primary)
+            primary_source = self.write_identity(primary, "NewlineBot")
+            subprocess.run(["git", "-C", primary, "worktree", "add", "-q", "-b", "linked", linked], check=True)
+
+            identity = self.resolve_in(linked)
+
+            self.assertEqual(identity["login"], "NewlineBot")
+            self.assertEqual(identity["source"], primary_source)
+
     def test_nested_repository_uses_its_own_project_identity(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             outer = os.path.join(temp_dir, "outer")
