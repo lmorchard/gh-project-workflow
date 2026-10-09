@@ -23,6 +23,18 @@ These options change the link destinations, not agent authentication or configur
 The installer does not remove older generic skill installations. Remove those links separately after you inspect their sources.
 If you move the source checkout, replace its stale links manually. The installer refuses to overwrite them.
 
+### Try a read-only task
+
+After you install `ghflow`, start an agent session in a local checkout of the target repository. The agent needs the installed skill, access to its source checkout, and permission to read the target issue and related GitHub records.
+
+Copy this request:
+
+```text
+Use ghflow to reassess https://github.com/lmorchard/gh-project-workflow/issues/23. Return findings only. Do not edit GitHub records or implement changes.
+```
+
+The [reconsider-issue task](references/tasks/reconsider-issue.md) returns current evidence, remaining work, and unresolved decisions. The request forbids repository and GitHub writes. Issue #23 is closed. If current evidence shows that it is resolved, reporting no remaining work is a correct result.
+
 OpenCode can discover nested `SKILL.md` files inside the linked checkout, including Git-ignored worktrees.
 Repository checks ignore worktrees, but native discovery does not.
 The selected policy documents this limitation and permits root checkout links without an installer guard.
@@ -121,13 +133,19 @@ Keep a local checkout of the target project for code investigation.
 The standard-library CLI in [cli/ghflow.py](cli/ghflow.py) handles repeatable operations.
 It uses existing Git and `gh` commands for other work.
 
-Configure the machine account through [Agent identity](references/shared/identity.md) before subagents run Git or GitHub commands.
-The account needs access to the target repository. Board operations also need writer access to the selected project.
-Do not change accounts to work around access failures.
+Observed on 2026-10-09 while running `make check`: Python 3.14.7 and GitHub CLI 2.101.0.
+These are observed versions, not minimum supported versions.
 
-Coordinated delivery requires subagent dispatch. Independent code review normally requires a fresh reviewer context and a different recorded model from the implementer. Apply any [user-approved review exception](references/shared/review.md#user-approved-exceptions) within its recorded scope.
-Report unavailable dispatch or model information. Self-review does not replace independent review.
-Direct operations remain usable without a coordinator, subject to their own requirements and boundaries.
+### Operation requirements
+
+- Reading: [reconsider-issue](references/tasks/reconsider-issue.md) needs a target checkout, source access, and permitted GitHub reads.
+- Implementation: [implement-issue](references/tasks/implement-issue.md) makes local commits. Subagents use the configured [machine identity](references/shared/identity.md) and need target repository access for Git and GitHub commands.
+- Coordinated delivery: [express-issue](references/tasks/express-issue.md) needs [subagent dispatch](references/shared/coordination.md#handoffs). Review follow-up leaves the PR open.
+- Independent review: [review-changes](references/tasks/review-changes.md) uses a fresh context and, by default, a different model recorded from runtime or dispatch metadata. See [Review](references/shared/review.md).
+- Board work: when a task uses a project board, select that board, use its actual Status options, and make sure the machine identity has writer access. See [Board status](references/shared/board-status.md) and [Machine account access](#machine-account-access).
+- Merge: [merge-pr](references/tasks/merge-pr.md) needs separate, explicit authorization under [Authorization](references/shared/authorization.md#limits).
+
+Apply any [user-approved review exception](references/shared/review.md#user-approved-exceptions) within its recorded scope. Report unavailable dispatch or model information. Self-review does not replace independent review. Direct operations remain usable without a coordinator, subject to their own requirements.
 
 ## Machine account access
 
