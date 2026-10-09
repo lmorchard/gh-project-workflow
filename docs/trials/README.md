@@ -106,6 +106,13 @@ The [burndown retrospective](2026-10-05-ready-queue-burndown.md) records deliver
 Les merged the seven resulting PRs. Subagents performed subject-repository writes as `MokaGnome`.
 The record preserves resulting skill changes, CI and ownership failures, and unrecorded manual checks.
 
+## 2026-10-09: issue #28 submission and sandboxed GitHub access
+
+The parent submitted [PR #53](https://github.com/lmorchard/gh-project-workflow/pull/53) for issue #28 through review follow-up. The submission subagent used ghflow revision `6e932ecd60751be8346ebe5e806515cd4c77fef1`.
+Inside the sandbox, `ghflow exec -- gh auth status` reported that the `GH_TOKEN` token was invalid. Les's terminal showed `MokaGnome` active with `repo`, `project`, and `read:org` scopes. An approved read-only check outside the sandbox confirmed the same host login.
+The subagent submitted PR #53 as `MokaGnome`. Hosted CI passed, and follow-up found no reviews or comments. No board transition was possible because issue #28 had no project membership.
+Copying the CLI token into the configured token file did not make the sandbox check pass. This task did not establish whether the configured token file works outside the sandbox. The identity reference now distinguishes sandbox failures from invalid credentials.
+
 ## ghflow installation
 
 [Routine-resolution comparison, 2026-10-07](2026-10-07-resolution.md) supplies the agreed first increment of issue #2.

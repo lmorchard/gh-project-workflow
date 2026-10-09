@@ -99,3 +99,12 @@ Follow [Review](review.md) for review sources and requirements.
 
 The machine account needs repository and project access before a task starts. [Machine account access](../../README.md#machine-account-access) describes setup.
 If access is missing, report the required action. Do not switch accounts or change credentials to bypass the failure.
+
+### Sandboxed GitHub checks
+
+A sandbox can block access to the host keyring or GitHub. A failed GitHub check inside a sandbox does not by itself show that the token is invalid.
+
+Compare `gh auth status` inside the configured identity with the result from an approved command outside the sandbox. Use the same host and configured login for both checks.
+If the host result shows the configured login and required scopes, treat the failure as a sandbox access limit. Use an approved host context for authorized GitHub commands when available.
+If both checks fail, report each result and follow the access-failure rule above.
+Do not copy tokens between stores or change credentials only because a sandbox check fails.
