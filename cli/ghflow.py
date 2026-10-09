@@ -745,23 +745,25 @@ def identity_config_paths(cwd=None):
     current = current.resolve()
     result = subprocess.run(
         ["git", "rev-parse", "--show-toplevel"], cwd=current,
-        text=True, capture_output=True, check=False,
+        capture_output=True, check=False,
     )
     if result.returncode != 0:
         return [current / ".ghflow" / "identity.json", Path.home() / ".config" / "ghflow" / "identity.json"]
 
-    worktree_root = Path(result.stdout.removesuffix("\n")).resolve()
+    worktree_root_text = os.fsdecode(result.stdout.removesuffix(b"\n"))
+    worktree_root = Path(worktree_root_text).resolve()
     primary_root = worktree_root
     worktrees = subprocess.run(
         ["git", "worktree", "list", "--porcelain", "-z"], cwd=worktree_root,
-        text=True, capture_output=True, check=False,
+        capture_output=True, check=False,
     )
     if worktrees.returncode == 0:
-        for block in worktrees.stdout.split("\0\0"):
-            fields = block.split("\0")
-            worktree_field = next((field for field in fields if field.startswith("worktree ")), None)
-            if worktree_field and "bare" not in fields:
-                primary_root = Path(worktree_field.removeprefix("worktree ")).resolve()
+        for block in worktrees.stdout.split(b"\0\0"):
+            fields = block.split(b"\0")
+            worktree_field = next((field for field in fields if field.startswith(b"worktree ")), None)
+            if worktree_field and b"bare" not in fields:
+                primary_path = os.fsdecode(worktree_field.removeprefix(b"worktree "))
+                primary_root = Path(primary_path).resolve()
                 break
 
     paths = [worktree_root / ".ghflow" / "identity.json"]
